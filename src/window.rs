@@ -20,6 +20,7 @@
     IN THE SOFTWARE.
 */
 
+#![allow(deprecated)]
 #![allow(clippy::too_many_arguments)]
 
 use std::{path, time};
@@ -99,8 +100,8 @@ impl Drop for Window {
 }
 
 impl Window {
-    pub fn addchnstr(&self, chstr: &ChtypeString, n: i32) -> result!(()) {
-        ncursesw::waddchnstr(self.handle, chstr, n)
+    pub fn addchnstr(&self, chstr: &ChtypeString, number: i32) -> result!(()) {
+        ncursesw::waddchnstr(self.handle, chstr, number)
     }
 
     pub fn addch(&self, ch: ChtypeChar) -> result!(()) {
@@ -111,20 +112,20 @@ impl Window {
         ncursesw::waddchstr(self.handle, chstr)
     }
 
-    pub fn addnstr(&self, str: &str, n: i32) -> result!(()) {
-        ncursesw::waddnstr(self.handle, str, n)
+    pub fn addnstr(&self, str: &str, number: i32) -> result!(()) {
+        ncursesw::waddnstr(self.handle, str, number)
     }
 
-    pub fn addnwstr(&self, wstr: &WideString, n: i32) -> result!(()) {
-        ncursesw::waddnwstr(self.handle, wstr, n)
+    pub fn addnwstr(&self, wstr: &WideString, number: i32) -> result!(()) {
+        ncursesw::waddnwstr(self.handle, wstr, number)
     }
 
     pub fn addstr(&self, str: &str) -> result!(()) {
         ncursesw::waddstr(self.handle, str)
     }
 
-    pub fn add_wchnstr(&self, wchstr: &ComplexString, n: i32) -> result!(()) {
-        ncursesw::wadd_wchnstr(self.handle, wchstr, n)
+    pub fn add_wchnstr(&self, wchstr: &ComplexString, number: i32) -> result!(()) {
+        ncursesw::wadd_wchnstr(self.handle, wchstr, number)
     }
 
     pub fn add_wch(&self, wch: ComplexChar) -> result!(()) {
@@ -195,8 +196,8 @@ impl Window {
         ncursesw::box_set(self.handle, verch, horch)
     }
 
-    pub fn chgat<A, P, T>(&self, n: i32, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
-        ncursesw::wchgat(self.handle, n, attrs, color_pair)
+    pub fn chgat<A, P, T>(&self, number: i32, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
+        ncursesw::wchgat(self.handle, number, attrs, color_pair)
     }
 
     pub fn clearok(&self, bf: bool) -> result!(()) {
@@ -219,7 +220,14 @@ impl Window {
         ncursesw::wcolor_set(self.handle, color_pair)
     }
 
-    pub fn copywin(&self, dstwin: &Self, smin: Origin, dmin: Origin, dmax: Origin, overlay: bool) -> result!(()) {
+    pub fn copywin(
+        &self,
+        dstwin: &Self,
+        smin: Origin,
+        dmin: Origin,
+        dmax: Origin,
+        overlay: bool) -> result!(())
+    {
         ncursesw::copywin(self.handle, dstwin.handle, smin, dmin, dmax, overlay)
     }
 
@@ -303,12 +311,12 @@ impl Window {
         ncursesw::getmaxyx(self.handle)
     }
 
-    pub fn getnstr(&self, n: i32) -> result!(String) {
-        ncursesw::wgetnstr(self.handle, n)
+    pub fn getnstr(&self, number: i32) -> result!(String) {
+        ncursesw::wgetnstr(self.handle, number)
     }
 
-    pub fn getn_wstr(&self, n: i32) -> result!(WideString) {
-        ncursesw::wgetn_wstr(self.handle, n)
+    pub fn getn_wstr(&self, number: i32) -> result!(WideString) {
+        ncursesw::wgetn_wstr(self.handle, number)
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
@@ -335,6 +343,7 @@ impl Window {
         ncursesw::wgetscrreg(self.handle)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getnstr() instead")]
     pub fn getstr(&self) -> result!(String) {
         ncursesw::wgetstr(self.handle)
     }
@@ -343,16 +352,17 @@ impl Window {
         ncursesw::wget_wch(self.handle)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getn_wstr() instead")]
     pub fn get_wstr(&self) -> result!(WideString) {
         ncursesw::wget_wstr(self.handle)
     }
 
-    pub fn hline(&self, ch: ChtypeChar, n: i32) -> result!(()) {
-        ncursesw::whline(self.handle, ch, n)
+    pub fn hline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
+        ncursesw::whline(self.handle, ch, number)
     }
 
-    pub fn hline_set(&self, wch: ComplexChar, n: i32) -> result!(()) {
-        ncursesw::whline_set(self.handle, wch, n)
+    pub fn hline_set(&self, wch: ComplexChar, number: i32) -> result!(()) {
+        ncursesw::whline_set(self.handle, wch, number)
     }
 
     pub fn idcok(&self, bf: bool) {
@@ -367,50 +377,52 @@ impl Window {
         ncursesw::immedok(self.handle, bf)
     }
 
-    pub fn inchnstr(&self, n: i32) -> result!(ChtypeString) {
-        ncursesw::winchnstr(self.handle, n)
+    pub fn inchnstr(&self, number: i32) -> result!(ChtypeString) {
+        ncursesw::winchnstr(self.handle, number)
     }
 
     pub fn inch(&self) -> ChtypeChar {
         ncursesw::winch(self.handle)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use inchnstr() instead")]
     pub fn inchstr(&self) -> result!(ChtypeString) {
         ncursesw::winchstr(self.handle)
     }
 
-    pub fn innstr(&self, n: i32) -> result!(String) {
-        ncursesw::winnstr(self.handle, n)
+    pub fn innstr(&self, number: i32) -> result!(String) {
+        ncursesw::winnstr(self.handle, number)
     }
 
-    pub fn innwstr(&self, n: i32) -> result!(WideString) {
-        ncursesw::winnwstr(self.handle, n)
+    pub fn innwstr(&self, number: i32) -> result!(WideString) {
+        ncursesw::winnwstr(self.handle, number)
     }
 
     pub fn insch(&self, ch: ChtypeChar) -> result!(()) {
         ncursesw::winsch(self.handle, ch)
     }
 
-    pub fn insdelln(&self, n: i32) -> result!(()) {
-        ncursesw::winsdelln(self.handle, n)
+    pub fn insdelln(&self, number: i32) -> result!(()) {
+        ncursesw::winsdelln(self.handle, number)
     }
 
     pub fn insertln(&self) -> result!(()) {
         ncursesw::winsertln(self.handle)
     }
 
-    pub fn insnstr(&self, str: &str, n: i32) -> result!(()) {
-        ncursesw::winsnstr(self.handle, str, n)
+    pub fn insnstr(&self, str: &str, number: i32) -> result!(()) {
+        ncursesw::winsnstr(self.handle, str, number)
     }
 
-    pub fn ins_nwstr(&self, wstr: &WideString, n: i32) -> result!(()) {
-        ncursesw::wins_nwstr(self.handle, wstr, n)
+    pub fn ins_nwstr(&self, wstr: &WideString, number: i32) -> result!(()) {
+        ncursesw::wins_nwstr(self.handle, wstr, number)
     }
 
     pub fn insstr(&self, str: &str) -> result!(()) {
         ncursesw::winsstr(self.handle, str)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use innstr() instead")]
     pub fn instr(&self) -> result!(String) {
         ncursesw::winstr(self.handle)
     }
@@ -427,18 +439,20 @@ impl Window {
         ncursesw::intrflush(self.handle, bf)
     }
 
-    pub fn in_wchnstr(&self, n: i32) -> result!(ComplexString) {
-        ncursesw::win_wchnstr(self.handle, n)
+    pub fn in_wchnstr(&self, number: i32) -> result!(ComplexString) {
+        ncursesw::win_wchnstr(self.handle, number)
     }
 
     pub fn in_wch(&self) -> result!(ComplexChar) {
         ncursesw::win_wch(self.handle)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use in_wchnstr() instead")]
     pub fn in_wchstr(&self) -> result!(ComplexString) {
         ncursesw::win_wchstr(self.handle)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use innwstr() instead")]
     pub fn inwstr(&self) -> result!(WideString) {
         ncursesw::winwstr(self.handle)
     }
@@ -512,8 +526,8 @@ impl Window {
         ncursesw::wmove(self.handle, origin)
     }
 
-    pub fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, n: i32) -> result!(()) {
-        ncursesw::mvwaddchnstr(self.handle, origin, chstr, n)
+    pub fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, number: i32) -> result!(()) {
+        ncursesw::mvwaddchnstr(self.handle, origin, chstr, number)
     }
 
     pub fn mvaddch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
@@ -524,20 +538,20 @@ impl Window {
         ncursesw::mvwaddchstr(self.handle, origin, chstr)
     }
 
-    pub fn mvaddnstr(&self, origin: Origin, str: &str, n: i32) -> result!(()) {
-        ncursesw::mvwaddnstr(self.handle, origin, str, n)
+    pub fn mvaddnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
+        ncursesw::mvwaddnstr(self.handle, origin, str, number)
     }
 
-    pub fn mvaddnwstr(&self, origin: Origin, wstr: &WideString, n: i32) -> result!(()) {
-        ncursesw::mvwaddnwstr(self.handle, origin, wstr, n)
+    pub fn mvaddnwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
+        ncursesw::mvwaddnwstr(self.handle, origin, wstr, number)
     }
 
     pub fn mvaddstr(&self, origin: Origin, str: &str) -> result!(()) {
         ncursesw::mvwaddstr(self.handle, origin, str)
     }
 
-    pub fn mvadd_wchnstr(&self, origin: Origin, wchstr: &ComplexString, n: i32) -> result!(()) {
-        ncursesw::mvwadd_wchnstr(self.handle, origin, wchstr, n)
+    pub fn mvadd_wchnstr(&self, origin: Origin, wchstr: &ComplexString, number: i32) -> result!(()) {
+        ncursesw::mvwadd_wchnstr(self.handle, origin, wchstr, number)
     }
 
     pub fn mvadd_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
@@ -552,8 +566,8 @@ impl Window {
         ncursesw::mvwaddwstr(self.handle, origin, wstr)
     }
 
-    pub fn mvchgat<A, P, T>(&self, origin: Origin, n: i32, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
-        ncursesw::mvwchgat(self.handle, origin, n, attrs, color_pair)
+    pub fn mvchgat<A, P, T>(&self, origin: Origin, number: i32, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
+        ncursesw::mvwchgat(self.handle, origin, number, attrs, color_pair)
     }
 
     pub fn mvdelch(&self, origin: Origin) -> result!(()) {
@@ -568,14 +582,15 @@ impl Window {
         ncursesw::mvwgetch(self.handle, origin)
     }
 
-    pub fn mvgetnstr(&self, origin: Origin, n: i32) -> result!(String) {
-        ncursesw::mvwgetnstr(self.handle, origin, n)
+    pub fn mvgetnstr(&self, origin: Origin, number: i32) -> result!(String) {
+        ncursesw::mvwgetnstr(self.handle, origin, number)
     }
 
-    pub fn mvgetn_wstr(&self, origin: Origin, n: i32) -> result!(WideString) {
-        ncursesw::mvwgetn_wstr(self.handle, origin, n)
+    pub fn mvgetn_wstr(&self, origin: Origin, number: i32) -> result!(WideString) {
+        ncursesw::mvwgetn_wstr(self.handle, origin, number)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetnstr() instead")]
     pub fn mvgetstr(&self, origin: Origin) -> result!(String) {
         ncursesw::mvwgetstr(self.handle, origin)
     }
@@ -584,54 +599,57 @@ impl Window {
         ncursesw::mvwget_wch(self.handle, origin)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetn_wstr() instead")]
     pub fn mvget_wstr(&self, origin: Origin) -> result!(WideString) {
         ncursesw::mvwget_wstr(self.handle, origin)
     }
 
-    pub fn mvhline(&self, origin: Origin, ch: ChtypeChar, n: i32) -> result!(()) {
-        ncursesw::mvwhline(self.handle, origin, ch, n)
+    pub fn mvhline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
+        ncursesw::mvwhline(self.handle, origin, ch, number)
     }
 
-    pub fn mvhline_set(&self, origin: Origin, wch: ComplexChar, n: i32) -> result!(()) {
-        ncursesw::mvwhline_set(self.handle, origin, wch, n)
+    pub fn mvhline_set(&self, origin: Origin, wch: ComplexChar, number: i32) -> result!(()) {
+        ncursesw::mvwhline_set(self.handle, origin, wch, number)
     }
 
-    pub fn mvinchnstr(&self, origin: Origin, n: i32) -> result!(ChtypeString) {
-        ncursesw::mvwinchnstr(self.handle, origin, n)
+    pub fn mvinchnstr(&self, origin: Origin, number: i32) -> result!(ChtypeString) {
+        ncursesw::mvwinchnstr(self.handle, origin, number)
     }
 
     pub fn mvinch(&self, origin: Origin) -> ChtypeChar {
         ncursesw::mvwinch(self.handle, origin)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinchnstr() instead")]
     pub fn mvinchstr(&self, origin: Origin) -> result!(ChtypeString) {
         ncursesw::mvwinchstr(self.handle, origin)
     }
 
-    pub fn mvinnstr(&self, origin: Origin, n: i32) -> result!(String) {
-        ncursesw::mvwinnstr(self.handle, origin, n)
+    pub fn mvinnstr(&self, origin: Origin, number: i32) -> result!(String) {
+        ncursesw::mvwinnstr(self.handle, origin, number)
     }
 
-    pub fn mvinnwstr(&self, origin: Origin, n: i32) -> result!(WideString) {
-        ncursesw::mvwinnwstr(self.handle, origin, n)
+    pub fn mvinnwstr(&self, origin: Origin, number: i32) -> result!(WideString) {
+        ncursesw::mvwinnwstr(self.handle, origin, number)
     }
 
     pub fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
         ncursesw::mvwinsch(self.handle, origin, ch)
     }
 
-    pub fn mvinsnstr(&self, origin: Origin, str: &str, n: i32) -> result!(()) {
-        ncursesw::mvwinsnstr(self.handle, origin, str, n)
+    pub fn mvinsnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
+        ncursesw::mvwinsnstr(self.handle, origin, str, number)
     }
 
-    pub fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, n: i32) -> result!(()) {
-        ncursesw::mvwins_nwstr(self.handle, origin, wstr, n)
+    pub fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
+        ncursesw::mvwins_nwstr(self.handle, origin, wstr, number)
     }
 
     pub fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
         ncursesw::mvwinsstr(self.handle, origin, str)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinnstr() instead")]
     pub fn mvinstr(&self, origin: Origin) -> result!(String) {
         ncursesw::mvwinstr(self.handle, origin)
     }
@@ -644,28 +662,30 @@ impl Window {
         ncursesw::mvwins_wstr(self.handle, origin, wstr)
     }
 
-    pub fn mvin_wchnstr(&self, origin: Origin, n: i32) -> result!(ComplexString) {
-        ncursesw::mvwin_wchnstr(self.handle, origin, n)
+    pub fn mvin_wchnstr(&self, origin: Origin, number: i32) -> result!(ComplexString) {
+        ncursesw::mvwin_wchnstr(self.handle, origin, number)
     }
 
     pub fn mvin_wch(&self, origin: Origin) -> result!(ComplexChar) {
         ncursesw::mvwin_wch(self.handle, origin)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvin_wchnstr() instead")]
     pub fn mvin_wchstr(&self, origin: Origin) -> result!(ComplexString) {
         ncursesw::mvwin_wchstr(self.handle, origin)
     }
 
+    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinnwstr() instead")]
     pub fn mvinwstr(&self, origin: Origin) -> result!(WideString) {
         ncursesw::mvwinwstr(self.handle, origin)
     }
 
-    pub fn mvvline(&self, origin: Origin, ch: ChtypeChar, n: i32) -> result!(()) {
-        ncursesw::mvwvline(self.handle, origin, ch, n)
+    pub fn mvvline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
+        ncursesw::mvwvline(self.handle, origin, ch, number)
     }
 
-    pub fn mvvline_set(&self, origin: Origin, wch: ComplexChar, n: i32) -> result!(()) {
-        ncursesw::mvwvline_set(self.handle, origin, wch, n)
+    pub fn mvvline_set(&self, origin: Origin, wch: ComplexChar, number: i32) -> result!(()) {
+        ncursesw::mvwvline_set(self.handle, origin, wch, number)
     }
 
     pub fn mvwin(&self, origin: Origin) -> result!(()) {
@@ -789,12 +809,12 @@ impl Window {
         ncursesw::untouchwin(self.handle)
     }
 
-    pub fn vline(&self, ch: ChtypeChar, n: i32) -> result!(()) {
-        ncursesw::wvline(self.handle, ch, n)
+    pub fn vline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
+        ncursesw::wvline(self.handle, ch, number)
     }
 
-    pub fn vline_set(&self, wch: ComplexChar, n: i32) -> result!(()) {
-        ncursesw::wvline_set(self.handle, wch, n)
+    pub fn vline_set(&self, wch: ComplexChar, number: i32) -> result!(()) {
+        ncursesw::wvline_set(self.handle, wch, number)
     }
 }
 

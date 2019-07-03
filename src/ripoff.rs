@@ -55,6 +55,17 @@ ripoff_init_fn!(ripoff_init2, 2);
 ripoff_init_fn!(ripoff_init3, 3);
 ripoff_init_fn!(ripoff_init4, 4);
 
+/// Ripoff a line from either the top or the bottom of the screen.
+///
+/// Function returns the ripoff number, a maximum of 5 lines can be ripped.
+///
+/// # Example
+/// ```
+/// let top_ripoff = match ripoffline(Orientation::Top) {
+///     Err(e) => return Err(e),
+///     Ok(n)  => n
+/// };
+/// ```
 pub fn ripoffline(orientation: Orientation) -> result!(usize) {
     // check that initscr() has not been called.
     if INITSCR_CALLED.load(Ordering::SeqCst) {
@@ -79,6 +90,17 @@ pub fn ripoffline(orientation: Orientation) -> result!(usize) {
     }
 }
 
+/// Update a ripped off line.
+///
+/// # Example
+/// ```
+/// update_ripoffline(top_ripoff, |ripoff, columns| -> result!(()) {
+///     ripoff.addstr(&format!("screen has {} columns", columns))?;
+///     ripoff.noutrefresh()?;
+///
+///     Ok(())
+/// })?;
+/// ```
 pub fn update_ripoffline<F>(number: usize, func: F) -> result!(()) where F: Fn(&Window, i32) -> result!(()) {
     // check that initscr() has been called.
     if !INITSCR_CALLED.load(Ordering::SeqCst) {

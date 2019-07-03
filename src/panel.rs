@@ -60,27 +60,27 @@ impl Drop for Panel {
 }
 
 impl Panel {
-    /// puts panel at the bottom of all panels.
+    /// Puts panel at the bottom of all panels.
     pub fn bottom_panel(&self) -> result!(()) {
         panels::bottom_panel(self.handle)
     }
 
-    /// puts the given visible panel on top of all panels in the stack.
+    /// Puts the given visible panel on top of all panels in the stack.
     pub fn top_panel(&self) -> result!(()) {
         panels::top_panel(self.handle)
     }
 
-    /// makes a hidden panel visible by placing it on top of the panels in the panel stack.
+    /// Makes a hidden panel visible by placing it on top of the panels in the panel stack.
     pub fn show_panel(&self) -> result!(()) {
         panels::show_panel(self.handle)
     }
 
-    /// removes the given panel from the panel stack and thus hides it from view. The Panel is not lost, merely removed from the stack.
+    /// Removes the given panel from the panel stack and thus hides it from view. The Panel is not lost, merely removed from the stack.
     pub fn hide_panel(&self) -> result!(()) {
         panels::hide_panel(self.handle)
     }
 
-    /// returns the window of the given panel.
+    /// Returns the window of the given panel.
     pub fn panel_window(&self) -> result!(Window) {
         match panels::panel_window(self.handle) {
             Err(e)     => Err(e),
@@ -88,22 +88,27 @@ impl Panel {
         }
     }
 
-    /// replaces the current window of panel with window (useful, for example if you want to resize a panel; if you're using ncurses, you can call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
+    /// Replaces the current window of panel with window.
+    ///
+    /// useful, for example if you want to resize a panel; if you're using ncurses, you can
+    /// call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
     pub fn replace_panel(&self, window: &Window) -> result!(()) {
         panels::replace_panel(self.handle, window.get_handle())
     }
 
-    /// moves the given panel window so that its upper-left corner is at origin.y, origin.x. It does not change the position of the panel in the stack. Be sure to use this function, not mvwin(), to move a panel window.
+    /// Moves the given panel window so that its upper-left corner is at origin.y, origin.x.
+    ///
+    /// It does not change the position of the panel in the stack. Be sure to use this function, not mvwin(), to move a panel window.
     pub fn move_panel(&self, origin: Origin) -> result!(()) {
         panels::move_panel(self.handle, origin)
     }
 
-    /// returns true if the panel is in the panel stack, false if it is not.
+    /// Returns true if the panel is in the panel stack, false if it is not.
     pub fn panel_hidden(&self) -> result!(bool) {
         panels::panel_hidden(self.handle)
     }
 
-    /// returns the panel above panel.
+    /// Returns the panel above panel.
     pub fn panel_above(&self) -> result!(Self) {
         match panels::panel_above(Some(self.handle)) {
             Err(e)     => Err(e),
@@ -111,7 +116,7 @@ impl Panel {
         }
     }
 
-    /// returns the panel just below panel.
+    /// Returns the panel just below panel.
     pub fn panel_below(&self) -> result!(Self) {
         match panels::panel_below(Some(self.handle)) {
             Err(e)     => Err(e),
@@ -119,18 +124,18 @@ impl Panel {
         }
     }
 
-    /// sets the panel's user pointer.
+    /// Sets the panel's user pointer.
     pub fn set_panel_userptr(&self, ptr: Option<PanelUserPtr>) -> result!(()) {
         panels::set_panel_userptr(self.handle, ptr)
     }
 
-    /// returns the user pointer for the given panel.
+    /// Returns the user pointer for the given panel.
     pub fn panel_userptr(&self) -> Option<PanelUserPtr> {
         panels::panel_userptr(self.handle)
     }
 }
 
-/// returns the panel above the specified panel. If the specified panel argument is None, it returns the bottom panel in the stack.
+/// Returns the panel above the specified panel. If the specified panel argument is None, it returns the bottom panel in the stack.
 pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
     match panels::panel_above(match panel {
         None        => None,
@@ -141,7 +146,7 @@ pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
     }
 }
 
-/// returns the panel just below the specified panel. If the specified panel argument is None, it returns the top panel in the stack.
+/// Returns the panel just below the specified panel. If the specified panel argument is None, it returns the top panel in the stack.
 pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
     match panels::panel_below(match panel {
         None        => None,

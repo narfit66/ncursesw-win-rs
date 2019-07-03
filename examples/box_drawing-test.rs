@@ -1,10 +1,10 @@
 extern crate ncursesw;
-extern crate ncurseswin;
+extern crate ncurseswwin;
 
 use ncursesw::{curs_set, NCurseswError, LcCategory, CursorType, Size, Origin};
 use ncursesw::normal::*;
 use ncursesw::ColorsType;
-use ncurseswin::*;
+use ncurseswwin::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswError> } }
 
@@ -18,7 +18,7 @@ fn main_routine() -> result!(()) {
     setlocale(LcCategory::All, "");
 
     ncursesw_init(|ncurses| {
-        let doit = |initial_window: Window| -> result!(()) {
+        let doit = |initial_window: &Window| -> result!(()) {
             curs_set(CursorType::Invisible)?;
             set_echo(false)?;
 
@@ -30,9 +30,11 @@ fn main_routine() -> result!(()) {
 
             let color_pair1 = ColorPair::new(1, Colors::new(fg_color, bg_color))?;
 
-            initial_window.color_set(color_pair1)?;
+            //initial_window.color_set(color_pair1)?;
 
             let attrs = Attributes::default();
+
+            let window_size = initial_window.get_size()?;
 
             let origin = Origin { y: 1, x: 1 };
             let size = Size { lines: 20, columns: 20 };
@@ -54,6 +56,8 @@ fn main_routine() -> result!(()) {
             mvwbox_set(&initial_window, Origin { y: 10, x: 10}, size, box_drawing_type)?;
             mvwbox_set(&initial_window, Origin { y: 0, x: 10}, size, box_drawing_type)?;
 
+            mvwbox_set(&initial_window, Origin { y: window_size.lines - (size.lines + 1), x: window_size.columns - (size.columns + 2)}, size, box_drawing_type)?;
+
             initial_window.refresh()?;
 
             initial_window.getch()?;
@@ -61,7 +65,7 @@ fn main_routine() -> result!(()) {
             Ok(())
         };
 
-        panic!(match doit(ncurses.initial_window()) {
+        panic!(match doit(&ncurses.initial_window()) {
             Err(e) => e.to_string(),
             _      => "this is the end my friend, the only end!!!".to_string()
         })
