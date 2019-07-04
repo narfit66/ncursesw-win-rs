@@ -24,3 +24,11 @@ The compiled library will be built in the `target` directory.
 ```
 cargo build
 ```
+
+## How to Use
+
+```
+extern crate ncurseswwin;
+
+use ncurseswwin::*;
+```
