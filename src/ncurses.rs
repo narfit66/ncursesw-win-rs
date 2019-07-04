@@ -34,11 +34,14 @@ lazy_static! {
     pub(crate) static ref INITSCR_NOT_CALLED: &'static str = "ncursesw::initscr() has not been called!";
 }
 
+/// NCurses context.
 pub struct NCurses {
     handle: WINDOW
 }
 
+/// NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
+    /// Initialise ncurses.
     pub fn initscr() -> result!(Self) {
         if !INITSCR_CALLED.compare_and_swap(false, true, Ordering::SeqCst) {
             COLOR_STARTED.store(false, Ordering::SeqCst);
@@ -51,12 +54,14 @@ impl NCurses {
         }
     }
 
+    /// Returns the initial window(stdscr) after initialisation.
     pub fn initial_window(&self) -> Window {
         Window::from(self.handle, true)
     }
 }
 
 impl Drop for NCurses {
+    /// Unallocate the initialised ncurses instance.
     fn drop(&mut self) {
         match ncursesw::endwin() {
             Err(e) => panic!(e.to_string()),
@@ -68,6 +73,7 @@ impl Drop for NCurses {
     }
 }
 
+/// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated correctly.
 pub fn ncursesw_init<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
     let result = catch_unwind(|| {
         let ncurses = match NCurses::initscr() {

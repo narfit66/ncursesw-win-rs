@@ -23,7 +23,7 @@
 use std::sync::atomic::Ordering;
 
 use crate::inputmode::InputMode;
-use ncursesw::{LcCategory, NCurseswError};
+use ncursesw::{LcCategory, SoftLabelType, NCurseswError};
 use ncursesw::gen::{ColorsType, ColorType, ColorAttributeTypes};
 use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED, INITSCR_NOT_CALLED, INITSCR_ALREADY_CALLED};
 
@@ -32,6 +32,7 @@ lazy_static! {
     static ref START_COLOR_NOT_CALLED: &'static str = "ncursesw::start_color() has not been called!";
 }
 
+/// Set the locale to be used, required if using unicode representation.
 pub fn setlocale(lc: LcCategory, locale: &str) -> String {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_ALREADY_CALLED.to_string());
@@ -40,6 +41,8 @@ pub fn setlocale(lc: LcCategory, locale: &str) -> String {
     ncursesw::setlocale(lc, locale)
 }
 
+/// Set the input mode to use within ncurses.
+///
 /// The terminal gets input from the user. Then it's sometimes buffered up. At
 /// some point it's passed into the program's input buffer.
 ///
@@ -69,6 +72,8 @@ pub fn set_input_mode(mode: InputMode) -> result!(()) {
     }
 }
 
+/// Set echo on or off within ncurses.
+///
 /// Enables or disables the automatic echoing of input into the window as
 /// the user types. Default to on, but you probably want it to be off most
 /// of the time.
@@ -82,6 +87,13 @@ pub fn set_echo(echoing: bool) -> result!(()) {
     }
 }
 
+/// Control whether the ncurses translates the return key into newline on input,
+///
+/// This determines wether ncurses translates newline into return and line-feed on output (in either
+/// case, the call addch('\n') does the equivalent of return and line feed on the virtual screen).
+/// Initially, these translations do occur. If you disable then ncurses will be able to make
+/// better use of the line-feed capability, resulting in faster cursor motion.
+/// Also, ncurses will then be able to detect the return key.
 pub fn set_newline(newline: bool) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_NOT_CALLED.to_string());
@@ -92,6 +104,9 @@ pub fn set_newline(newline: bool) -> result!(()) {
     }
 }
 
+/// Initialise ncurses internal color system.
+///
+/// This allows ncurses to initialise internal buffers to deal with color pairs etc.
 pub fn start_color() -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_NOT_CALLED.to_string());
@@ -108,6 +123,9 @@ pub fn start_color() -> result!(()) {
     }
 }
 
+/// Use the default terminal colors for color pair 0.
+///
+/// This is usually a white foreground on a black background.
 pub fn use_default_colors() -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_NOT_CALLED.to_string());
@@ -118,6 +136,7 @@ pub fn use_default_colors() -> result!(()) {
     ncursesw::use_default_colors()
 }
 
+/// Use the specialifed colors (foreground and background) as the default colors for defining color pair 0.
 pub fn assume_default_colors<S, C, T>(colors: S) -> result!(()) where S: ColorsType<C, T>, C: ColorType<T>, T: ColorAttributeTypes {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_NOT_CALLED.to_string());
@@ -126,4 +145,15 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(()) where S: ColorsT
     };
 
     ncursesw::assume_default_colors(colors)
+}
+
+/// Define the softlabels line at the bottom of the screen.
+///
+/// This will be initialised when ncurses is initialised.
+pub fn slk_init(fmt: SoftLabelType) -> result!(()) {
+    if INITSCR_CALLED.load(Ordering::SeqCst) {
+        panic!(INITSCR_ALREADY_CALLED.to_string());
+    };
+
+    ncursesw::slk_init(fmt)
 }

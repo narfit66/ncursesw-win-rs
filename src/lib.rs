@@ -33,7 +33,6 @@ mod inputmode;
 mod panel;
 mod ncurses;
 mod ripoff;
-mod softlabel;
 mod utils;
 mod window;
 
@@ -42,6 +41,5 @@ pub use inputmode::*;
 pub use panel::*;
 pub use ncurses::*;
 pub use ripoff::*;
-pub use softlabel::*;
 pub use utils::*;
 pub use window::*;

@@ -25,17 +25,20 @@ use ncursesw::{NCurseswError, Origin};
 
 use crate::window::Window;
 
+/// A raw pointer that can be user defined.
 pub type PanelUserPtr = panels::PANEL_USERPTR;
 
+/// A moveable panel that is a container for a `Window`.
 pub struct Panel {
     handle:       PANEL,
     free_on_drop: bool
 }
 
-unsafe impl Send for Panel { }
-unsafe impl Sync for Panel { }
+unsafe impl Send for Panel { } // too make thread safe
+unsafe impl Sync for Panel { } // too make thread safe
 
 impl Panel {
+    /// Create a new Panel instance with it's associated Window.
     pub fn new_panel(window: &Window) -> result!(Self) {
         match panels::new_panel(window.handle()) {
             Err(e)     => Err(e),
@@ -43,7 +46,12 @@ impl Panel {
         }
     }
 
-    #[inline]
+    // make a new instance from the passed panel structure pointer and specify
+    // if the handle is to be free'd when the structure is dropped.
+    //
+    // free_on_drop is false in call's such as panel_above(&self) where we are
+    // 'peeking' the Panel but it would be invalid to free the handle when
+    // our instance goes out of scope.
     pub(crate) fn from(handle: PANEL, free_on_drop: bool) -> Self {
         Self { handle, free_on_drop }
     }
@@ -75,7 +83,9 @@ impl Panel {
         panels::show_panel(self.handle)
     }
 
-    /// Removes the given panel from the panel stack and thus hides it from view. The Panel is not lost, merely removed from the stack.
+    /// Removes the given panel from the panel stack and thus hides it from view.
+    ///
+    /// The Panel is not lost, merely removed from the stack.
     pub fn hide_panel(&self) -> result!(()) {
         panels::hide_panel(self.handle)
     }
@@ -90,7 +100,7 @@ impl Panel {
 
     /// Replaces the current window of panel with window.
     ///
-    /// useful, for example if you want to resize a panel; if you're using ncurses, you can
+    /// Useful, for example if you want to resize a panel; if you're using ncurses, you can
     /// call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
     pub fn replace_panel(&self, window: &Window) -> result!(()) {
         panels::replace_panel(self.handle, window.handle())
@@ -135,7 +145,9 @@ impl Panel {
     }
 }
 
-/// Returns the panel above the specified panel. If the specified panel argument is None, it returns the bottom panel in the stack.
+/// Returns the panel above the specified panel.
+///
+/// If the specified panel argument is None, it returns the bottom panel in the stack.
 pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
     match panels::panel_above(match panel {
         None        => None,
@@ -146,7 +158,9 @@ pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
     }
 }
 
-/// Returns the panel just below the specified panel. If the specified panel argument is None, it returns the top panel in the stack.
+/// Returns the panel just below the specified panel.
+///
+/// If the specified panel argument is None, it returns the top panel in the stack.
 pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
     match panels::panel_below(match panel {
         None        => None,

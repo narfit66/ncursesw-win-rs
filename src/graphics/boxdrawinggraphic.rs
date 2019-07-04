@@ -24,6 +24,7 @@ use std::convert::{TryFrom, Into};
 
 use ncursesw::NCurseswError;
 
+/// The boxdrawing graphic characters.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BoxDrawingGraphic {
     UpperLeftCorner,

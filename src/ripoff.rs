@@ -28,7 +28,7 @@ use ncursesw::{WINDOW, Orientation, NCurseswError};
 use crate::window::Window;
 use crate::ncurses::{INITSCR_CALLED, INITSCR_ALREADY_CALLED, INITSCR_NOT_CALLED};
 
-const MAX_LINES: usize = 5;
+const MAX_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
 
 lazy_static! {
     static ref RIPOFFCOUNT: AtomicUsize = AtomicUsize::new(0);
@@ -57,7 +57,7 @@ ripoff_init_fn!(ripoff_init4, 4);
 
 /// Ripoff a line from either the top or the bottom of the screen.
 ///
-/// Function returns the ripoff number, a maximum of 5 lines can be ripped.
+/// Returns the ripoff number, a maximum of 5 lines can be ripped.
 pub fn ripoffline(orientation: Orientation) -> result!(usize) {
     // check that initscr() has not been called.
     if INITSCR_CALLED.load(Ordering::SeqCst) {
@@ -82,7 +82,7 @@ pub fn ripoffline(orientation: Orientation) -> result!(usize) {
     }
 }
 
-/// Update a ripped off line.
+/// Update the specified ripped off line using the specified closure.
 pub fn update_ripoffline<F>(number: usize, func: F) -> result!(()) where F: Fn(&Window, i32) -> result!(()) {
     // check that initscr() has been called.
     if !INITSCR_CALLED.load(Ordering::SeqCst) {

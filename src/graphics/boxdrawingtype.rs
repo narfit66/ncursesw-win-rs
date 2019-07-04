@@ -22,6 +22,7 @@
 
 use crate::graphics::BoxDrawingTypeDetail;
 
+/// Boxdrawing type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum BoxDrawingType {

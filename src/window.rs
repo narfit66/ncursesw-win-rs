@@ -25,10 +25,19 @@
 
 use std::{path, time};
 
-use ncursesw::{WINDOW, Origin, Size, CharacterResult, AttributesColorPairSet, Region, Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString, WideCharResult, NCurseswError};
+use ncursesw::{
+    WINDOW, Origin, Size, CharacterResult, AttributesColorPairSet, Region,
+    Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString,
+    WideCharResult, NCurseswError
+};
 use ncursesw::normal;
 use ncursesw::gen::{AttributesType, ColorPairType, ColorAttributeTypes};
 
+/// A moveable window canvas.
+///
+/// All methods are either there original ncurses name or were specificlly passed a pointer
+/// to `_win_st` the 'w' has been removed for example the ncurses function `mvwgetn_wstr()`
+/// has become the method `mvgetn_wstr()`.
 pub struct Window {
     handle:       WINDOW, // pointer to ncurses _win_st internal structure
     free_on_drop: bool    // free WINDOW handle on drop of structure
@@ -38,6 +47,7 @@ unsafe impl Send for Window { } // too make thread safe
 unsafe impl Sync for Window { } // too make thread safe
 
 impl Window {
+    /// Create a new instance of a Window
     pub fn newwin(size: Size, origin: Origin) -> result!(Self) {
         match ncursesw::newwin(size, origin) {
             Err(e)     => Err(e),
@@ -860,6 +870,9 @@ impl Window {
     }
 }
 
+/// Create a Window instance from a previous saved file.
+///
+/// This uses the file previously generated using the Window.putwin() routine.
 pub fn getwin(path: &path::Path) -> result!(Window) {
     match ncursesw::getwin(path) {
         Err(e)     => Err(e),
@@ -867,6 +880,7 @@ pub fn getwin(path: &path::Path) -> result!(Window) {
     }
 }
 
+/// Create a new instance of a Window that will act as a pad.
 pub fn newpad(size: Size) -> result!(Window) {
     match ncursesw::newpad(size) {
         Err(e)     => Err(e),
