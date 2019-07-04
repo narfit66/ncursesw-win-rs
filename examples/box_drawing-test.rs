@@ -34,7 +34,7 @@ fn main_routine() -> result!(()) {
 
             let attrs = Attributes::default();
 
-            let window_size = initial_window.get_size()?;
+            let window_size = initial_window.size()?;
 
             let origin = Origin { y: 1, x: 1 };
             let size = Size { lines: 20, columns: 20 };

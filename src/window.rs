@@ -56,7 +56,7 @@ impl Window {
     }
 
     // get the ncurses _win_st pointer for this Window structure.
-    pub(crate) fn get_handle(&self) -> WINDOW {
+    pub(crate) fn handle(&self) -> WINDOW {
         self.handle
     }
 
@@ -820,17 +820,17 @@ impl Window {
 
 impl Window {
     /// get the origin of the window.
-    pub fn get_origin(&self) -> result!(Origin) {
+    pub fn origin(&self) -> result!(Origin) {
         ncursesw::getbegyx(self.handle)
     }
 
     /// get the size of the window.
-    pub fn get_size(&self) -> result!(Size) {
+    pub fn size(&self) -> result!(Size) {
         ncursesw::getmaxyx(self.handle)
     }
 
     /// get the cursor origin on the window.
-    pub fn get_cursor(&self) -> result!(Origin) {
+    pub fn cursor(&self) -> result!(Origin) {
         ncursesw::getcuryx(self.handle)
     }
 

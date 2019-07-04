@@ -37,7 +37,7 @@ unsafe impl Sync for Panel { }
 
 impl Panel {
     pub fn new_panel(window: &Window) -> result!(Self) {
-        match panels::new_panel(window.get_handle()) {
+        match panels::new_panel(window.handle()) {
             Err(e)     => Err(e),
             Ok(handle) => Ok(Self::from(handle, true))
         }
@@ -93,7 +93,7 @@ impl Panel {
     /// useful, for example if you want to resize a panel; if you're using ncurses, you can
     /// call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
     pub fn replace_panel(&self, window: &Window) -> result!(()) {
-        panels::replace_panel(self.handle, window.get_handle())
+        panels::replace_panel(self.handle, window.handle())
     }
 
     /// Moves the given panel window so that its upper-left corner is at origin.y, origin.x.

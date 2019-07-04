@@ -305,34 +305,16 @@ lazy_static! {
 }
 
 /// Obtain the box drawing graphic of ChtypeChar type.
-///
-/// # Example
-/// ```
-/// let vertical_line = chtype_box_graphic(BoxDrawingGraphic::VerticalLine);
-/// ```
 pub fn chtype_box_graphic(graphic: BoxDrawingGraphic) -> ChtypeChar {
     ChtypeChar::from(NCURSES_ACS(*CHTYPEBOXDRAWING.get(&graphic).unwrap_or_else(|| panic!("chtype_box_graphic() : unable to retrive {:?}", graphic))))
 }
 
 /// Obtain the box drawing graphic of WideChar type.
-///
-/// # Example
-/// ```
-/// let vertical_line = wide_box_graphic(BoxDrawingType::Double, BoxDrawingGraphic::VerticalLine);
-/// ```
 pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic) -> WideChar {
     WideChar::from(*WIDEBOXDRAWING.get(&MatrixKey::new(box_drawing_type, graphic)).unwrap_or_else(|| panic!("wide_box_graphic() : unable to retrive {:?} {:?}", box_drawing_type, graphic)) as wchar_t)
 }
 
 /// Obtain the box drawing graphic of ComplexChar type.
-///
-/// # Example
-/// ```
-/// let color_pair1 = ColorPair::new(1, Colors::new(Color::Yellow, Color::Blue))?;
-/// let attrs = Attribute::Dim;
-///
-/// let vertical_line = complex_box_graphic(BoxDrawingType::Double, BoxDrawingGraphic::VerticalLine, &attrs, &color_pair1)?;
-/// ```
 pub fn complex_box_graphic<A, P, T>(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic, attrs: &A, color_pair: &P) -> result!(ComplexChar) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
     ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, graphic), attrs, color_pair)
 }
@@ -340,25 +322,13 @@ pub fn complex_box_graphic<A, P, T>(box_drawing_type: BoxDrawingType, graphic: B
 /// Draw a horizontal line at current cursor of a length using the box drawing type.
 ///
 /// The original attributes and color pairs are retained from characters that are overwritten.
-///
-/// # Example
-/// ```
-/// whline_set(&window, BoxDrawingType::Double, 10)?;
-/// ```
 pub fn whline_set(window: &Window, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
-    mvwhline_set(window, window.get_cursor()?, box_drawing_type, length)
+    mvwhline_set(window, window.cursor()?, box_drawing_type, length)
 }
 
 /// Draw a horizontal line at origin of a length using the box drawing type.
 ///
 /// The original attributes and color pairs are retained from characters that are overwritten.
-///
-/// # Example
-/// ```
-/// let origin = Origin { y: 5, x: 25 };
-///
-/// mvwhline_set(&window, origin, BoxDrawingType::Double, 10)?;
-/// ```
 pub fn mvwhline_set(window: &Window, origin: Origin, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
     assert!(length > 0, "mvwhline_set() : length={} > 0", length);
 
@@ -428,25 +398,13 @@ pub fn mvwhline_set(window: &Window, origin: Origin, box_drawing_type: BoxDrawin
 /// Draw a vertical line at the current cursor of a length using the box drawing type.
 ///
 /// The original attributes and color pairs are retained from characters that are overwritten.
-///
-/// # Example
-/// ```
-/// wvline_set(&window, BoxDrawingType::Double, 10)?;
-/// ```
 pub fn wvline_set(window: &Window, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
-    mvwvline_set(window, window.get_cursor()?, box_drawing_type, length)
+    mvwvline_set(window, window.cursor()?, box_drawing_type, length)
 }
 
 /// Draw a vertical line at origin of a length using the box drawing type.
 ///
 /// The original attributes and color pairs are retained from characters that are overwritten.
-///
-/// # Example
-/// ```
-/// let origin = Origin { y: 5, x: 25 };
-///
-/// mvwvline_set(&window, origin, BoxDrawingType::Double, 10)?;
-/// ```
 pub fn mvwvline_set(window: &Window, origin: Origin, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
     assert!(length > 0, "mvwvline_set() : length={} > 0", length);
 
@@ -523,28 +481,13 @@ pub fn mvwvline_set(window: &Window, origin: Origin, box_drawing_type: BoxDrawin
 /// Draw a box at current cursor of a size using the box drawing type.
 ///
 /// The original attributes and color pairs are retained from characters that are overwritten.
-///
-/// # Example
-/// ```
-/// let size = Size { lines: 5, columns: 25 };
-///
-/// wbox_set(&window, size, BoxDrawingType::Double)?;
-/// ```
 pub fn wbox_set(window: &Window, size: Size, box_drawing_type: BoxDrawingType) -> result!(()) {
-    mvwbox_set(window, window.get_cursor()?, size, box_drawing_type)
+    mvwbox_set(window, window.cursor()?, size, box_drawing_type)
 }
 
 /// Draw a box at origin of a size using the box drawing type.
 ///
 /// The original attributes and color pairs are retained from characters that are overwritten.
-///
-/// # Example
-/// ```
-/// let origin = Origin { y: 4, x: 1 };
-/// let size = Size { lines: 5, columns: 25 };
-///
-/// wbox_set(&window, size, BoxDrawingType::Double)?;
-/// ```
 pub fn mvwbox_set(window: &Window, origin: Origin, size: Size, box_drawing_type: BoxDrawingType) -> result!(()) {
     let get_corner_char = |corner_origin: Origin, graphic: BoxDrawingGraphic| -> result!(ComplexChar) {
         let char_attr_pair = getcchar(window.mvin_wch(corner_origin)?)?;

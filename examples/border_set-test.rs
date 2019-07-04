@@ -31,7 +31,7 @@ fn main_routine() -> result!(()) {
             let attrs = Attributes::default();
 
             // get the size of the initial window (stdscr).
-            let initial_size = initial_window.get_size()?;
+            let initial_size = initial_window.size()?;
 
             // workout the size of a inner window have a 1 character spacing all the way around.
             let inner_size = Size { lines: initial_size.lines - 2, columns: initial_size.columns - 2 };
