@@ -263,7 +263,7 @@ impl Window {
         ncursesw::getbegy(self.handle)
     }
 
-    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_origin() instead")]
+    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use origin() instead")]
     pub fn getbegyx(&self) -> result!(Origin) {
         ncursesw::getbegyx(self.handle)
     }
@@ -288,7 +288,7 @@ impl Window {
         ncursesw::getcury(self.handle)
     }
 
-    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_cursor() instead")]
+    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use cursor() instead")]
     pub fn getcuryx(&self) -> result!(Origin) {
         ncursesw::getcuryx(self.handle)
     }
@@ -306,7 +306,7 @@ impl Window {
         ncursesw::getmaxy(self.handle)
     }
 
-    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_size() instead")]
+    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use size() instead")]
     pub fn getmaxyx(&self) -> result!(Size) {
         ncursesw::getmaxyx(self.handle)
     }
