@@ -510,19 +510,24 @@ pub fn mvwbox_set(window: &Window, origin: Origin, size: Size, box_drawing_type:
     let mut corner_origin = origin;
     window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::UpperLeftCorner)?)?;
 
-    corner_origin = Origin { y: origin.y, x: origin.x + size.columns };
+    corner_origin = Origin { y: origin.y, x: origin.x + (size.columns - 1) };
     window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::UpperRightCorner)?)?;
 
-    corner_origin = Origin { y: origin.y + size.lines, x: origin.x };
+    corner_origin = Origin { y: origin.y + (size.lines - 1), x: origin.x };
     window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerLeftCorner)?)?;
 
-    corner_origin = Origin { y: origin.y + size.lines, x: origin.x + size.columns };
-    window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerRightCorner)?)?;
+    corner_origin = Origin { y: origin.y + (size.lines - 1), x: origin.x + (size.columns - 1) };
+    let screen_size = Origin { y: ncursesw::LINES() - 1, x: ncursesw::COLS() - 1 };
+    if corner_origin == screen_size {
+        window.mvins_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerRightCorner)?)?;
+    } else {
+        window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerRightCorner)?)?;
+    }
 
-    mvwhline_set(window, Origin { y: origin.y, x: origin.x + 1}, box_drawing_type, size.columns - 1)?;
-    mvwhline_set(window, Origin { y: origin.y + size.lines, x: origin.x + 1}, box_drawing_type, size.columns - 1)?;
-    mvwvline_set(window, Origin { y: origin.y + 1, x: origin.x }, box_drawing_type, size.lines - 1)?;
-    mvwvline_set(window, Origin { y: origin.y + 1, x: origin.x + size.columns}, box_drawing_type, size.lines - 1)?;
+    mvwhline_set(window, Origin { y: origin.y, x: origin.x + 1}, box_drawing_type, size.columns - 2)?;
+    mvwhline_set(window, Origin { y: origin.y + (size.lines - 1), x: origin.x + 1}, box_drawing_type, size.columns - 2)?;
+    mvwvline_set(window, Origin { y: origin.y + 1, x: origin.x }, box_drawing_type, size.lines - 2)?;
+    mvwvline_set(window, Origin { y: origin.y + 1, x: origin.x + (size.columns - 1)}, box_drawing_type, size.lines - 2)?;
 
     Ok(())
 }

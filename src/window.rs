@@ -437,7 +437,7 @@ impl Window {
         ncursesw::winstr(self.handle)
     }
 
-    pub fn ins_wch(&self, wch: &ComplexString) -> result!(()) {
+    pub fn ins_wch(&self, wch: ComplexChar) -> result!(()) {
         ncursesw::wins_wch(self.handle, wch)
     }
 
@@ -664,7 +664,7 @@ impl Window {
         ncursesw::mvwinstr(self.handle, origin)
     }
 
-    pub fn mvins_wch(&self, origin: Origin, wch: &ComplexString) -> result!(()) {
+    pub fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
         ncursesw::mvwins_wch(self.handle, origin, wch)
     }
 
