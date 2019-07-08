@@ -27,8 +27,8 @@ use std::{path, time};
 
 use ncursesw::{
     WINDOW, Origin, Size, CharacterResult, AttributesColorPairSet, Region,
-    Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString,
-    WideCharResult, NCurseswError
+    Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideChar,
+    WideString, NCurseswError
 };
 use ncursesw::normal;
 use ncursesw::gen::{AttributesType, ColorPairType, ColorAttributeTypes};
@@ -286,7 +286,7 @@ impl Window {
         ncursesw::wgetbkgrnd(self.handle)
     }
 
-    pub fn getch(&self) -> result!(CharacterResult) {
+    pub fn getch(&self) -> result!(CharacterResult<char>) {
         ncursesw::wgetch(self.handle)
     }
 
@@ -358,7 +358,7 @@ impl Window {
         ncursesw::wgetstr(self.handle)
     }
 
-    pub fn get_wch(&self) -> result!(WideCharResult) {
+    pub fn get_wch(&self) -> result!(CharacterResult<WideChar>) {
         ncursesw::wget_wch(self.handle)
     }
 
@@ -588,7 +588,7 @@ impl Window {
         ncursesw::mvderwin(self.handle, origin)
     }
 
-    pub fn mvgetch(&self, origin: Origin) -> result!(CharacterResult) {
+    pub fn mvgetch(&self, origin: Origin) -> result!(CharacterResult<char>) {
         ncursesw::mvwgetch(self.handle, origin)
     }
 
@@ -605,7 +605,7 @@ impl Window {
         ncursesw::mvwgetstr(self.handle, origin)
     }
 
-    pub fn mvget_wch(&self, origin: Origin) -> result!(WideCharResult) {
+    pub fn mvget_wch(&self, origin: Origin) -> result!(CharacterResult<WideChar>) {
         ncursesw::mvwget_wch(self.handle, origin)
     }
 
