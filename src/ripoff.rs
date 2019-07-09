@@ -40,7 +40,7 @@ macro_rules! ripoff_init_fn {
     ($f: ident, $n: expr) => {
         #[no_mangle]
         extern fn $f(win: WINDOW, cols: i32) -> i32 {
-            RIPOFFLINES.lock().unwrap().insert($n, (Window::from(win, false), cols));
+            RIPOFFLINES.lock().unwrap_or_else(|_| panic!("ripoff_init{}() : RIPOFFLINES.lock() failed!", $n)).insert($n, (Window::from(win, false), cols));
 
             ncursesw::shims::constants::OK
         }
