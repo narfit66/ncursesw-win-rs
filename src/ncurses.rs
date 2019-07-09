@@ -43,10 +43,12 @@ pub struct NCurses {
 impl NCurses {
     /// Initialise ncurses.
     pub fn initscr() -> result!(Self) {
-        if !INITSCR_CALLED.compare_and_swap(false, true, Ordering::SeqCst) {
-            COLOR_STARTED.store(false, Ordering::SeqCst);
+        if !INITSCR_CALLED.load(Ordering::SeqCst) {
 
             let handle = ncursesw::initscr()?;
+
+            COLOR_STARTED.store(false, Ordering::SeqCst);
+            INITSCR_CALLED.store(true, Ordering::SeqCst);
 
             Ok(Self { handle })
         } else {

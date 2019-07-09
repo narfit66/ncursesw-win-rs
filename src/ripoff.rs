@@ -93,7 +93,7 @@ pub fn update_ripoffline<F>(number: usize, func: F) -> result!(()) where F: Fn(&
     assert!(number < MAX_LINES, "update_ripoffline() : number={} > {}", number, MAX_LINES);
 
     // get the ripoff details and assert that we have a valid ripoff!
-    let ripoff = &RIPOFFLINES.lock().unwrap()[number];
+    let ripoff = &RIPOFFLINES.lock().unwrap_or_else(|_| panic!("update_ripoffline() : RIPOFFLINES.lock() failed!"))[number];
     assert!(!ripoff.0.handle().is_null(), "update_ripoffline() : ripoff.0.get_handle().is_null()");
 
     // call the passed closure to process against the ripoff.
