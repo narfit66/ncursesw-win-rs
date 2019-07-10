@@ -1,4 +1,4 @@
-ncursesw-win
+ncursesw-win [![Build Status](https://travis-ci.com/narfit66/ncursesw-win-rs.svg?branch=master)](https://travis-ci.com/narfit66/ncursesw-win-rs)
 ============
 
 This is a *thin* wrapper around the `ncursesw`(https://crates.io/crates/ncursesw) crate, it's purpose is too abstracts away the raw pointers that ncurses uses and function in a more safe way, however a knowledge of how ncurses works is advised to use the true power of this library.
