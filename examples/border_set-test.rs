@@ -26,7 +26,7 @@ fn main_routine() -> result!(()) {
             start_color()?;
             use_default_colors()?;
 
-            // define color pir 0 and normal attriburs.
+            // define color pair 0 and normal attriburs.
             let color_pair0 = ColorPair::default();
             let attrs = Attributes::default();
 

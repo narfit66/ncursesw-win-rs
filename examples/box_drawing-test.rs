@@ -1,7 +1,7 @@
 extern crate ncursesw;
 extern crate ncurseswwin;
 
-use ncursesw::{curs_set, NCurseswError, LcCategory, CursorType, Size, Origin};
+use ncursesw::{curs_set, NCurseswError, LcCategory, BaseColor, CursorType, Size, Origin};
 use ncursesw::normal::*;
 use ncursesw::ColorsType;
 use ncurseswwin::*;
@@ -25,8 +25,8 @@ fn main_routine() -> result!(()) {
             start_color()?;
             use_default_colors()?;
 
-            let fg_color = Color::Yellow;
-            let bg_color = Color::Blue;
+            let fg_color = Color::Light(BaseColor::Yellow);
+            let bg_color = Color::Dark(BaseColor::Blue);
 
             let color_pair1 = ColorPair::new(1, Colors::new(fg_color, bg_color))?;
 
