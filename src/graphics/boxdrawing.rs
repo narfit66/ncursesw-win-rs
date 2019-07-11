@@ -24,14 +24,13 @@
 
 use std::collections::HashMap;
 
-use crate::Window;
 use crate::graphics::{BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic};
-use ncursesw::gen::{AttributesType, ColorPairType, ColorAttributeTypes, AttributesColorPairType};
-use ncursesw::{getcchar, AttributesColorPairSet, ChtypeChar, WideChar, ComplexChar, ComplexString, Origin, Size, NCurseswError};
+use ncursesw::gen::{AttributesType, ColorPairType, ColorAttributeTypes};
+use ncursesw::{ChtypeChar, WideChar, ComplexChar, NCurseswError};
 use ncursesw::shims::ncurses::{wchar_t, NCURSES_ACS};
 
 #[derive(PartialEq, Eq, Hash)]
-struct MatrixKey {
+pub(crate) struct MatrixKey {
     box_drawing_type:    BoxDrawingType,
     box_drawing_graphic: BoxDrawingGraphic
 }
@@ -41,11 +40,11 @@ impl MatrixKey {
         Self { box_drawing_type, box_drawing_graphic }
     }
 
-    fn box_drawing_type(&self) -> BoxDrawingType {
+    pub(crate) fn box_drawing_type(&self) -> BoxDrawingType {
         self.box_drawing_type
     }
 
-    fn box_drawing_graphic(&self) -> BoxDrawingGraphic {
+    pub(crate) fn box_drawing_graphic(&self) -> BoxDrawingGraphic {
         self.box_drawing_graphic
     }
 }
@@ -73,7 +72,7 @@ lazy_static! {
         graphics
     };
 
-    static ref WIDEBOXDRAWING: HashMap<MatrixKey, u32> = {
+    pub(crate) static ref WIDEBOXDRAWING: HashMap<MatrixKey, u32> = {
         let mut graphics = HashMap::new();
 
         graphics.insert(MatrixKey::new(BoxDrawingType::Ascii,                                      BoxDrawingGraphic::UpperLeftCorner     ), 0x002b); // #
@@ -317,217 +316,4 @@ pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGra
 /// Obtain the box drawing graphic of ComplexChar type.
 pub fn complex_box_graphic<A, P, T>(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic, attrs: &A, color_pair: &P) -> result!(ComplexChar) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
     ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, graphic), attrs, color_pair)
-}
-
-/// Draw a horizontal line at current cursor of a length using the box drawing type.
-///
-/// The original attributes and color pairs are retained from characters that are overwritten.
-pub fn whline_set(window: &Window, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
-    mvwhline_set(window, window.cursor()?, box_drawing_type, length)
-}
-
-/// Draw a horizontal line at origin of a length using the box drawing type.
-///
-/// The original attributes and color pairs are retained from characters that are overwritten.
-pub fn mvwhline_set(window: &Window, origin: Origin, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
-    assert!(length > 0, "mvwhline_set() : length={} > 0", length);
-
-    // build a vector of the complex characters we are going to overwrite
-    let complex_chars: Vec<ComplexChar> = ComplexString::into(window.mvin_wchnstr(origin, length)?);
-    let mut line_origin = origin;
-
-    // iterate over the vector of complex characters
-    for &complex_char in &complex_chars {
-        // get the elements of out complex character i.e. wide character, attributes and color pair
-        let char_attr_pair = getcchar(complex_char)?;
-        // get the unicode value of our complex characters character
-        let wchar: u32 = WideChar::into(char_attr_pair.character());
-
-        // define our default graphic character to use
-        let mut box_drawing_graphic = BoxDrawingGraphic::HorizontalLine;
-
-        // iterate and filter wide character graphic characters of the specified box drawing type that have the same unicode value
-        for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
-            // transform our selected graphic character with our default graphic character
-            box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
-
-            // if we've transformed into a plus or upper/lower tee graphic then...
-            if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::UpperTee || box_drawing_graphic == BoxDrawingGraphic::LowerTee {
-                // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-                box_drawing_graphic = if line_origin.x == 0 {
-                    if line_origin.y == 0 {
-                        BoxDrawingGraphic::UpperLeftCorner
-                    } else if line_origin.y == window.getmaxx()? {
-                        BoxDrawingGraphic::LowerLeftCorner
-                    } else {
-                        BoxDrawingGraphic::LeftTee
-                    }
-                } else if line_origin.y == window.getmaxy()? {
-                    if line_origin.x == 0 {
-                        BoxDrawingGraphic::UpperRightCorner
-                    } else if line_origin.x == window.getmaxx()? {
-                        BoxDrawingGraphic::LowerRightCorner
-                    } else {
-                        BoxDrawingGraphic::RightTee
-                    }
-                } else {
-                    box_drawing_graphic
-                };
-            }
-
-            break;
-        }
-
-        // place our complex graphics character onto the window with the existing attributes and color pair
-        window.mvadd_wch(line_origin, match char_attr_pair.attributes_and_color_pair() {
-            AttributesColorPairSet::Normal(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
-            AttributesColorPairSet::Extend(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
-        })?;
-
-        line_origin.x += 1;
-
-        // check if we've reached the right edge of the window
-        if line_origin.x >= window.getmaxx()? {
-            break;
-        }
-    }
-
-    Ok(())
-}
-
-/// Draw a vertical line at the current cursor of a length using the box drawing type.
-///
-/// The original attributes and color pairs are retained from characters that are overwritten.
-pub fn wvline_set(window: &Window, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
-    mvwvline_set(window, window.cursor()?, box_drawing_type, length)
-}
-
-/// Draw a vertical line at origin of a length using the box drawing type.
-///
-/// The original attributes and color pairs are retained from characters that are overwritten.
-pub fn mvwvline_set(window: &Window, origin: Origin, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
-    assert!(length > 0, "mvwvline_set() : length={} > 0", length);
-
-    let mut complex_chars = vec!();
-    let mut line_origin = origin;
-
-    // build a vector of the complex characters we are going to overwrite
-    for _ in 0..length {
-        complex_chars.push(window.mvin_wch(line_origin)?);
-        line_origin.y += 1;
-    }
-
-    line_origin = origin;
-
-    // iterate over the vector of complex characters
-    for &complex_char in &complex_chars {
-        // get the elements of out complex character i.e. wide character, attributes and color pair
-        let char_attr_pair = getcchar(complex_char)?;
-        // get the unicode value of our complex characters character
-        let wchar: u32 = WideChar::into(char_attr_pair.character());
-
-        // define our default graphic character to use
-        let mut box_drawing_graphic = BoxDrawingGraphic::VerticalLine;
-
-        // iterate and filter wide character graphic characters of the specified box drawing type that have the same unicode value
-        for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
-            // transform our selected graphic character with our default graphic character
-            box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
-
-            // if we've transformed into a plus or left/right tee graphic then...
-            if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::LeftTee || box_drawing_graphic == BoxDrawingGraphic::RightTee {
-                // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-                box_drawing_graphic = if line_origin.x == 0 {
-                    if line_origin.y == 0 {
-                        BoxDrawingGraphic::UpperLeftCorner
-                    } else if line_origin.y == window.getmaxx()? {
-                        BoxDrawingGraphic::LowerLeftCorner
-                    } else {
-                        BoxDrawingGraphic::UpperTee
-                    }
-                } else if line_origin.y == window.getmaxy()? {
-                    if line_origin.x == 0 {
-                        BoxDrawingGraphic::UpperRightCorner
-                    } else if line_origin.x == window.getmaxx()? {
-                        BoxDrawingGraphic::LowerRightCorner
-                    } else {
-                        BoxDrawingGraphic::LowerTee
-                    }
-                } else {
-                    box_drawing_graphic
-                };
-            }
-
-            break;
-        }
-
-        // place our complex graphics character onto the window with the existing attributes and color pair
-        window.mvadd_wch(line_origin, match char_attr_pair.attributes_and_color_pair() {
-            AttributesColorPairSet::Normal(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
-            AttributesColorPairSet::Extend(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
-        })?;
-
-        line_origin.y += 1;
-
-        // check if we've reached the bottom edge of the window
-        if line_origin.y >= window.getmaxy()? {
-            break;
-        }
-    }
-
-    Ok(())
-}
-
-/// Draw a box at current cursor of a size using the box drawing type.
-///
-/// The original attributes and color pairs are retained from characters that are overwritten.
-pub fn wbox_set(window: &Window, size: Size, box_drawing_type: BoxDrawingType) -> result!(()) {
-    mvwbox_set(window, window.cursor()?, size, box_drawing_type)
-}
-
-/// Draw a box at origin of a size using the box drawing type.
-///
-/// The original attributes and color pairs are retained from characters that are overwritten.
-pub fn mvwbox_set(window: &Window, origin: Origin, size: Size, box_drawing_type: BoxDrawingType) -> result!(()) {
-    let get_corner_char = |corner_origin: Origin, graphic: BoxDrawingGraphic| -> result!(ComplexChar) {
-        let char_attr_pair = getcchar(window.mvin_wch(corner_origin)?)?;
-        let mut box_drawing_graphic = graphic;
-
-        for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == WideChar::into(char_attr_pair.character())) {
-            box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
-
-            break;
-        }
-
-        let cchar = match char_attr_pair.attributes_and_color_pair() {
-            AttributesColorPairSet::Normal(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
-            AttributesColorPairSet::Extend(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
-        };
-
-        Ok(cchar)
-    };
-
-    let mut corner_origin = origin;
-    window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::UpperLeftCorner)?)?;
-
-    corner_origin = Origin { y: origin.y, x: origin.x + (size.columns - 1) };
-    window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::UpperRightCorner)?)?;
-
-    corner_origin = Origin { y: origin.y + (size.lines - 1), x: origin.x };
-    window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerLeftCorner)?)?;
-
-    corner_origin = Origin { y: origin.y + (size.lines - 1), x: origin.x + (size.columns - 1) };
-    let screen_size = Origin { y: ncursesw::LINES() - 1, x: ncursesw::COLS() - 1 };
-    if corner_origin == screen_size {
-        window.mvins_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerRightCorner)?)?;
-    } else {
-        window.mvadd_wch(corner_origin, get_corner_char(corner_origin, BoxDrawingGraphic::LowerRightCorner)?)?;
-    }
-
-    mvwhline_set(window, Origin { y: origin.y, x: origin.x + 1}, box_drawing_type, size.columns - 2)?;
-    mvwhline_set(window, Origin { y: origin.y + (size.lines - 1), x: origin.x + 1}, box_drawing_type, size.columns - 2)?;
-    mvwvline_set(window, Origin { y: origin.y + 1, x: origin.x }, box_drawing_type, size.lines - 2)?;
-    mvwvline_set(window, Origin { y: origin.y + 1, x: origin.x + (size.columns - 1)}, box_drawing_type, size.lines - 2)?;
-
-    Ok(())
 }

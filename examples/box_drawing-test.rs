@@ -50,13 +50,13 @@ fn main_routine() -> result!(()) {
 
             initial_window.border_set(vl, vl, hl, hl, ul, ur, ll, lr)?;
 
-            mvwbox_set(&initial_window, origin, size, box_drawing_type)?;
-            mvwbox_set(&initial_window, Origin { y: 5, x: 5 }, size, box_drawing_type)?;
-            mvwbox_set(&initial_window, Origin { y: 2, x: 0 }, size, box_drawing_type)?;
-            mvwbox_set(&initial_window, Origin { y: 10, x: 10 }, size, box_drawing_type)?;
-            mvwbox_set(&initial_window, Origin { y: 0, x: 10 }, size, box_drawing_type)?;
+            initial_window.mvwbox_set(origin, size, box_drawing_type)?;
+            initial_window.mvwbox_set(Origin { y: 5, x: 5 }, size, box_drawing_type)?;
+            initial_window.mvwbox_set(Origin { y: 2, x: 0 }, size, box_drawing_type)?;
+            initial_window.mvwbox_set(Origin { y: 10, x: 10 }, size, box_drawing_type)?;
+            initial_window.mvwbox_set(Origin { y: 0, x: 10 }, size, box_drawing_type)?;
 
-            mvwbox_set(&initial_window, Origin { y: window_size.lines - size.lines, x: window_size.columns - size.columns }, size, box_drawing_type)?;
+            initial_window.mvwbox_set(Origin { y: window_size.lines - size.lines, x: window_size.columns - size.columns }, size, box_drawing_type)?;
 
             initial_window.refresh()?;
 
