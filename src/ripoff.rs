@@ -83,7 +83,9 @@ pub fn ripoffline(orientation: Orientation) -> result!(usize) {
 }
 
 /// Update the specified ripped off line using the specified closure.
-pub fn update_ripoffline<F>(number: usize, func: F) -> result!(()) where F: Fn(&Window, i32) -> result!(()) {
+pub fn update_ripoffline<F>(number: usize, func: F) -> result!(())
+    where F: Fn(&Window, i32) -> result!(())
+{
     // check that initscr() has been called.
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_NOT_CALLED.to_string());

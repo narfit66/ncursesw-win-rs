@@ -155,15 +155,25 @@ impl Window {
         ncursesw::wattr_get(self.handle)
     }
 
-    pub fn attr_off<A, T>(&self, attrs: A) -> result!(()) where A: AttributesType<T>, T: ColorAttributeTypes {
+    pub fn attr_off<A, T>(&self, attrs: A) -> result!(())
+        where A: AttributesType<T>,
+              T: ColorAttributeTypes
+    {
         ncursesw::wattr_off(self.handle, attrs)
     }
 
-    pub fn attr_on<A, T>(&self, attrs: A) -> result!(()) where A: AttributesType<T>, T: ColorAttributeTypes {
+    pub fn attr_on<A, T>(&self, attrs: A) -> result!(())
+        where A: AttributesType<T>,
+              T: ColorAttributeTypes
+    {
         ncursesw::wattr_on(self.handle, attrs)
     }
 
-    pub fn attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
+    pub fn attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(())
+        where A: AttributesType<T>,
+              P: ColorPairType<T>,
+              T: ColorAttributeTypes
+    {
         ncursesw::wattr_set(self.handle, attrs, color_pair)
     }
 
@@ -195,11 +205,31 @@ impl Window {
         ncursesw::wbkgrndset(self.handle, wch)
     }
 
-    pub fn border(&self, ls: ChtypeChar, rs: ChtypeChar, ts: ChtypeChar, bs: ChtypeChar, tl: ChtypeChar, tr: ChtypeChar, bl: ChtypeChar, br: ChtypeChar) -> result!(()) {
+    pub fn border(
+        &self,
+        ls: ChtypeChar,
+        rs: ChtypeChar,
+        ts: ChtypeChar,
+        bs: ChtypeChar,
+        tl: ChtypeChar,
+        tr: ChtypeChar,
+        bl: ChtypeChar,
+        br: ChtypeChar) -> result!(())
+    {
         ncursesw::wborder(self.handle, ls, rs, ts, bs, tl, tr, bl, br)
     }
 
-    pub fn border_set(&self, ls: ComplexChar, rs: ComplexChar, ts: ComplexChar, bs: ComplexChar, tl: ComplexChar, tr: ComplexChar, bl: ComplexChar, br: ComplexChar) -> result!(()) {
+    pub fn border_set(
+        &self,
+        ls: ComplexChar,
+        rs: ComplexChar,
+        ts: ComplexChar,
+        bs: ComplexChar,
+        tl: ComplexChar,
+        tr: ComplexChar,
+        bl: ComplexChar,
+        br: ComplexChar) -> result!(())
+    {
         ncursesw::wborder_set(self.handle, ls, rs, ts, bs, tl, tr, bl, br)
     }
 
@@ -207,7 +237,11 @@ impl Window {
         ncursesw::box_set(self.handle, verch, horch)
     }
 
-    pub fn chgat<A, P, T>(&self, number: i32, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
+    pub fn chgat<A, P, T>(&self, number: i32, attrs: A, color_pair: P) -> result!(())
+        where A: AttributesType<T>,
+              P: ColorPairType<T>,
+              T: ColorAttributeTypes
+    {
         ncursesw::wchgat(self.handle, number, attrs, color_pair)
     }
 
@@ -227,7 +261,10 @@ impl Window {
         ncursesw::wclrtoeol(self.handle)
     }
 
-    pub fn color_set<P, T>(&self, color_pair: P) -> result!(()) where P: ColorPairType<T>, T: ColorAttributeTypes {
+    pub fn color_set<P, T>(&self, color_pair: P) -> result!(())
+        where P: ColorPairType<T>,
+              T: ColorAttributeTypes
+    {
         ncursesw::wcolor_set(self.handle, color_pair)
     }
 
@@ -577,7 +614,11 @@ impl Window {
         ncursesw::mvwaddwstr(self.handle, origin, wstr)
     }
 
-    pub fn mvchgat<A, P, T>(&self, origin: Origin, number: i32, attrs: A, color_pair: P) -> result!(()) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
+    pub fn mvchgat<A, P, T>(&self, origin: Origin, number: i32, attrs: A, color_pair: P) -> result!(())
+        where A: AttributesType<T>,
+              P: ColorPairType<T>,
+              T: ColorAttributeTypes
+    {
         ncursesw::mvwchgat(self.handle, origin, number, attrs, color_pair)
     }
 
@@ -903,7 +944,8 @@ impl Window {
                 box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
     
                 // if we've transformed into a plus or upper/lower tee graphic then...
-                if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::UpperTee || box_drawing_graphic == BoxDrawingGraphic::LowerTee {
+                if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::UpperTee ||
+                   box_drawing_graphic == BoxDrawingGraphic::LowerTee {
                     // if we are in the left or right edge of the window then change to the appropriate tee or corner character
                     box_drawing_graphic = if line_origin.x == 0 {
                         if line_origin.y == 0 {
@@ -986,7 +1028,8 @@ impl Window {
                 box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
     
                 // if we've transformed into a plus or left/right tee graphic then...
-                if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::LeftTee || box_drawing_graphic == BoxDrawingGraphic::RightTee {
+                if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::LeftTee ||
+                   box_drawing_graphic == BoxDrawingGraphic::RightTee {
                     // if we are in the left or right edge of the window then change to the appropriate tee or corner character
                     box_drawing_graphic = if line_origin.x == 0 {
                         if line_origin.y == 0 {

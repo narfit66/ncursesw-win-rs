@@ -137,7 +137,11 @@ pub fn use_default_colors() -> result!(()) {
 }
 
 /// Use the specialifed colors (foreground and background) as the default colors for defining color pair 0.
-pub fn assume_default_colors<S, C, T>(colors: S) -> result!(()) where S: ColorsType<C, T>, C: ColorType<T>, T: ColorAttributeTypes {
+pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
+    where S: ColorsType<C, T>,
+          C: ColorType<T>,
+          T: ColorAttributeTypes
+{
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         panic!(INITSCR_NOT_CALLED.to_string());
     } else if !COLOR_STARTED.load(Ordering::SeqCst) {
