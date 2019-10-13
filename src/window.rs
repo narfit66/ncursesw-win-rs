@@ -973,8 +973,8 @@ impl Window {
     
             // place our complex graphics character onto the window with the existing attributes and color pair
             self.mvadd_wch(line_origin, match char_attr_pair.attributes_and_color_pair() {
-                AttributesColorPairSet::Normal(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
-                AttributesColorPairSet::Extend(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
+                AttributesColorPairSet::Normal(s)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
+                AttributesColorPairSet::Extended(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
             })?;
     
             line_origin.x += 1;
@@ -1057,8 +1057,8 @@ impl Window {
     
             // place our complex graphics character onto the window with the existing attributes and color pair
             self.mvadd_wch(line_origin, match char_attr_pair.attributes_and_color_pair() {
-                AttributesColorPairSet::Normal(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
-                AttributesColorPairSet::Extend(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
+                AttributesColorPairSet::Normal(s)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
+                AttributesColorPairSet::Extended(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
             })?;
     
             line_origin.y += 1;
@@ -1094,8 +1094,8 @@ impl Window {
             }
     
             let cchar = match char_attr_pair.attributes_and_color_pair() {
-                AttributesColorPairSet::Normal(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
-                AttributesColorPairSet::Extend(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
+                AttributesColorPairSet::Normal(s)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?,
+                AttributesColorPairSet::Extended(s) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &s.attributes(), &s.color_pair())?
             };
     
             Ok(cchar)

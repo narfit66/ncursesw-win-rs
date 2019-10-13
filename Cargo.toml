@@ -13,10 +13,13 @@ license = "MIT"
 
 [dependencies]
 libc = "0.2"
-#ncursesw = "0.1"
-ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
+ncursesw = "^0.1.7"
 custom_error = "1.6.0"
 lazy_static = "1.3.0"
+
+[patch.crates-io]
+ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
+#ncursesw = { path = "../ncursesw-rs" }
 
 [lib]
 name = "ncurseswwin"

@@ -75,7 +75,7 @@ impl Drop for NCurses {
     }
 }
 
-/// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated correctly.
+/// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
 pub fn ncursesw_init<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
     let result = catch_unwind(|| {
         let ncurses = match NCurses::initscr() {
