@@ -46,7 +46,6 @@ pub use window::*;
 
 pub use ncursesw::normal;
 pub use ncursesw::extend;
-pub use ncursesw::panels;
 
 pub use ncursesw::{
     ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin,
