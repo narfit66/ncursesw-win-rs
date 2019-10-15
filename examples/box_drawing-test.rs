@@ -1,10 +1,7 @@
-extern crate ncursesw;
 extern crate ncurseswwin;
 
-use ncursesw::{curs_set, NCurseswError, LcCategory, BaseColor, CursorType, Size, Origin};
-use ncursesw::normal::*;
-use ncursesw::ColorsType;
 use ncurseswwin::*;
+use ncurseswwin::normal::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswError> } }
 

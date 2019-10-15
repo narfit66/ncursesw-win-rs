@@ -1,9 +1,7 @@
-extern crate ncursesw;
 extern crate ncurseswwin;
 
-use ncursesw::{curs_set, NCurseswError, LcCategory, CursorType, Size, Origin};
-use ncursesw::extend::*;
 use ncurseswwin::*;
+use ncurseswwin::extend::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswError> } }
 

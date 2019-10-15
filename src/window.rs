@@ -25,14 +25,15 @@
 
 use std::{path, time};
 
-use ncursesw::{
-    WINDOW, Origin, Size, CharacterResult, AttributesColorPairSet, Region,
-    Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideChar,
-    WideString, NCurseswError, getcchar
-};
+use ncursesw::{WINDOW, getcchar};
 use ncursesw::normal;
-use ncursesw::gen::{AttributesType, ColorPairType, ColorAttributeTypes, AttributesColorPairType};
 use crate::graphics::{WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic};
+use crate::{
+    AttributesType, ColorPairType, ColorAttributeTypes, AttributesColorPairType,
+    Origin, Size, CharacterResult, AttributesColorPairSet, Region,
+    Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString,
+    WideChar, WideString, NCurseswError
+};
 
 /// A moveable window canvas.
 ///

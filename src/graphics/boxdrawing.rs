@@ -25,8 +25,10 @@
 use std::collections::HashMap;
 
 use crate::graphics::{BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic};
-use ncursesw::gen::{AttributesType, ColorPairType, ColorAttributeTypes};
-use ncursesw::{ChtypeChar, WideChar, ComplexChar, NCurseswError};
+use ncursesw::{
+    ChtypeChar, WideChar, ComplexChar, NCurseswError,
+    AttributesType, ColorPairType, ColorAttributeTypes
+};
 use ncursesw::shims::ncurses::{wchar_t, NCURSES_ACS};
 
 #[derive(PartialEq, Eq, Hash)]

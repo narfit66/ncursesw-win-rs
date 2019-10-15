@@ -1,7 +1,5 @@
-extern crate ncursesw;
 extern crate ncurseswwin;
 
-use ncursesw::{curs_set, NCurseswError, CursorType, Origin};
 use ncurseswwin::*;
 
 fn main() {

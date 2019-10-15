@@ -23,9 +23,11 @@
 use std::sync::atomic::Ordering;
 
 use crate::inputmode::InputMode;
-use ncursesw::{LcCategory, SoftLabelType, NCurseswError};
-use ncursesw::gen::{ColorsType, ColorType, ColorAttributeTypes};
 use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED, INITSCR_NOT_CALLED, INITSCR_ALREADY_CALLED};
+use crate::{
+    ColorsType, ColorType, ColorAttributeTypes,
+    LcCategory, NCurseswError, SoftLabelType
+};
 
 lazy_static! {
     static ref START_COLOR_ALREADY_CALLED: &'static str = "ncursesw::start_color() has already been called!";

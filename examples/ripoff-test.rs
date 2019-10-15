@@ -1,7 +1,5 @@
-extern crate ncursesw;
 extern crate ncurseswwin;
 
-use ncursesw::{curs_set, NCurseswError, CursorType, Origin, Orientation};
 use ncurseswwin::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswError> } }
