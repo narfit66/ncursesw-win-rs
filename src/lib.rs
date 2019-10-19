@@ -20,11 +20,9 @@
     IN THE SOFTWARE.
 */
 
-extern crate libc;
 extern crate ncursesw;
 #[macro_use]
 extern crate lazy_static;
-extern crate custom_error;
 
 mod macros;
 
