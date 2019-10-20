@@ -28,16 +28,18 @@ mod macros;
 
 mod graphics;
 mod inputmode;
-mod panel;
+mod mouse;
 mod ncurses;
+mod panel;
 mod ripoff;
 mod utils;
 mod window;
 
 pub use graphics::*;
 pub use inputmode::*;
-pub use panel::*;
+pub use mouse::*;
 pub use ncurses::*;
+pub use panel::*;
 pub use ripoff::*;
 pub use utils::*;
 pub use window::*;
@@ -69,4 +71,7 @@ pub use ncursesw::{
     ncurses_colortype, ncurses_colortype_set, ncurses_version,
     reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
     resize_term, resizeterm, setcchar, timeout
+};
+pub use ncursesw::mouse::{
+    has_mouse, mouseinterval, set_mouseinterval, mouse_trafo, mouse_version
 };

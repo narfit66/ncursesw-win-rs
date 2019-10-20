@@ -27,6 +27,7 @@ use std::{path, time};
 
 use ncursesw::{WINDOW, getcchar};
 use ncursesw::normal;
+use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
 use crate::graphics::{WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic};
 use crate::{
     AttributesType, ColorPairType, ColorAttributeTypes, AttributesColorPairType,
@@ -1125,6 +1126,16 @@ impl Window {
         self.mvwvline_set(Origin { y: origin.y + 1, x: origin.x + (size.columns - 1)}, box_drawing_type, size.lines - 2)?;
     
         Ok(())
+    }
+}
+
+impl Window {
+    pub fn enclose(&self, origin: Origin) -> bool {
+        wenclose(self.handle, origin)
+    }
+
+    pub fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> result!(OriginResult) {
+        wmouse_trafo(self.handle, origin, to_screen)
     }
 }
 
