@@ -23,20 +23,20 @@ fn main() {
     });
 }
 
-fn mouse_test(initial_window: &Window) -> Result<(), NCurseswError> {
+fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
     curs_set(CursorType::Visible)?;
     set_echo(false)?;
 
-    initial_window.keypad(true)?;
+    window.keypad(true)?;
 
     let mut origin = Origin { y: 1, x: 1 };
 
-    initial_window.mvaddstr(origin, &format!("Mouse Version : {} ", mouse_version()))?;
+    window.mvaddstr(origin, &format!("Mouse Version : {} ", mouse_version()))?;
     origin.y += 2;
-    initial_window.mvaddstr(origin, "Hit <Return> to continue : ")?;
+    window.mvaddstr(origin, "Hit <Return> to continue : ")?;
     origin.y += 2;
 
-    initial_window.getch()?;
+    window.getch()?;
 
     curs_set(CursorType::Invisible)?;
 
@@ -47,7 +47,7 @@ fn mouse_test(initial_window: &Window) -> Result<(), NCurseswError> {
     let mouse = &mut Mouse::new(0, MouseMask::AllMouseEvents)?;
 
     loop {
-        match initial_window.getch()? {
+        match window.getch()? {
             CharacterResult::Key(kb)      => {
                 match kb {
                     KeyBinding::MouseEvent => {
@@ -56,55 +56,55 @@ fn mouse_test(initial_window: &Window) -> Result<(), NCurseswError> {
                                 let mouse_events = mouse.events();
 
                                 if mouse_events.button_1_released() {
-                                    mouse_button_event(initial_window, origin, 1, "released", mouse.origin())?;
+                                    mouse_button_event(window, origin, 1, "released", mouse.origin())?;
                                 } else if mouse_events.button_1_pressed() {
-                                    mouse_button_event(initial_window, origin, 1, "pressed", mouse.origin())?;
+                                    mouse_button_event(window, origin, 1, "pressed", mouse.origin())?;
                                 } else if mouse_events.button_1_clicked() {
-                                    mouse_button_event(initial_window, origin, 1, "clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 1, "clicked", mouse.origin())?;
                                 } else if mouse_events.button_1_double_clicked() {
-                                    mouse_button_event(initial_window, origin, 1, "double clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 1, "double clicked", mouse.origin())?;
                                 } else if mouse_events.button_1_triple_clicked() {
-                                    mouse_button_event(initial_window, origin, 1, "triple clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 1, "triple clicked", mouse.origin())?;
                                 } else if mouse_events.button_2_released() {
-                                    mouse_button_event(initial_window, origin, 2, "released", mouse.origin())?;
+                                    mouse_button_event(window, origin, 2, "released", mouse.origin())?;
                                 } else if mouse_events.button_2_pressed() {
-                                    mouse_button_event(initial_window, origin, 2, "pressed", mouse.origin())?;
+                                    mouse_button_event(window, origin, 2, "pressed", mouse.origin())?;
                                 } else if mouse_events.button_2_clicked() {
-                                    mouse_button_event(initial_window, origin, 2, "clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 2, "clicked", mouse.origin())?;
                                 } else if mouse_events.button_2_double_clicked() {
-                                    mouse_button_event(initial_window, origin, 2, "double clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 2, "double clicked", mouse.origin())?;
                                 } else if mouse_events.button_2_triple_clicked() {
-                                    mouse_button_event(initial_window, origin, 2, "triple clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 2, "triple clicked", mouse.origin())?;
                                 } else if mouse_events.button_3_released() {
-                                    mouse_button_event(initial_window, origin, 3, "released", mouse.origin())?;
+                                    mouse_button_event(window, origin, 3, "released", mouse.origin())?;
                                 } else if mouse_events.button_3_pressed() {
-                                    mouse_button_event(initial_window, origin, 3, "pressed", mouse.origin())?;
+                                    mouse_button_event(window, origin, 3, "pressed", mouse.origin())?;
                                 } else if mouse_events.button_3_clicked() {
-                                    mouse_button_event(initial_window, origin, 3, "clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 3, "clicked", mouse.origin())?;
                                 } else if mouse_events.button_3_double_clicked() {
-                                    mouse_button_event(initial_window, origin, 3, "double clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 3, "double clicked", mouse.origin())?;
                                 } else if mouse_events.button_3_triple_clicked() {
-                                    mouse_button_event(initial_window, origin, 3, "triple clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 3, "triple clicked", mouse.origin())?;
                                 } else if mouse_events.button_4_released() {
-                                    mouse_button_event(initial_window, origin, 4, "released", mouse.origin())?;
+                                    mouse_button_event(window, origin, 4, "released", mouse.origin())?;
                                 } else if mouse_events.button_4_pressed() {
-                                    mouse_button_event(initial_window, origin, 4, "pressed", mouse.origin())?;
+                                    mouse_button_event(window, origin, 4, "pressed", mouse.origin())?;
                                 } else if mouse_events.button_4_clicked() {
-                                    mouse_button_event(initial_window, origin, 4, "clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 4, "clicked", mouse.origin())?;
                                 } else if mouse_events.button_4_double_clicked() {
-                                    mouse_button_event(initial_window, origin, 4, "double clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 4, "double clicked", mouse.origin())?;
                                 } else if mouse_events.button_4_triple_clicked() {
-                                    mouse_button_event(initial_window, origin, 4, "triple clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 4, "triple clicked", mouse.origin())?;
                                 } else if mouse_events.button_5_released() {
-                                    mouse_button_event(initial_window, origin, 5, "released", mouse.origin())?;
+                                    mouse_button_event(window, origin, 5, "released", mouse.origin())?;
                                 } else if mouse_events.button_5_pressed() {
-                                    mouse_button_event(initial_window, origin, 5, "pressed", mouse.origin())?;
+                                    mouse_button_event(window, origin, 5, "pressed", mouse.origin())?;
                                 } else if mouse_events.button_5_clicked() {
-                                    mouse_button_event(initial_window, origin, 5, "clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 5, "clicked", mouse.origin())?;
                                 } else if mouse_events.button_5_double_clicked() {
-                                    mouse_button_event(initial_window, origin, 5, "double clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 5, "double clicked", mouse.origin())?;
                                 } else if mouse_events.button_5_triple_clicked() {
-                                    mouse_button_event(initial_window, origin, 5, "triple clicked", mouse.origin())?;
+                                    mouse_button_event(window, origin, 5, "triple clicked", mouse.origin())?;
                                 }
 
                                 let old_origin = origin;
@@ -112,39 +112,44 @@ fn mouse_test(initial_window: &Window) -> Result<(), NCurseswError> {
                                 origin.y += 1;
 
                                 if mouse_events.button_ctrl() {
-                                    initial_window.mvaddstr(origin, "with <ctrl> pressed")?;
+                                    window.mvaddstr(origin, "with <ctrl> pressed")?;
                                 } else if mouse_events.button_shift() {
-                                    initial_window.mvaddstr(origin, "with <shift> pressed")?;
+                                    window.mvaddstr(origin, "with <shift> pressed")?;
                                 } else if mouse_events.button_alt() {
-                                    initial_window.mvaddstr(origin, "with <alt> pressed")?;
+                                    window.mvaddstr(origin, "with <alt> pressed")?;
                                 }
 
                                 origin = old_origin;
                             }
                         }
                     },
-                    _                      => initial_window.mvaddstr(origin, &format!("{:?}", kb))?
+                    _                      => window.mvaddstr(origin, &format!("{:?}", kb))?
                 }
             },
             CharacterResult::Character(c) => {
-                initial_window.set_cursor(origin)?;
-                initial_window.clrtoeol()?;
+                clear_to_eol(window, origin)?;
 
-                initial_window.mvaddstr(origin, &format!("{}", c))?;
+                window.mvaddstr(origin, &format!("{}", c))?;
 
                 if c == 'q' || c == 'Q' {
-                    return Ok(())
+                    break;
                 }
             }
         }
     }
+
+    Ok(())
 }
 
 fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mouse_origin: MouseOrigin) -> Result<(), NCurseswError> {
-    window.set_cursor(origin)?;
-    window.clrtoeol()?;
+    clear_to_eol(window, origin)?;
 
     window.mvaddstr(origin, &format!("B{} {} @ {}", button, str, mouse_origin))?;
 
     window.mvaddch(mouse_origin.origin(), ChtypeChar::new(AsciiChar::Asterisk))
+}
+
+fn clear_to_eol(window: &Window, origin: Origin) -> Result<(), NCurseswError> {
+    window.set_cursor(origin)?;
+    window.clrtoeol()
 }
