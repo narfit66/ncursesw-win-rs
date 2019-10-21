@@ -1,5 +1,5 @@
 /*
-    src/mouse/mod.rs
+    src/mouse/mousebuttonevent.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,17 +20,13 @@
     IN THE SOFTWARE.
 */
 
-mod mouse;
-mod mousebutton;
-mod mousebuttonevent;
-mod mouseevent;
-mod mouseevents;
-mod mousemask;
-mod mouseorigin;
+use strum_macros::{Display, EnumIter};
 
-pub use crate::mouse::mouse::*;
-pub use crate::mouse::mousebutton::*;
-pub use crate::mouse::mousebuttonevent::*;
-pub use crate::mouse::mouseevents::*;
-pub use crate::mouse::mousemask::*;
-pub use crate::mouse::mouseorigin::*;
+#[derive(Copy, Clone, Debug, Display, EnumIter, PartialEq, Eq, Hash)]
+pub enum MouseButtonEvent {
+    Released,
+    Pressed,
+    Clicked,
+    DoubleClicked,
+    TripleClicked
+}

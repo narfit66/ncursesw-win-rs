@@ -20,14 +20,10 @@
     IN THE SOFTWARE.
 */
 
+use crate::mouse::mousebuttonevent::MouseButtonEvent;
 use crate::mouse::mousebutton::MouseButton;
 use crate::mouse::mouseevent::MouseEvent;
 use ncursesw::mouse::mmask_t;
-
-#[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
-pub struct MouseEvents {
-    mask: mmask_t
-}
 
 macro_rules! pub_getter {
     ($name: ident, $attr: ident) => {
@@ -49,12 +45,31 @@ macro_rules! private_method {
     };
 }
 
+#[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
+pub struct MouseEvents {
+    mask: mmask_t
+}
+
 impl MouseEvents {
     pub(in crate::mouse) fn new(mask: mmask_t) -> Self {
         Self { mask }
     }
 
-    pub fn released(&self, button: MouseButton) -> bool {
+    pub fn button(&self, button: MouseButton, event: MouseButtonEvent) -> bool {
+        match event {
+            MouseButtonEvent::Released      => self.released(button),
+            MouseButtonEvent::Pressed       => self.pressed(button),
+            MouseButtonEvent::Clicked       => self.clicked(button),
+            MouseButtonEvent::DoubleClicked => self.double_clicked(button),
+            MouseButtonEvent::TripleClicked => self.triple_clicked(button)
+        }
+    }
+
+    pub_getter!(ctrl_button, ButtonCtrl);
+    pub_getter!(shift_button, ButtonShift);
+    pub_getter!(alt_button, ButtonAlt);
+
+    fn released(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_released(),
             MouseButton::Two   => self.button_2_released(),
@@ -64,7 +79,7 @@ impl MouseEvents {
         }
     }
 
-    pub fn pressed(&self, button: MouseButton) -> bool {
+    fn pressed(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_pressed(),
             MouseButton::Two   => self.button_2_pressed(),
@@ -74,7 +89,7 @@ impl MouseEvents {
         }
     }
 
-    pub fn clicked(&self, button: MouseButton) -> bool {
+    fn clicked(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_clicked(),
             MouseButton::Two   => self.button_2_clicked(),
@@ -84,7 +99,7 @@ impl MouseEvents {
         }
     }
 
-    pub fn double_clicked(&self, button: MouseButton) -> bool {
+    fn double_clicked(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_double_clicked(),
             MouseButton::Two   => self.button_2_double_clicked(),
@@ -94,7 +109,7 @@ impl MouseEvents {
         }
     }
 
-    pub fn triple_clicked(&self, button: MouseButton) -> bool {
+    fn triple_clicked(&self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_triple_clicked(),
             MouseButton::Two   => self.button_2_triple_clicked(),
@@ -103,10 +118,6 @@ impl MouseEvents {
             MouseButton::Five  => self.button_5_triple_clicked()
         }
     }
-
-    pub_getter!(ctrl_button, ButtonCtrl);
-    pub_getter!(shift_button, ButtonShift);
-    pub_getter!(alt_button, ButtonAlt);
 
     private_method!(button_1_released, Button1Released);
     private_method!(button_1_pressed, Button1Pressed);

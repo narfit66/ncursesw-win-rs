@@ -57,16 +57,10 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
                                 let mouse_events = mouse.events();
 
                                 for button in MouseButton::iter() {
-                                    if mouse_events.released(button) {
-                                        mouse_button_event(window, origin, button.into(), "released", mouse.origin())?;
-                                    } else if mouse_events.pressed(button) {
-                                        mouse_button_event(window, origin, button.into(), "pressed", mouse.origin())?;
-                                    } else if mouse_events.clicked(button) {
-                                        mouse_button_event(window, origin, button.into(), "clicked", mouse.origin())?;
-                                    } else if mouse_events.double_clicked(button) {
-                                        mouse_button_event(window, origin, button.into(), "double clicked", mouse.origin())?;
-                                    } else if mouse_events.triple_clicked(button) {
-                                        mouse_button_event(window, origin, button.into(), "triple clicked", mouse.origin())?;
+                                    for event in MouseButtonEvent::iter() {
+                                        if mouse_events.button(button, event) {
+                                            mouse_button_event(window, origin, button.into(), &format!("{}", event), mouse.origin())?;
+                                        }
                                     }
                                 }
 
