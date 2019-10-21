@@ -1,5 +1,5 @@
 /*
-    src/mouse/mod.rs
+    src/mouse/mousebutton.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,15 +20,26 @@
     IN THE SOFTWARE.
 */
 
-mod mouse;
-mod mousebutton;
-mod mouseevent;
-mod mouseevents;
-mod mousemask;
-mod mouseorigin;
+use std::convert::Into;
+use strum_macros::{Display, EnumIter};
 
-pub use crate::mouse::mouse::*;
-pub use crate::mouse::mousebutton::*;
-pub use crate::mouse::mouseevents::*;
-pub use crate::mouse::mousemask::*;
-pub use crate::mouse::mouseorigin::*;
+#[derive(Copy, Clone, Debug, Display, EnumIter, PartialEq, Eq, Hash)]
+pub enum MouseButton {
+    One,
+    Two,
+    Three,
+    Four,
+    Five
+}
+
+impl Into<u8> for MouseButton {
+    fn into(self) -> u8 {
+        match self {
+            MouseButton::One   => 1,
+            MouseButton::Two   => 2,
+            MouseButton::Three => 3,
+            MouseButton::Four  => 4,
+            MouseButton::Five  => 5
+        }
+    }
+}

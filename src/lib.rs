@@ -23,6 +23,8 @@
 extern crate ncursesw;
 #[macro_use]
 extern crate lazy_static;
+extern crate strum;
+extern crate strum_macros;
 
 mod macros;
 

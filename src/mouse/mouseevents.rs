@@ -20,55 +20,117 @@
     IN THE SOFTWARE.
 */
 
+use crate::mouse::mousebutton::MouseButton;
 use crate::mouse::mouseevent::MouseEvent;
 use ncursesw::mouse::mmask_t;
 
 #[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 pub struct MouseEvents {
-    raw: mmask_t
+    mask: mmask_t
 }
 
-macro_rules! getter {
+macro_rules! pub_getter {
     ($name: ident, $attr: ident) => {
         pub fn $name(&self) -> bool {
-            let e: mmask_t = MouseEvent::$attr.into();
+            let event_mask: mmask_t = MouseEvent::$attr.into();
 
-            (self.raw & e) > 0
+            (self.mask & event_mask) > 0
+        }
+    };
+}
+
+macro_rules! private_method {
+    ($name: ident, $attr: ident) => {
+        fn $name(&self) -> bool {
+            let event_mask: mmask_t = MouseEvent::$attr.into();
+
+            (self.mask & event_mask) > 0
         }
     };
 }
 
 impl MouseEvents {
     pub(in crate::mouse) fn new(mask: mmask_t) -> Self {
-        Self { raw: mask }
+        Self { mask }
     }
 
-    getter!(button_1_released, Button1Released);
-    getter!(button_1_pressed, Button1Pressed);
-    getter!(button_1_clicked, Button1Clicked);
-    getter!(button_1_double_clicked, Button1DoubleClicked);
-    getter!(button_1_triple_clicked, Button1TripleClicked);
-    getter!(button_2_released, Button2Released);
-    getter!(button_2_pressed, Button2Pressed);
-    getter!(button_2_clicked, Button2Clicked);
-    getter!(button_2_double_clicked, Button2DoubleClicked);
-    getter!(button_2_triple_clicked, Button2TripleClicked);
-    getter!(button_3_released, Button3Released);
-    getter!(button_3_pressed, Button3Pressed);
-    getter!(button_3_clicked, Button3Clicked);
-    getter!(button_3_double_clicked, Button3DoubleClicked);
-    getter!(button_3_triple_clicked, Button3TripleClicked);
-    getter!(button_4_released, Button4Released);
-    getter!(button_4_pressed, Button4Pressed);
-    getter!(button_4_clicked, Button4Clicked);
-    getter!(button_4_double_clicked, Button4DoubleClicked);
-    getter!(button_4_triple_clicked, Button4TripleClicked);
-    getter!(button_5_released, Button5Released);
-    getter!(button_5_pressed, Button5Pressed);
-    getter!(button_5_clicked, Button5Clicked);
-    getter!(button_5_double_clicked, Button5DoubleClicked);
-    getter!(button_5_triple_clicked, Button5TripleClicked);
-    getter!(button_ctrl, ButtonCtrl);
-    getter!(button_shift, ButtonShift);
-    getter!(button_alt, ButtonAlt);
+    pub fn released(&self, button: MouseButton) -> bool {
+        match button {
+            MouseButton::One   => self.button_1_released(),
+            MouseButton::Two   => self.button_2_released(),
+            MouseButton::Three => self.button_3_released(),
+            MouseButton::Four  => self.button_4_released(),
+            MouseButton::Five  => self.button_5_released()
+        }
+    }
+
+    pub fn pressed(&self, button: MouseButton) -> bool {
+        match button {
+            MouseButton::One   => self.button_1_pressed(),
+            MouseButton::Two   => self.button_2_pressed(),
+            MouseButton::Three => self.button_3_pressed(),
+            MouseButton::Four  => self.button_4_pressed(),
+            MouseButton::Five  => self.button_5_pressed()
+        }
+    }
+
+    pub fn clicked(&self, button: MouseButton) -> bool {
+        match button {
+            MouseButton::One   => self.button_1_clicked(),
+            MouseButton::Two   => self.button_2_clicked(),
+            MouseButton::Three => self.button_3_clicked(),
+            MouseButton::Four  => self.button_4_clicked(),
+            MouseButton::Five  => self.button_5_clicked()
+        }
+    }
+
+    pub fn double_clicked(&self, button: MouseButton) -> bool {
+        match button {
+            MouseButton::One   => self.button_1_double_clicked(),
+            MouseButton::Two   => self.button_2_double_clicked(),
+            MouseButton::Three => self.button_3_double_clicked(),
+            MouseButton::Four  => self.button_4_double_clicked(),
+            MouseButton::Five  => self.button_5_double_clicked()
+        }
+    }
+
+    pub fn triple_clicked(&self, button: MouseButton) -> bool {
+        match button {
+            MouseButton::One   => self.button_1_triple_clicked(),
+            MouseButton::Two   => self.button_2_triple_clicked(),
+            MouseButton::Three => self.button_3_triple_clicked(),
+            MouseButton::Four  => self.button_4_triple_clicked(),
+            MouseButton::Five  => self.button_5_triple_clicked()
+        }
+    }
+
+    pub_getter!(ctrl_button, ButtonCtrl);
+    pub_getter!(shift_button, ButtonShift);
+    pub_getter!(alt_button, ButtonAlt);
+
+    private_method!(button_1_released, Button1Released);
+    private_method!(button_1_pressed, Button1Pressed);
+    private_method!(button_1_clicked, Button1Clicked);
+    private_method!(button_1_double_clicked, Button1DoubleClicked);
+    private_method!(button_1_triple_clicked, Button1TripleClicked);
+    private_method!(button_2_released, Button2Released);
+    private_method!(button_2_pressed, Button2Pressed);
+    private_method!(button_2_clicked, Button2Clicked);
+    private_method!(button_2_double_clicked, Button2DoubleClicked);
+    private_method!(button_2_triple_clicked, Button2TripleClicked);
+    private_method!(button_3_released, Button3Released);
+    private_method!(button_3_pressed, Button3Pressed);
+    private_method!(button_3_clicked, Button3Clicked);
+    private_method!(button_3_double_clicked, Button3DoubleClicked);
+    private_method!(button_3_triple_clicked, Button3TripleClicked);
+    private_method!(button_4_released, Button4Released);
+    private_method!(button_4_pressed, Button4Pressed);
+    private_method!(button_4_clicked, Button4Clicked);
+    private_method!(button_4_double_clicked, Button4DoubleClicked);
+    private_method!(button_4_triple_clicked, Button4TripleClicked);
+    private_method!(button_5_released, Button5Released);
+    private_method!(button_5_pressed, Button5Pressed);
+    private_method!(button_5_clicked, Button5Clicked);
+    private_method!(button_5_double_clicked, Button5DoubleClicked);
+    private_method!(button_5_triple_clicked, Button5TripleClicked);
 }

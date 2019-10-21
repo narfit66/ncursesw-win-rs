@@ -3,6 +3,7 @@ extern crate ncurseswwin;
 
 use ascii::AsciiChar;
 use ncurseswwin::*;
+use strum::IntoEnumIterator;
 
 fn main() {
     // We wrap all our use of ncurseswin with this function.
@@ -55,81 +56,41 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
                             if registered_mouse {                        // is the mouse event for our mouse
                                 let mouse_events = mouse.events();
 
-                                if mouse_events.button_1_released() {
-                                    mouse_button_event(window, origin, 1, "released", mouse.origin())?;
-                                } else if mouse_events.button_1_pressed() {
-                                    mouse_button_event(window, origin, 1, "pressed", mouse.origin())?;
-                                } else if mouse_events.button_1_clicked() {
-                                    mouse_button_event(window, origin, 1, "clicked", mouse.origin())?;
-                                } else if mouse_events.button_1_double_clicked() {
-                                    mouse_button_event(window, origin, 1, "double clicked", mouse.origin())?;
-                                } else if mouse_events.button_1_triple_clicked() {
-                                    mouse_button_event(window, origin, 1, "triple clicked", mouse.origin())?;
-                                } else if mouse_events.button_2_released() {
-                                    mouse_button_event(window, origin, 2, "released", mouse.origin())?;
-                                } else if mouse_events.button_2_pressed() {
-                                    mouse_button_event(window, origin, 2, "pressed", mouse.origin())?;
-                                } else if mouse_events.button_2_clicked() {
-                                    mouse_button_event(window, origin, 2, "clicked", mouse.origin())?;
-                                } else if mouse_events.button_2_double_clicked() {
-                                    mouse_button_event(window, origin, 2, "double clicked", mouse.origin())?;
-                                } else if mouse_events.button_2_triple_clicked() {
-                                    mouse_button_event(window, origin, 2, "triple clicked", mouse.origin())?;
-                                } else if mouse_events.button_3_released() {
-                                    mouse_button_event(window, origin, 3, "released", mouse.origin())?;
-                                } else if mouse_events.button_3_pressed() {
-                                    mouse_button_event(window, origin, 3, "pressed", mouse.origin())?;
-                                } else if mouse_events.button_3_clicked() {
-                                    mouse_button_event(window, origin, 3, "clicked", mouse.origin())?;
-                                } else if mouse_events.button_3_double_clicked() {
-                                    mouse_button_event(window, origin, 3, "double clicked", mouse.origin())?;
-                                } else if mouse_events.button_3_triple_clicked() {
-                                    mouse_button_event(window, origin, 3, "triple clicked", mouse.origin())?;
-                                } else if mouse_events.button_4_released() {
-                                    mouse_button_event(window, origin, 4, "released", mouse.origin())?;
-                                } else if mouse_events.button_4_pressed() {
-                                    mouse_button_event(window, origin, 4, "pressed", mouse.origin())?;
-                                } else if mouse_events.button_4_clicked() {
-                                    mouse_button_event(window, origin, 4, "clicked", mouse.origin())?;
-                                } else if mouse_events.button_4_double_clicked() {
-                                    mouse_button_event(window, origin, 4, "double clicked", mouse.origin())?;
-                                } else if mouse_events.button_4_triple_clicked() {
-                                    mouse_button_event(window, origin, 4, "triple clicked", mouse.origin())?;
-                                } else if mouse_events.button_5_released() {
-                                    mouse_button_event(window, origin, 5, "released", mouse.origin())?;
-                                } else if mouse_events.button_5_pressed() {
-                                    mouse_button_event(window, origin, 5, "pressed", mouse.origin())?;
-                                } else if mouse_events.button_5_clicked() {
-                                    mouse_button_event(window, origin, 5, "clicked", mouse.origin())?;
-                                } else if mouse_events.button_5_double_clicked() {
-                                    mouse_button_event(window, origin, 5, "double clicked", mouse.origin())?;
-                                } else if mouse_events.button_5_triple_clicked() {
-                                    mouse_button_event(window, origin, 5, "triple clicked", mouse.origin())?;
+                                for button in MouseButton::iter() {
+                                    if mouse_events.released(button) {
+                                        mouse_button_event(window, origin, button.into(), "released", mouse.origin())?;
+                                    } else if mouse_events.pressed(button) {
+                                        mouse_button_event(window, origin, button.into(), "pressed", mouse.origin())?;
+                                    } else if mouse_events.clicked(button) {
+                                        mouse_button_event(window, origin, button.into(), "clicked", mouse.origin())?;
+                                    } else if mouse_events.double_clicked(button) {
+                                        mouse_button_event(window, origin, button.into(), "double clicked", mouse.origin())?;
+                                    } else if mouse_events.triple_clicked(button) {
+                                        mouse_button_event(window, origin, button.into(), "triple clicked", mouse.origin())?;
+                                    }
                                 }
 
                                 let old_origin = origin;
 
                                 origin.y += 1;
 
-                                if mouse_events.button_ctrl() {
-                                    window.mvaddstr(origin, "with <ctrl> pressed")?;
-                                } else if mouse_events.button_shift() {
-                                    window.mvaddstr(origin, "with <shift> pressed")?;
-                                } else if mouse_events.button_alt() {
-                                    window.mvaddstr(origin, "with <alt> pressed")?;
+                                if mouse_events.ctrl_button() {
+                                    other_event(window, origin, "with <ctrl> pressed")?;
+                                } else if mouse_events.shift_button() {
+                                    other_event(window, origin, "with <shift> pressed")?;
+                                } else if mouse_events.alt_button() {
+                                    other_event(window, origin, "with <alt> pressed")?;
                                 }
 
                                 origin = old_origin;
                             }
                         }
                     },
-                    _                      => window.mvaddstr(origin, &format!("{:?}", kb))?
+                    _                      => other_event(window, origin, &format!("{:?}", kb))?
                 }
             },
             CharacterResult::Character(c) => {
-                clear_to_eol(window, origin)?;
-
-                window.mvaddstr(origin, &format!("{}", c))?;
+                other_event(window, origin, &format!("{}", c))?;
 
                 if c == 'q' || c == 'Q' {
                     break;
@@ -147,6 +108,12 @@ fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mo
     window.mvaddstr(origin, &format!("B{} {} @ {}", button, str, mouse_origin))?;
 
     window.mvaddch(mouse_origin.origin(), ChtypeChar::new(AsciiChar::Asterisk))
+}
+
+fn other_event(window: &Window, origin: Origin, str: &str) -> Result<(), NCurseswError> {
+    clear_to_eol(window, origin)?;
+
+    window.mvaddstr(origin, str)
 }
 
 fn clear_to_eol(window: &Window, origin: Origin) -> Result<(), NCurseswError> {
