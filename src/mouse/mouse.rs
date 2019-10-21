@@ -34,8 +34,10 @@ pub struct Mouse {
 }
 
 impl Mouse {
-    pub fn new(id: i16, mask: MouseMask) -> Self {
-        Self { handle: MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }, mask }
+    pub fn new(id: i16, mask: MouseMask) -> result!(Self) {
+        mousemask(mask.into(), None)?;
+
+        Ok(Self { handle: MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }, mask })
     }
 
     pub fn refresh(&mut self) -> result!(bool) {
@@ -45,14 +47,14 @@ impl Mouse {
 
         getmouse(handle.as_mut_ptr())?;
 
-        if self.handle.id != handle[0].id {
-            ungetmouse(handle.as_mut_ptr())?;
-
-            Ok(false)
-        } else {
+        if self.handle.id == handle[0].id {
             self.handle = handle[0];
 
             Ok(true)
+        } else {
+            ungetmouse(handle.as_mut_ptr())?;
+
+            Ok(false)
         }
     }
 
@@ -73,11 +75,11 @@ impl Mouse {
     }
 
     pub fn set_mask(&mut self, mask: MouseMask) -> MouseMask {
-        let oldmask = self.mask;
+        let old_mask = self.mask;
 
         self.mask = mask;
 
-        oldmask
+        old_mask
     }
 }
 

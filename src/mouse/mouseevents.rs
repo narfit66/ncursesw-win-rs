@@ -39,7 +39,7 @@ macro_rules! getter {
 }
 
 impl MouseEvents {
-    pub (in crate::mouse) fn new(mask: mmask_t) -> Self {
+    pub(in crate::mouse) fn new(mask: mmask_t) -> Self {
         Self { raw: mask }
     }
 

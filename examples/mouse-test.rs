@@ -15,24 +15,28 @@ fn main() {
             initial_window.mvaddstr(origin, &format!("Mouse Version : {} ", mouse_version()))?;
             origin.y += 2;
             initial_window.mvaddstr(origin, "Hit <Return> to continue : ")?;
+            origin.y += 2;
 
             initial_window.getch()?;
 
             curs_set(CursorType::Invisible)?;
 
-            if !has_mouse() {
+            /*if !has_mouse() {
                 panic!("no mouse detected!!!");
-            }
+            }*/
 
-            let mouse = &mut Mouse::new(0, MouseMask::AllMouseEvents);
+            let mouse = &mut Mouse::new(0, MouseMask::AllMouseEvents)?;
 
             loop {
-                match initial_window.getch()? {
+                let ch = initial_window.getch()?;
+
+                initial_window.set_cursor(origin)?;
+                initial_window.clrtoeol()?;
+
+                match ch {
                     CharacterResult::Key(kb)      => {
                         match kb {
                             KeyBinding::MouseEvent => {
-                                initial_window.clear()?;
-
                                 if mouse.refresh()? {
                                     if mouse.events().button_1_released() {
                                         initial_window.mvaddstr(origin, "B1 released")?;
@@ -64,13 +68,19 @@ fn main() {
                                         initial_window.mvaddstr(origin, "B3 double clicked")?;
                                     } else if mouse.events().button_3_triple_clicked() {
                                         initial_window.mvaddstr(origin, "B3 triple clicked")?;
+                                    } else {
+                                        initial_window.mvaddstr(origin, "unknown mouse event")?;
                                     }
                                 }
+                            },
+                            _                      => { 
+                                initial_window.mvaddstr(origin, &format!("{:?}", kb))?
                             }
-                            _                      => { }
                         }
                     },
                     CharacterResult::Character(c) => {
+                        initial_window.mvaddstr(origin, &format!("{}", c))?;
+
                         if c == 'q' || c == 'Q' {
                             return Ok(())
                         }

@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::fmt::{Display, Formatter, Result};
+
 use ncursesw::Origin;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -38,14 +40,20 @@ impl MouseOrigin {
     }
 
     pub fn y(&self) -> i32 {
-        self.origin().y
+        self.origin.y
     }
 
     pub fn x(&self) -> i32 {
-        self.origin().x
+        self.origin.x
     }
 
     pub fn z(&self) -> i32 {
         self.z
+    }
+}
+
+impl Display for MouseOrigin {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "(y: {}, x: {}, z: {})", self.y(), self.x(), self.z())
     }
 }
