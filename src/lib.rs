@@ -74,6 +74,7 @@ pub use ncursesw::{
     reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
     resize_term, resizeterm, setcchar, timeout
 };
+pub use ncursesw::mouse::OriginResult;
 pub use ncursesw::mouse::{
     has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,
     mouse_version, has_mouse_interface
