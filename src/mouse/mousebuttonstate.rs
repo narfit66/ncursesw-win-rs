@@ -1,5 +1,5 @@
 /*
-    src/mouse/mod.rs
+    src/mouse/mousebuttonstate.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,19 +20,33 @@
     IN THE SOFTWARE.
 */
 
-mod mouse;
-mod mousebutton;
-mod mousebuttonevent;
-mod mousebuttonstate;
-mod mouseevent;
-mod mouseevents;
-mod mousemask;
-mod mouseorigin;
+use std::fmt::{Display, Formatter, Result};
 
-pub use crate::mouse::mouse::*;
-pub use crate::mouse::mousebutton::*;
-pub use crate::mouse::mousebuttonevent::*;
-pub use crate::mouse::mousebuttonstate::*;
-pub use crate::mouse::mouseevents::*;
-pub use crate::mouse::mousemask::*;
-pub use crate::mouse::mouseorigin::*;
+use crate::mouse::mousebutton::MouseButton;
+use crate::mouse::mousebuttonevent::MouseButtonEvent;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct MouseButtonState {
+    button: MouseButton,
+    event:  MouseButtonEvent
+}
+
+impl MouseButtonState {
+    pub(in crate::mouse) fn new(button: MouseButton, event: MouseButtonEvent) -> Self {
+        Self { button, event }
+    }
+
+    pub fn button(&self) -> MouseButton {
+        self.button
+    }
+
+    pub fn event(&self) -> MouseButtonEvent {
+        self.event
+    }
+}
+
+impl Display for MouseButtonState {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "(button: {}, event: {})", self.button, self.event)
+    }
+}

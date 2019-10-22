@@ -58,6 +58,12 @@ impl Mouse {
         }
     }
 
+    pub fn push(&mut self) -> result!(()) {
+        ungetmouse(&mut self.handle)?;
+
+        Ok(())
+    }
+
     pub fn id(&self) -> i16 {
         self.handle.id
     }

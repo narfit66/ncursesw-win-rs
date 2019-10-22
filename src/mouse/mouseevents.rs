@@ -20,7 +20,10 @@
     IN THE SOFTWARE.
 */
 
+use strum::IntoEnumIterator;
+
 use crate::mouse::mousebuttonevent::MouseButtonEvent;
+use crate::mouse::mousebuttonstate::MouseButtonState;
 use crate::mouse::mousebutton::MouseButton;
 use crate::mouse::mouseevent::MouseEvent;
 use ncursesw::mouse::mmask_t;
@@ -55,14 +58,26 @@ impl MouseEvents {
         Self { mask }
     }
 
-    pub fn button_state(&self, button: MouseButton, event: MouseButtonEvent) -> bool {
-        match event {
-            MouseButtonEvent::Released      => self.released(button),
-            MouseButtonEvent::Pressed       => self.pressed(button),
-            MouseButtonEvent::Clicked       => self.clicked(button),
-            MouseButtonEvent::DoubleClicked => self.double_clicked(button),
-            MouseButtonEvent::TripleClicked => self.triple_clicked(button)
+    pub fn button_state(&self) -> Option<MouseButtonState> {
+        let _button_state = | button: MouseButton, event: MouseButtonEvent | -> bool {
+            match event {
+                MouseButtonEvent::Released      => self.released(button),
+                MouseButtonEvent::Pressed       => self.pressed(button),
+                MouseButtonEvent::Clicked       => self.clicked(button),
+                MouseButtonEvent::DoubleClicked => self.double_clicked(button),
+                MouseButtonEvent::TripleClicked => self.triple_clicked(button)
+            }
+        };
+
+        for button in MouseButton::iter() {
+            for event in MouseButtonEvent::iter() {
+                if _button_state(button, event) {
+                    return Some(MouseButtonState::new(button, event))
+                }
+            }
         }
+
+        None
     }
 
     pub_getter!(ctrl_button, ButtonCtrl);

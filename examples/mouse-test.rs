@@ -3,7 +3,7 @@ extern crate ncurseswwin;
 
 use ascii::AsciiChar;
 use ncurseswwin::*;
-use strum::IntoEnumIterator;
+//use strum::IntoEnumIterator;
 
 fn main() {
     // We wrap all our use of ncurseswin with this function.
@@ -62,12 +62,10 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
                             if registered_mouse {                        // is the mouse event for our mouse
                                 let mouse_events = mouse.events();
 
-                                for button in MouseButton::iter() {
-                                    for event in MouseButtonEvent::iter() {
-                                        if mouse_events.button_state(button, event) {
-                                            mouse_button_event(window, origin, button.into(), &format!("{}", event), mouse.origin())?;
-                                        }
-                                    }
+                                if let Some(button_event) = mouse_events.button_state() {
+                                    mouse_button_event(window, origin, button_event.button().into(), &format!("{}", button_event.event()), mouse.origin())?;
+                                } else {
+                                    other_event(window, origin, "no mouse button event!!!!")?;
                                 }
 
                                 if mouse_events.ctrl_button() {
