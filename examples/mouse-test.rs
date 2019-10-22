@@ -58,7 +58,7 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
 
                                 for button in MouseButton::iter() {
                                     for event in MouseButtonEvent::iter() {
-                                        if mouse_events.button(button, event) {
+                                        if mouse_events.button_state(button, event) {
                                             mouse_button_event(window, origin, button.into(), &format!("{}", event), mouse.origin())?;
                                         }
                                     }

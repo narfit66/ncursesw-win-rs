@@ -55,7 +55,7 @@ impl MouseEvents {
         Self { mask }
     }
 
-    pub fn button(&self, button: MouseButton, event: MouseButtonEvent) -> bool {
+    pub fn button_state(&self, button: MouseButton, event: MouseButtonEvent) -> bool {
         match event {
             MouseButtonEvent::Released      => self.released(button),
             MouseButtonEvent::Pressed       => self.pressed(button),
