@@ -37,15 +37,21 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
     window.mvaddstr(origin, "Hit <Return> to continue : ")?;
     origin.y += 2;
 
+    let next_origin = Origin { y: origin.y + 1, x: origin.x };
+
     window.getch()?;
 
     curs_set(CursorType::Invisible)?;
 
-    /*if !has_mouse() { // TODO: this doesn't seem to be returning true, $TERM=xterm-256color
-        panic!("no mouse detected!!!");
-    }*/
+    if !has_mouse_interface() {  // check if ncursesw supports a mouse pointer
+        panic!("no mouse interface detected!!!");
+    }
 
     let mouse = &mut Mouse::new(0, MouseMask::AllMouseEvents)?;
+
+    if !has_mouse() {            // has a mouse pointer been defined.
+        panic!("no mouse detected!!!");
+    }
 
     loop {
         match window.getch()? {
@@ -64,19 +70,13 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
                                     }
                                 }
 
-                                let old_origin = origin;
-
-                                origin.y += 1;
-
                                 if mouse_events.ctrl_button() {
-                                    other_event(window, origin, "with <ctrl> pressed")?;
+                                    other_event(window, next_origin, "with <ctrl> pressed")?;
                                 } else if mouse_events.shift_button() {
-                                    other_event(window, origin, "with <shift> pressed")?;
+                                    other_event(window, next_origin, "with <shift> pressed")?;
                                 } else if mouse_events.alt_button() {
-                                    other_event(window, origin, "with <alt> pressed")?;
+                                    other_event(window, next_origin, "with <alt> pressed")?;
                                 }
-
-                                origin = old_origin;
                             }
                         }
                     },
