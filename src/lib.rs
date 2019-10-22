@@ -75,5 +75,6 @@ pub use ncursesw::{
     resize_term, resizeterm, setcchar, timeout
 };
 pub use ncursesw::mouse::{
-    has_mouse, mouseinterval, set_mouseinterval, mouse_trafo, mouse_version
+    has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,
+    mouse_version, has_mouse_interface
 };
