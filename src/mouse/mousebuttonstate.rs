@@ -32,7 +32,7 @@ pub struct MouseButtonState {
 }
 
 impl MouseButtonState {
-    pub(in crate::mouse) fn new(button: MouseButton, event: MouseButtonEvent) -> Self {
+    pub fn new(button: MouseButton, event: MouseButtonEvent) -> Self {
         Self { button, event }
     }
 

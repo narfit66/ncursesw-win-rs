@@ -59,25 +59,27 @@ impl MouseEvents {
     }
 
     pub fn button_state(&self) -> Option<MouseButtonState> {
-        let _button_state = | button: MouseButton, event: MouseButtonEvent | -> bool {
-            match event {
-                MouseButtonEvent::Released      => self.released(button),
-                MouseButtonEvent::Pressed       => self.pressed(button),
-                MouseButtonEvent::Clicked       => self.clicked(button),
-                MouseButtonEvent::DoubleClicked => self.double_clicked(button),
-                MouseButtonEvent::TripleClicked => self.triple_clicked(button)
-            }
-        };
-
         for button in MouseButton::iter() {
             for event in MouseButtonEvent::iter() {
-                if _button_state(button, event) {
-                    return Some(MouseButtonState::new(button, event))
+                let state = MouseButtonState::new(button, event);
+
+                if self.is_button_state(state) {
+                    return Some(state);
                 }
             }
         }
 
         None
+    }
+
+    pub fn is_button_state(&self, state: MouseButtonState) -> bool {
+        match state.event() {
+            MouseButtonEvent::Released      => self.released(state.button()),
+            MouseButtonEvent::Pressed       => self.pressed(state.button()),
+            MouseButtonEvent::Clicked       => self.clicked(state.button()),
+            MouseButtonEvent::DoubleClicked => self.double_clicked(state.button()),
+            MouseButtonEvent::TripleClicked => self.triple_clicked(state.button())
+        }
     }
 
     pub_getter!(ctrl_button, ButtonCtrl);
