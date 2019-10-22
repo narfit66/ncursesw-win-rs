@@ -12,10 +12,13 @@ license = "MIT"
 [workspace]
 
 [dependencies]
-ncursesw = "0.3.0"
 lazy_static = "1.3.0"
 strum = "0.16.0"
 strum_macros = "0.16.0"
+
+[dependencies.ncursesw]
+version = "0.3.0"
+#features = ["key_resize_as_error", "key_event_as_error"]
 
 [dev-dependencies]
 ascii = "0.9.1"
