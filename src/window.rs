@@ -1134,7 +1134,7 @@ impl Window {
         wenclose(self.handle, origin)
     }
 
-    pub fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> result!(OriginResult) {
+    pub fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> OriginResult {
         wmouse_trafo(self.handle, origin, to_screen)
     }
 }
