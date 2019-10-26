@@ -21,6 +21,7 @@
 */
 
 extern crate ncursesw;
+extern crate custom_error;
 #[macro_use]
 extern crate lazy_static;
 extern crate strum;
@@ -32,6 +33,7 @@ mod graphics;
 mod inputmode;
 mod mouse;
 mod ncurses;
+mod ncurseswwinerror;
 mod panel;
 mod ripoff;
 mod utils;
@@ -41,6 +43,7 @@ pub use graphics::*;
 pub use inputmode::*;
 pub use mouse::*;
 pub use ncurses::*;
+pub use ncurseswwinerror::*;
 pub use panel::*;
 pub use ripoff::*;
 pub use utils::*;

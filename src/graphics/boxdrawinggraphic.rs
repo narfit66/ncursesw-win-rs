@@ -22,7 +22,7 @@
 
 use std::convert::{TryFrom, Into};
 
-use ncursesw::NCurseswError;
+use crate::ncurseswwinerror::NCurseswWinError;
 
 /// The boxdrawing graphic characters.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -106,7 +106,7 @@ impl Into<u16> for BoxDrawingGraphic {
 }
 
 impl TryFrom<u16> for BoxDrawingGraphic {
-    type Error = NCurseswError;
+    type Error = NCurseswWinError;
 
     fn try_from(raw: u16) -> Result<Self, Self::Error> {
         match raw {
@@ -125,7 +125,7 @@ impl TryFrom<u16> for BoxDrawingGraphic {
             LEFTVERTICALLINE    => Ok(BoxDrawingGraphic::LeftVerticalLine),
             RIGHTVERTICALLINE   => Ok(BoxDrawingGraphic::RightVerticalLine),
             PLUS                => Ok(BoxDrawingGraphic::Plus),
-            _                   => Err(NCurseswError::InternalError)
+            _                   => Err(NCurseswWinError::InternalError)
         }
     }
 }

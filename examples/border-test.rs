@@ -2,7 +2,7 @@ extern crate ncurseswwin;
 
 use ncurseswwin::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswError> } }
+macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     if let Err(e) = main_routine() {

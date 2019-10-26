@@ -25,8 +25,8 @@ use std::hash::{Hash, Hasher};
 use crate::mouse::mouseevents::MouseEvents;
 use crate::mouse::mousemask::MouseMask;
 use crate::mouse::mouseorigin::MouseOrigin;
+use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::mouse::{MEVENT, mousemask, getmouse, ungetmouse};
-use ncursesw::NCurseswError;
 
 pub struct Mouse {
     handle: MEVENT,

@@ -5,7 +5,7 @@ use ncurseswwin::*;
 fn main() {
     // We wrap all our use of ncurseswin with this function.
     ncursesw_init(|ncurses| {
-        fn doit(initial_window: &Window) -> Result<(), NCurseswError> {
+        fn doit(initial_window: &Window) -> Result<(), NCurseswWinError> {
             curs_set(CursorType::Invisible)?;
             set_echo(false)?;
 

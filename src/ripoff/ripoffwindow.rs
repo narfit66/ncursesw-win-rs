@@ -1,5 +1,5 @@
 /*
-    src/window.rs
+    src/ripoff/ripoffwindow.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -26,96 +26,48 @@
 use std::{path, time};
 
 use ncursesw::{
-    AttributesType, ColorPairType, ColorAttributeTypes, AttributesColorPairType,
+    AttributesType, ColorPairType, ColorAttributeTypes,
     Origin, Size, CharacterResult, AttributesColorPairSet, Region,
     Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString,
-    WideChar, WideString, WINDOW,
-    getcchar
+    WideChar, WideString, WINDOW
 };
 use ncursesw::normal;
 use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
-use crate::graphics::{
-    WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic
-};
 use crate::ncurseswwinerror::NCurseswWinError;
 
-/// A moveable window canvas.
+/// A ripoff line window canvas.
 ///
 /// All methods are either there original ncurses name or were specificlly passed a pointer
 /// to `_win_st` the 'w' has been removed for example the ncurses function `mvwgetn_wstr()`
 /// has become the method `self.mvgetn_wstr()`.
-pub struct Window {
-    handle:       WINDOW, // pointer to ncurses _win_st internal structure
-    free_on_drop: bool    // free WINDOW handle on drop of structure
+pub struct RipoffWindow {
+    handle: WINDOW // pointer to ncurses _win_st internal structure
 }
 
-impl Window {
-    /// Create a new instance of a Window
-    pub fn newwin(size: Size, origin: Origin) -> result!(Self) {
-        match ncursesw::newwin(size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Self::from(handle, true))
-        }
-    }
-
-    // make a new instance from the passed ncurses _win_st pointer and specify
-    // if the handle is to be free'd when the structure is dropped.
-    //
-    // free_on_drop is false in call's such as getparent(&self) where we are
-    // 'peeking' the Window but it would be invalid to free the handle when
-    // our instance goes out of scope.
-    pub(crate) fn from(handle: WINDOW, free_on_drop: bool) -> Self {
-        Self { handle, free_on_drop }
+impl RipoffWindow {
+    // make a new instance from the passed ncurses _win_st pointer.
+    pub(in crate::ripoff) fn from(handle: WINDOW) -> Self {
+        Self { handle }
     }
 
     // get the ncurses _win_st pointer for this Window structure.
-    pub(crate) fn handle(&self) -> WINDOW {
+    pub(in crate::ripoff) fn handle(&self) -> WINDOW {
         self.handle
     }
-
-    pub fn derwin(&self, size: Size, origin: Origin) -> result!(Self) {
-        match ncursesw::derwin(self.handle, size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Self::from(handle, true))
-        }
-    }
-
-    pub fn dupwin(&self) -> result!(Self) {
-        match ncursesw::dupwin(self.handle) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Self::from(handle, true))
-        }
-    }
-
-    pub fn subpad(&self, size: Size, origin: Origin) -> result!(Self) {
-        match ncursesw::subpad(self.handle, size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Self::from(handle, true))
-        }
-    }
-
-    pub fn subwin(&self, size: Size, origin: Origin) -> result!(Self) {
-        match ncursesw::subwin(self.handle, size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Self::from(handle, true))
-        }
-    }
 }
 
-impl Drop for Window {
+impl Drop for RipoffWindow {
     fn drop(&mut self) {
-        if self.free_on_drop {
-            if let Err(e) = ncursesw::delwin(self.handle) {
-                panic!(e.to_string())
-            }
+        if let Err(e) = ncursesw::delwin(self.handle) {
+            panic!(e.to_string())
         }
     }
 }
 
-unsafe impl Send for Window { } // too make thread safe
-unsafe impl Sync for Window { } // too make thread safe
+unsafe impl Send for RipoffWindow { } // too make thread safe
+unsafe impl Sync for RipoffWindow { } // too make thread safe
 
-impl Window {
+impl RipoffWindow {
     pub fn addchnstr(&self, chstr: &ChtypeString, number: i32) -> result!(()) {
         ncursesw::waddchnstr(self.handle, chstr, number)?;
 
@@ -249,7 +201,7 @@ impl Window {
         ncursesw::wbkgrndset(self.handle, wch)
     }
 
-    pub fn border(
+    /*pub fn border(
         &self,
         ls: ChtypeChar,
         rs: ChtypeChar,
@@ -285,7 +237,7 @@ impl Window {
         ncursesw::box_set(self.handle, verch, horch)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn chgat<A, P, T>(&self, number: i32, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
@@ -309,11 +261,11 @@ impl Window {
         Ok(())
     }
 
-    pub fn clrtobot(&self) -> result!(()) {
+    /*pub fn clrtobot(&self) -> result!(()) {
         ncursesw::wclrtobot(self.handle)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn clrtoeol(&self) -> result!(()) {
         ncursesw::wclrtoeol(self.handle)?;
@@ -330,7 +282,7 @@ impl Window {
         Ok(())
     }
 
-    pub fn copywin(
+    /*pub fn copywin(
         &self,
         dstwin: &Self,
         smin: Origin,
@@ -341,7 +293,7 @@ impl Window {
         ncursesw::copywin(self.handle, dstwin.handle, smin, dmin, dmax, overlay)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn cursyncup(&self) {
         ncursesw::wcursyncup(self.handle);
@@ -481,13 +433,13 @@ impl Window {
         }
     }
 
-    /// returns the parent Window for subwindows, or None if their is no parent.
+    /*/// returns the parent Window for subwindows, or None if their is no parent.
     pub fn getparent(&self) -> Option<Self> {
         match ncursesw::wgetparent(self.handle) {
             None         => None,
             Some(handle) => Some(Self::from(handle, false))
         }
-    }
+    }*/
 
     pub fn getparx(&self) -> result!(i32) {
         match ncursesw::getparx(self.handle) {
@@ -540,7 +492,7 @@ impl Window {
         }
     }
 
-    pub fn hline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
+    /*pub fn hline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
         ncursesw::whline(self.handle, ch, number)?;
 
         Ok(())
@@ -550,7 +502,7 @@ impl Window {
         ncursesw::whline_set(self.handle, wch, number)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn idcok(&self, bf: bool) {
         ncursesw::idcok(self.handle, bf)
@@ -605,7 +557,7 @@ impl Window {
         Ok(())
     }
 
-    pub fn insdelln(&self, number: i32) -> result!(()) {
+    /*pub fn insdelln(&self, number: i32) -> result!(()) {
         ncursesw::winsdelln(self.handle, number)?;
 
         Ok(())
@@ -615,7 +567,7 @@ impl Window {
         ncursesw::winsertln(self.handle)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn insnstr(&self, str: &str, number: i32) -> result!(()) {
         ncursesw::winsnstr(self.handle, str, number)?;
@@ -763,66 +715,88 @@ impl Window {
 
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_cursor() instead")]
     pub fn r#move(&self, origin: Origin) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::wmove(self.handle, origin)?;
 
         Ok(())
     }
 
     pub fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, number: i32) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddchnstr(self.handle, origin, chstr, number)?;
 
         Ok(())
     }
 
     pub fn mvaddch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddch(self.handle, origin, ch)?;
 
         Ok(())
     }
 
     pub fn mvaddchstr(&self, origin: Origin, chstr: &ChtypeString) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddchstr(self.handle, origin, chstr)?;
 
         Ok(())
     }
 
     pub fn mvaddnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddnstr(self.handle, origin, str, number)?;
 
         Ok(())
     }
 
     pub fn mvaddnwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddnwstr(self.handle, origin, wstr, number)?;
 
         Ok(())
     }
 
     pub fn mvaddstr(&self, origin: Origin, str: &str) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddstr(self.handle, origin, str)?;
 
         Ok(())
     }
 
     pub fn mvadd_wchnstr(&self, origin: Origin, wchstr: &ComplexString, number: i32) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwadd_wchnstr(self.handle, origin, wchstr, number)?;
 
         Ok(())
     }
 
     pub fn mvadd_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwadd_wch(self.handle, origin, wch)?;
 
         Ok(())
     }
 
     pub fn mvadd_wchstr(&self, origin: Origin, wchstr: &ComplexString) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwadd_wchstr(self.handle, origin, wchstr)?;
 
         Ok(())
     }
 
     pub fn mvaddwstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwaddwstr(self.handle, origin, wstr)?;
 
         Ok(())
@@ -833,24 +807,30 @@ impl Window {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
+        assert!(origin.y == 0);
+
         ncursesw::mvwchgat(self.handle, origin, number, attrs, color_pair)?;
 
         Ok(())
     }
 
     pub fn mvdelch(&self, origin: Origin) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwdelch(self.handle, origin)?;
 
         Ok(())
     }
 
-    pub fn mvderwin(&self, origin: Origin) -> result!(()) {
+    /*pub fn mvderwin(&self, origin: Origin) -> result!(()) {
         ncursesw::mvderwin(self.handle, origin)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn mvgetch(&self, origin: Origin) -> result!(CharacterResult<char>) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwgetch(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(result)  => Ok(result)
@@ -858,6 +838,8 @@ impl Window {
     }
 
     pub fn mvgetnstr(&self, origin: Origin, number: i32) -> result!(String) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwgetnstr(self.handle, origin, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
@@ -865,6 +847,8 @@ impl Window {
     }
 
     pub fn mvgetn_wstr(&self, origin: Origin, number: i32) -> result!(WideString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwgetn_wstr(self.handle, origin, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
@@ -873,6 +857,8 @@ impl Window {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetnstr() instead")]
     pub fn mvgetstr(&self, origin: Origin) -> result!(String) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwgetstr(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
@@ -880,6 +866,8 @@ impl Window {
     }
 
     pub fn mvget_wch(&self, origin: Origin) -> result!(CharacterResult<WideChar>) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwget_wch(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(result)  => Ok(result)
@@ -888,13 +876,15 @@ impl Window {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetn_wstr() instead")]
     pub fn mvget_wstr(&self, origin: Origin) -> result!(WideString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwget_wstr(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
         }
     }
 
-    pub fn mvhline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
+    /*pub fn mvhline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
         ncursesw::mvwhline(self.handle, origin, ch, number)?;
 
         Ok(())
@@ -904,9 +894,11 @@ impl Window {
         ncursesw::mvwhline_set(self.handle, origin, wch, number)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn mvinchnstr(&self, origin: Origin, number: i32) -> result!(ChtypeString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwinchnstr(self.handle, origin, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(chstr)   => Ok(chstr)
@@ -914,11 +906,15 @@ impl Window {
     }
 
     pub fn mvinch(&self, origin: Origin) -> ChtypeChar {
+        assert!(origin.y == 0);
+
         ncursesw::mvwinch(self.handle, origin)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinchnstr() instead")]
     pub fn mvinchstr(&self, origin: Origin) -> result!(ChtypeString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwinchstr(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(chstr)   => Ok(chstr)
@@ -926,6 +922,8 @@ impl Window {
     }
 
     pub fn mvinnstr(&self, origin: Origin, number: i32) -> result!(String) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwinnstr(self.handle, origin, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
@@ -933,6 +931,8 @@ impl Window {
     }
 
     pub fn mvinnwstr(&self, origin: Origin, number: i32) -> result!(WideString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwinnwstr(self.handle, origin, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
@@ -940,24 +940,32 @@ impl Window {
     }
 
     pub fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwinsch(self.handle, origin, ch)?;
 
         Ok(())
     }
 
     pub fn mvinsnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwinsnstr(self.handle, origin, str, number)?;
 
         Ok(())
     }
 
     pub fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwins_nwstr(self.handle, origin, wstr, number)?;
 
         Ok(())
     }
 
     pub fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwinsstr(self.handle, origin, str)?;
 
         Ok(())
@@ -965,6 +973,8 @@ impl Window {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinnstr() instead")]
     pub fn mvinstr(&self, origin: Origin) -> result!(String) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwinstr(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
@@ -972,18 +982,24 @@ impl Window {
     }
 
     pub fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwins_wch(self.handle, origin, wch)?;
 
         Ok(())
     }
 
     pub fn mvins_wstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::mvwins_wstr(self.handle, origin, wstr)?;
 
         Ok(())
     }
 
     pub fn mvin_wchnstr(&self, origin: Origin, number: i32) -> result!(ComplexString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwin_wchnstr(self.handle, origin, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(cstr)    => Ok(cstr)
@@ -991,6 +1007,8 @@ impl Window {
     }
 
     pub fn mvin_wch(&self, origin: Origin) -> result!(ComplexChar) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwin_wch(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(cc)      => Ok(cc)
@@ -999,6 +1017,8 @@ impl Window {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvin_wchnstr() instead")]
     pub fn mvin_wchstr(&self, origin: Origin) -> result!(ComplexString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwin_wchstr(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(cstr)    => Ok(cstr)
@@ -1007,13 +1027,15 @@ impl Window {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinnwstr() instead")]
     pub fn mvinwstr(&self, origin: Origin) -> result!(WideString) {
+        assert!(origin.y == 0);
+
         match ncursesw::mvwinwstr(self.handle, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
         }
     }
 
-    pub fn mvvline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
+    /*pub fn mvvline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
         ncursesw::mvwvline(self.handle, origin, ch, number)?;
 
         Ok(())
@@ -1029,7 +1051,7 @@ impl Window {
         ncursesw::mvwin(self.handle, origin)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn nodelay(&self, bf: bool) -> result!(()) {
         ncursesw::nodelay(self.handle, bf)?;
@@ -1049,7 +1071,7 @@ impl Window {
         Ok(())
     }
 
-    pub fn overlay(&self, srcwin: &Self) -> result!(()) {
+    /*pub fn overlay(&self, srcwin: &Self) -> result!(()) {
         ncursesw::overlay(srcwin.handle, self.handle)?;
 
         Ok(())
@@ -1083,7 +1105,7 @@ impl Window {
         ncursesw::prefresh(self.handle, pmin, smin, smax)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn putwin(&self, path: &path::Path) -> result!(()) {
         ncursesw::putwin(self.handle, path)?;
@@ -1091,11 +1113,11 @@ impl Window {
         Ok(())
     }
 
-    pub fn r#box(&self, verch: ChtypeChar, horch: ChtypeChar) -> result!(()) {
+    /*pub fn r#box(&self, verch: ChtypeChar, horch: ChtypeChar) -> result!(()) {
         ncursesw::r#box(self.handle, verch, horch)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn redrawln(&self, beg_line: i32, num_lines: i32) -> result!(()) {
         ncursesw::wredrawln(self.handle, beg_line, num_lines)?;
@@ -1202,7 +1224,7 @@ impl Window {
         Ok(())
     }
 
-    pub fn vline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
+    /*pub fn vline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
         ncursesw::wvline(self.handle, ch, number)?;
 
         Ok(())
@@ -1212,11 +1234,11 @@ impl Window {
         ncursesw::wvline_set(self.handle, wch, number)?;
 
         Ok(())
-    }
+    }*/
 }
 
-impl Window {
-    /// get the origin of the window.
+impl RipoffWindow {
+    /*/// get the origin of the window.
     pub fn origin(&self) -> result!(Origin) {
         match ncursesw::getbegyx(self.handle) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
@@ -1230,7 +1252,7 @@ impl Window {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(size)    => Ok(size)
         }
-    }
+    }*/
 
     /// get the cursor origin on the window.
     pub fn cursor(&self) -> result!(Origin) {
@@ -1242,6 +1264,8 @@ impl Window {
 
     /// set the cursor origin on the window.
     pub fn set_cursor(&self, origin: Origin) -> result!(()) {
+        assert!(origin.y == 0);
+
         ncursesw::wmove(self.handle, origin)?;
         
         Ok(())
@@ -1272,7 +1296,7 @@ impl Window {
         ncursesw::shims::ncurses::wtimeout(self.handle, -1)
     }
     
-    /// Draw a horizontal line at current cursor of a length using the box drawing type.
+    /*/// Draw a horizontal line at current cursor of a length using the box drawing type.
     ///
     /// The original attributes and color pairs are retained from characters that are overwritten.
     pub fn whline_set(&self, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
@@ -1485,33 +1509,15 @@ impl Window {
         self.mvwvline_set(Origin { y: origin.y + 1, x: origin.x + (size.columns - 1)}, box_drawing_type, size.lines - 2)?;
     
         Ok(())
-    }
+    }*/
 }
 
-impl Window {
+impl RipoffWindow {
     pub fn enclose(&self, origin: Origin) -> bool {
         wenclose(self.handle, origin)
     }
 
     pub fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> OriginResult {
         wmouse_trafo(self.handle, origin, to_screen)
-    }
-}
-
-/// Create a Window instance from a previous saved file.
-///
-/// This uses the file previously generated using the Window.putwin() routine.
-pub fn getwin(path: &path::Path) -> result!(Window) {
-    match ncursesw::getwin(path) {
-        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-        Ok(handle)  => Ok(Window::from(handle, true))
-    }
-}
-
-/// Create a new instance of a Window that will act as a pad.
-pub fn newpad(size: Size) -> result!(Window) {
-    match ncursesw::newpad(size) {
-        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-        Ok(handle)  => Ok(Window::from(handle, true))
     }
 }

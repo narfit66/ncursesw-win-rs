@@ -24,14 +24,13 @@ use std::panic::{UnwindSafe, catch_unwind};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use ncursesw;
-use ncursesw::{WINDOW, NCurseswError};
+use ncursesw::WINDOW;
 use crate::window::Window;
+use crate::ncurseswwinerror::NCurseswWinError;
 
 lazy_static! {
     pub(crate) static ref INITSCR_CALLED: AtomicBool = AtomicBool::new(false);
     pub(crate) static ref COLOR_STARTED: AtomicBool = AtomicBool::new(false);
-    pub(crate) static ref INITSCR_ALREADY_CALLED: &'static str = "ncursesw::initscr() has already been called!";
-    pub(crate) static ref INITSCR_NOT_CALLED: &'static str = "ncursesw::initscr() has not been called!";
 }
 
 /// NCurses context.
@@ -42,7 +41,7 @@ pub struct NCurses {
 /// NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
     /// Initialise ncurses.
-    pub fn initscr() -> result!(Self) {
+    pub fn initscr() -> Result<Self, NCurseswWinError> {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
 
             let handle = ncursesw::initscr()?;
@@ -52,7 +51,7 @@ impl NCurses {
 
             Ok(Self { handle })
         } else {
-            Err(NCurseswError::AlreadyInitialized)
+            Err(NCurseswWinError::InitscrAlreadyCalled)
         }
     }
 
@@ -81,8 +80,8 @@ pub fn ncursesw_init<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(user_function: F)
         let ncurses = match NCurses::initscr() {
             Err(e)  => {
                 panic!(match e {
-                    NCurseswError::AlreadyInitialized => "NCurses already initialized!",
-                    _                                 => "ncursesw::initscr() has failed!."
+                    NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
+                    _                                      => "ncursesw::initscr() has failed!."
                 })
             },
             Ok(ptr) => ptr

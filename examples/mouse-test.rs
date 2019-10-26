@@ -24,7 +24,7 @@ fn main() {
     });
 }
 
-fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
+fn mouse_test(window: &Window) -> Result<(), NCurseswWinError> {
     curs_set(CursorType::Visible)?;
     set_echo(false)?;
 
@@ -94,21 +94,27 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswError> {
     Ok(())
 }
 
-fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mouse_origin: MouseOrigin) -> Result<(), NCurseswError> {
+fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mouse_origin: MouseOrigin) -> Result<(), NCurseswWinError> {
     clear_to_eol(window, origin)?;
 
     window.mvaddstr(origin, &format!("B{} {} @ {}", button, str, mouse_origin))?;
 
-    window.mvaddch(mouse_origin.origin(), ChtypeChar::new(AsciiChar::Asterisk))
+    window.mvaddch(mouse_origin.origin(), ChtypeChar::new(AsciiChar::Asterisk))?;
+
+    Ok(())
 }
 
-fn other_event(window: &Window, origin: Origin, str: &str) -> Result<(), NCurseswError> {
+fn other_event(window: &Window, origin: Origin, str: &str) -> Result<(), NCurseswWinError> {
     clear_to_eol(window, origin)?;
 
-    window.mvaddstr(origin, str)
+    window.mvaddstr(origin, str)?;
+
+    Ok(())
 }
 
-fn clear_to_eol(window: &Window, origin: Origin) -> Result<(), NCurseswError> {
+fn clear_to_eol(window: &Window, origin: Origin) -> Result<(), NCurseswWinError> {
     window.set_cursor(origin)?;
-    window.clrtoeol()
+    window.clrtoeol()?;
+
+    Ok(())
 }

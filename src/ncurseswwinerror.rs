@@ -1,5 +1,5 @@
 /*
-    src/macros.rs
+    src/ncurseswwinerror.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,6 +20,15 @@
     IN THE SOFTWARE.
 */
 
-#![macro_use]
-
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+custom_error::custom_error! {
+/// NCurseswWin Errors.
+pub NCurseswWinError
+    InitscrAlreadyCalled = "ncurses has already been initialised",
+    InitscrNotCalled = "ncurses has not been initialised",
+    StartColorAlreadyCalled = "ncurseswwin::start_color() already called",
+    StartColorNotCalled = "ncurseswwin::start_color() not called",
+    MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, crate::ripoff::MAX_LINES) },
+    RipoffNotInitialized { number: usize } = "ripoff line {number} has not been initialised",
+    InternalError = "an internal error has occured",
+    NCurseswError { source: ncursesw::NCurseswError } = "{source}"
+}

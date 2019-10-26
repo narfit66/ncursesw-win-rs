@@ -23,10 +23,10 @@
 use std::sync::atomic::Ordering;
 
 use crate::inputmode::InputMode;
-use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED, INITSCR_NOT_CALLED, INITSCR_ALREADY_CALLED};
+use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED};
+use crate::ncurseswwinerror::NCurseswWinError;
 use crate::{
-    ColorsType, ColorType, ColorAttributeTypes,
-    LcCategory, NCurseswError, SoftLabelType
+    ColorsType, ColorType, ColorAttributeTypes, LcCategory, SoftLabelType
 };
 
 lazy_static! {
@@ -35,12 +35,12 @@ lazy_static! {
 }
 
 /// Set the locale to be used, required if using unicode representation.
-pub fn setlocale(lc: LcCategory, locale: &str) -> String {
+pub fn setlocale(lc: LcCategory, locale: &str) -> Result<String, NCurseswWinError> {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_ALREADY_CALLED.to_string());
-    };
-
-    ncursesw::setlocale(lc, locale)
+        Err(NCurseswWinError::InitscrAlreadyCalled)
+    } else {
+        Ok(ncursesw::setlocale(lc, locale))
+    }
 }
 
 /// Set the input mode to use within ncurses.
@@ -61,16 +61,21 @@ pub fn setlocale(lc: LcCategory, locale: &str) -> String {
 /// The default mode is inherited from the terminal that started the program
 /// (usually Cooked), so you should _always_ set the desired mode explicitly
 /// at the start of your program.
-pub fn set_input_mode(mode: InputMode) -> result!(()) {
+pub fn set_input_mode(mode: InputMode) -> Result<(), NCurseswWinError> {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_NOT_CALLED.to_string());
-    };
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        let rc = match mode {
+            InputMode::Character    => ncursesw::cbreak(),
+            InputMode::Cooked       => ncursesw::nocbreak(),
+            InputMode::RawCharacter => ncursesw::raw(),
+            InputMode::RawCooked    => ncursesw::noraw()
+        };
 
-    match mode {
-        InputMode::Character    => ncursesw::cbreak(),
-        InputMode::Cooked       => ncursesw::nocbreak(),
-        InputMode::RawCharacter => ncursesw::raw(),
-        InputMode::RawCooked    => ncursesw::noraw()
+        match rc {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(_)       => Ok(())
+        }
     }
 }
 
@@ -81,11 +86,18 @@ pub fn set_input_mode(mode: InputMode) -> result!(()) {
 /// of the time.
 pub fn set_echo(echoing: bool) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_NOT_CALLED.to_string());
-    } else if echoing {
-        ncursesw::echo()
+        Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        ncursesw::noecho()
+        let rc = if echoing {
+            ncursesw::echo()
+        } else {
+            ncursesw::noecho()
+        };
+
+        match rc {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(_)       => Ok(())
+        }
     }
 }
 
@@ -98,11 +110,18 @@ pub fn set_echo(echoing: bool) -> result!(()) {
 /// Also, ncurses will then be able to detect the return key.
 pub fn set_newline(newline: bool) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_NOT_CALLED.to_string());
-    } else if newline {
-        ncursesw::nl()
+        Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        ncursesw::nonl()
+        let rc = if newline {
+            ncursesw::nl()
+        } else {
+            ncursesw::nonl()
+        };
+
+        match rc {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(_)       => Ok(())
+        }
     }
 }
 
@@ -111,17 +130,15 @@ pub fn set_newline(newline: bool) -> result!(()) {
 /// This allows ncurses to initialise internal buffers to deal with color pairs etc.
 pub fn start_color() -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_NOT_CALLED.to_string());
+        Err(NCurseswWinError::InitscrNotCalled)
     } else if COLOR_STARTED.load(Ordering::SeqCst) {
-        panic!(START_COLOR_ALREADY_CALLED.to_string());
-    }
+        Err(NCurseswWinError::StartColorAlreadyCalled)
+    } else {
+        ncursesw::start_color()?;
 
-    match ncursesw::start_color() {
-        Err(e) => Err(e),
-        Ok(_)  => {
-            COLOR_STARTED.store(true, Ordering::SeqCst);
-            Ok(())
-        }
+        COLOR_STARTED.store(true, Ordering::SeqCst);
+
+        Ok(())
     }
 }
 
@@ -130,12 +147,14 @@ pub fn start_color() -> result!(()) {
 /// This is usually a white foreground on a black background.
 pub fn use_default_colors() -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_NOT_CALLED.to_string());
+        Err(NCurseswWinError::InitscrNotCalled)
     } else if !COLOR_STARTED.load(Ordering::SeqCst) {
-        panic!(START_COLOR_NOT_CALLED.to_string());
-    };
+        Err(NCurseswWinError::StartColorNotCalled)
+    } else {
+        ncursesw::use_default_colors()?;
 
-    ncursesw::use_default_colors()
+        Ok(())
+    }
 }
 
 /// Use the specialifed colors (foreground and background) as the default colors for defining color pair 0.
@@ -145,12 +164,14 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
           T: ColorAttributeTypes
 {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_NOT_CALLED.to_string());
+        Err(NCurseswWinError::InitscrNotCalled)
     } else if !COLOR_STARTED.load(Ordering::SeqCst) {
-        panic!(START_COLOR_NOT_CALLED.to_string());
-    };
+        Err(NCurseswWinError::StartColorNotCalled)
+    } else {
+        ncursesw::assume_default_colors(colors)?;
 
-    ncursesw::assume_default_colors(colors)
+        Ok(())
+    }
 }
 
 /// Define the softlabels line at the bottom of the screen.
@@ -158,8 +179,10 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
 /// This will be initialised when ncurses is initialised.
 pub fn slk_init(fmt: SoftLabelType) -> result!(()) {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
-        panic!(INITSCR_ALREADY_CALLED.to_string());
-    };
+        Err(NCurseswWinError::InitscrAlreadyCalled)
+    } else {
+        ncursesw::slk_init(fmt)?;
 
-    ncursesw::slk_init(fmt)
+        Ok(())
+    }
 }

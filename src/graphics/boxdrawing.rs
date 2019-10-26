@@ -25,8 +25,9 @@
 use std::collections::HashMap;
 
 use crate::graphics::{BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic};
+use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::{
-    ChtypeChar, WideChar, ComplexChar, NCurseswError,
+    ChtypeChar, WideChar, ComplexChar,
     AttributesType, ColorPairType, ColorAttributeTypes
 };
 use ncursesw::shims::ncurses::{wchar_t, NCURSES_ACS};
@@ -317,5 +318,8 @@ pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGra
 
 /// Obtain the box drawing graphic of ComplexChar type.
 pub fn complex_box_graphic<A, P, T>(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic, attrs: &A, color_pair: &P) -> result!(ComplexChar) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
-    ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, graphic), attrs, color_pair)
+    match ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, graphic), attrs, color_pair) {
+        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+        Ok(cc)      => Ok(cc)
+    }
 }

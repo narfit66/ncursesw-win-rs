@@ -3,7 +3,7 @@ extern crate ncurseswwin;
 use ncurseswwin::*;
 use ncurseswwin::normal::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswError> } }
+macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     if let Err(e) = main_routine() {
@@ -12,7 +12,7 @@ fn main() {
 }
 
 fn main_routine() -> result!(()) {
-    setlocale(LcCategory::All, "");
+    setlocale(LcCategory::All, "")?;
 
     ncursesw_init(|ncurses| {
         let doit = |initial_window: &Window| -> result!(()) {

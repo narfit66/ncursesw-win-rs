@@ -1,5 +1,5 @@
 /*
-    src/macros.rs
+    src/ripoff/mod.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
-#![macro_use]
+mod ripoffline;
+mod ripoffwindow;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+pub use crate::ripoff::ripoffline::*;
+pub use crate::ripoff::ripoffwindow::*;
