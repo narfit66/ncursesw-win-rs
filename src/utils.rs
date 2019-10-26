@@ -35,7 +35,7 @@ lazy_static! {
 }
 
 /// Set the locale to be used, required if using unicode representation.
-pub fn setlocale(lc: LcCategory, locale: &str) -> Result<String, NCurseswWinError> {
+pub fn setlocale(lc: LcCategory, locale: &str) -> result!(String) {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrAlreadyCalled)
     } else {
@@ -61,7 +61,7 @@ pub fn setlocale(lc: LcCategory, locale: &str) -> Result<String, NCurseswWinErro
 /// The default mode is inherited from the terminal that started the program
 /// (usually Cooked), so you should _always_ set the desired mode explicitly
 /// at the start of your program.
-pub fn set_input_mode(mode: InputMode) -> Result<(), NCurseswWinError> {
+pub fn set_input_mode(mode: InputMode) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {

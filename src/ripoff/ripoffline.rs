@@ -65,7 +65,7 @@ pub struct RipoffLine {
 }
 
 impl RipoffLine {
-    pub fn new(orientation: Orientation) -> Result<Self, NCurseswWinError> {
+    pub fn new(orientation: Orientation) -> result!(Self) {
         // check that initscr() has not been called.
         if INITSCR_CALLED.load(Ordering::SeqCst) {
             Err(NCurseswWinError::InitscrAlreadyCalled)
@@ -93,8 +93,8 @@ impl RipoffLine {
         self.number
     }
 
-    pub fn update<F, T>(&self, func: F) -> Result<T, NCurseswWinError>
-        where F: Fn(&RipoffWindow, i32) -> Result<T, NCurseswWinError>
+    pub fn update<F, T>(&self, func: F) -> result!(T)
+        where F: Fn(&RipoffWindow, i32) -> result!(T)
     {
         // check that initscr() has been called.
         if !INITSCR_CALLED.load(Ordering::SeqCst) {

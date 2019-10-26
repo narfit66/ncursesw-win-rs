@@ -9,7 +9,7 @@ Please see the [README.md](https://github.com/narfit66/ncursesw-rs/blob/master/R
 
 ```
 [dependencies]
-ncursesw-win = "0.2"
+ncursesw-win = "0.3"
 ```
 Or to use the latest git version
 ```

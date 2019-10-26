@@ -41,7 +41,7 @@ pub struct NCurses {
 /// NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
     /// Initialise ncurses.
-    pub fn initscr() -> Result<Self, NCurseswWinError> {
+    pub fn initscr() -> result!(Self) {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
 
             let handle = ncursesw::initscr()?;
