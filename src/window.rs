@@ -1255,7 +1255,7 @@ impl Window {
         }
     }
 
-    /// set the non-blocking read timeout in milliseconds, use `set_blocking_mode()` is set blocking read mode.
+    /// set the non-blocking read timeout in milliseconds, use `set_blocking_mode()` to set blocking read mode.
     pub fn set_timeout(&self, ms: time::Duration) -> result!(()) {
         ncursesw::wtimeout(self.handle, ms)?;
 
@@ -1496,6 +1496,16 @@ impl Window {
     pub fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> OriginResult {
         wmouse_trafo(self.handle, origin, to_screen)
     }
+}
+
+impl Window {
+    nonblocking_get!(getch_nonblocking, getch, "wgetch", char);
+
+    nonblocking_get_with_origin!(mvgetch_nonblocking, mvgetch, "mvwgetch", char);
+
+    nonblocking_get!(get_wch_nonblocking, get_wch, "wget_wch", WideChar);
+
+    nonblocking_get_with_origin!(mvget_wch_nonblocking, mvget_wch, "mvwget_wch", WideChar);
 }
 
 /// Create a Window instance from a previous saved file.

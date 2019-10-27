@@ -23,3 +23,55 @@
 #![macro_use]
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+
+macro_rules! nonblocking_get {
+    ($fname: ident, $func: ident, $str: expr, $result: ident) => {
+        pub fn $fname(&self, timeout: Option<time::Duration>) -> result!(Option<CharacterResult<$result>>) {
+            match timeout {
+                None       => self.timeout(time::Duration::new(0, 0))?,
+                Some(time) => self.timeout(time)?
+            }
+
+            let result = match self.$func() {
+                Err(source) => {
+                    if source == crate::timeout_error(&$str) {
+                        Ok(None)
+                    } else {
+                        Err(source)
+                    }
+                },
+                Ok(result) => Ok(Some(result))
+            };
+
+            self.set_blocking_mode();
+
+            result
+        }
+    }
+}
+
+macro_rules! nonblocking_get_with_origin {
+    ($fname: ident, $func: ident, $str: expr, $result: ident) => {
+        pub fn $fname(&self, origin: Origin, timeout: Option<time::Duration>) -> result!(Option<CharacterResult<$result>>) {
+            match timeout {
+                None       => self.timeout(time::Duration::new(0, 0))?,
+                Some(time) => self.timeout(time)?
+            }
+
+            let result = match self.$func(origin) {
+                Err(source) => {
+                    if source == crate::timeout_error(&$str) {
+                        Ok(None)
+                    } else {
+                        Err(source)
+                    }
+                },
+                Ok(result) => Ok(Some(result))
+            };
+
+            self.set_blocking_mode();
+
+            result
+        }
+    }
+}

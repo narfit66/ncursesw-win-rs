@@ -1521,3 +1521,13 @@ impl RipoffWindow {
         wmouse_trafo(self.handle, origin, to_screen)
     }
 }
+
+impl RipoffWindow {
+    nonblocking_get!(getch_nonblocking, getch, "wgetch", char);
+
+    nonblocking_get_with_origin!(mvgetch_nonblocking, mvgetch, "mvwgetch", char);
+
+    nonblocking_get!(get_wch_nonblocking, get_wch, "wget_wch", WideChar);
+
+    nonblocking_get_with_origin!(mvget_wch_nonblocking, mvget_wch, "mvwget_wch", WideChar);
+}
