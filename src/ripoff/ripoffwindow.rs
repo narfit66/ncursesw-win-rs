@@ -1292,18 +1292,13 @@ impl RipoffWindow {
     /// set the non-blocking read timeout in milliseconds, use `set_blocking_mode()` to set blocking read mode.
     pub fn set_timeout(&self, ms: Option<time::Duration>) -> result!(()) {
         match ms {
-            None     => self.set_blocking_mode(),
+            None     => ncursesw::shims::ncurses::wtimeout(self.handle, -1),
             Some(ms) => ncursesw::wtimeout(self.handle, ms)?
         }
 
         Ok(())
     }
 
-    /// set Window to be in blocking read mode.
-    pub fn set_blocking_mode(&self) {
-        ncursesw::shims::ncurses::wtimeout(self.handle, -1)
-    }
-    
     /*/// Draw a horizontal line at current cursor of a length using the box drawing type.
     ///
     /// The original attributes and color pairs are retained from characters that are overwritten.
