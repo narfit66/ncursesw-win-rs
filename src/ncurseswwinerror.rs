@@ -30,5 +30,6 @@ pub NCurseswWinError
     MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, crate::ripoff::MAX_LINES) },
     RipoffNotInitialized { number: usize } = "ripoff line {number} has not been initialised",
     InternalError = "an internal error has occured",
+    IntError { source: std::num::TryFromIntError } = "{source}",
     NCurseswError { source: ncursesw::NCurseswError } = "{source}"
 }

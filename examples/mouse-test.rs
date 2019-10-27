@@ -89,7 +89,7 @@ fn mouse_test(window: &Window) -> result!(()) {
                                     mouse_button_event(
                                         window,
                                         origin,
-                                        button_event.button().into(),
+                                        button_event.button().number(),
                                         &format!("{}", button_event.event()),
                                         mouse.origin()
                                     )?;

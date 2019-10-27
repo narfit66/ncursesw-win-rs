@@ -65,7 +65,7 @@ pub(in crate::mouse) enum MouseEvent {
 
 impl Into<mmask_t> for MouseEvent {
     fn into(self) -> mmask_t {
-        let mask = match self {
+        match self {
             MouseEvent::Button1Released      => BUTTON1_RELEASED,
             MouseEvent::Button1Pressed       => BUTTON1_PRESSED,
             MouseEvent::Button1Clicked       => BUTTON1_CLICKED,
@@ -94,8 +94,6 @@ impl Into<mmask_t> for MouseEvent {
             MouseEvent::ButtonCtrl           => BUTTON_CTRL,
             MouseEvent::ButtonShift          => BUTTON_SHIFT,
             MouseEvent::ButtonAlt            => BUTTON_ALT
-        };
-
-        mask.try_into().unwrap()
+        }.try_into().unwrap()
     }
 }

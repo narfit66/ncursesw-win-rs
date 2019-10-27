@@ -35,7 +35,7 @@ pub struct Mouse {
 
 impl Mouse {
     pub fn new(id: i16, mask: MouseMask) -> result!(Self) {
-        mousemask(mask.into(), None)?;
+        mousemask(mask.mask()?, None)?;
 
         Ok(Self { handle: MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }, mask })
     }
@@ -43,7 +43,7 @@ impl Mouse {
     pub fn refresh(&mut self) -> result!(bool) {
         let mut handle: [MEVENT; 1] = [self.handle];
 
-        mousemask(self.mask.into(), None)?;
+        mousemask(self.mask.mask()?, None)?;
 
         getmouse(handle.as_mut_ptr())?;
 

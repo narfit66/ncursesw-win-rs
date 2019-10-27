@@ -23,6 +23,7 @@
 use std::convert::TryInto;
 
 use ncursesw::mouse::{mmask_t, REPORT_MOUSE_POSITION, ALL_MOUSE_EVENTS};
+use crate::ncurseswwinerror::NCurseswWinError;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MouseMask {
@@ -30,13 +31,13 @@ pub enum MouseMask {
     AllMouseEvents
 }
 
-impl Into<mmask_t> for MouseMask {
-    fn into(self) -> mmask_t {
+impl MouseMask {
+    pub(in crate::mouse) fn mask(&self) -> result!(mmask_t) {
         let mask = match self {
             MouseMask::ReportMousePosition => REPORT_MOUSE_POSITION,
             MouseMask::AllMouseEvents      => ALL_MOUSE_EVENTS
-        };
+        }.try_into()?;
 
-        mask.try_into().unwrap()
+        Ok(mask)
     }
 }

@@ -20,7 +20,6 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::Into;
 use strum_macros::{Display, EnumIter};
 
 #[derive(Copy, Clone, Debug, Display, EnumIter, PartialEq, Eq, Hash)]
@@ -32,8 +31,8 @@ pub enum MouseButton {
     Five
 }
 
-impl Into<u8> for MouseButton {
-    fn into(self) -> u8 {
+impl MouseButton {
+    pub fn number(&self) -> u8 {
         match self {
             MouseButton::One   => 1,
             MouseButton::Two   => 2,
