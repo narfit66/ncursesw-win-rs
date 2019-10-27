@@ -20,8 +20,10 @@
     IN THE SOFTWARE.
 */
 
+extern crate ascii;
 extern crate ncurseswwin;
 
+use ascii::AsciiChar;
 use ncurseswwin::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
@@ -55,20 +57,25 @@ fn ncursesw_init_test(initial_window: &Window) -> result!(()) {
     Ok(())
 }
 
-fn ncursesw_init_test_pass(initial_window: &Window) -> result!(()) {
+fn ncursesw_init_test_pass(window: &Window) -> result!(()) {
     let mut origin = Origin { y: 0, x: 0};
 
-    initial_window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
+    window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;
-    initial_window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
+    window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
+    origin.y += 2;
+    window.mvaddstr(origin, "Press <Return> to continue: ")?;
 
-    initial_window.refresh()?;
+    window.refresh()?;
 
-    initial_window.getch()?;
+    window.getch()?;
 
     Ok(())
 }
 
-fn ncursesw_init_test_fail(_initial_window: &Window) -> result!(()) {
+// the following will cause an NCurseswError to be returned!!!
+fn ncursesw_init_test_fail(window: &Window) -> result!(()) {
+    window.mvaddch(Origin { y: LINES() + 1, x: COLS() + 1 }, ChtypeChar::new(AsciiChar::Asterisk))?;
+
     Ok(())
 }

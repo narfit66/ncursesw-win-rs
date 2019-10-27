@@ -26,6 +26,8 @@ extern crate ncurseswwin;
 use ascii::AsciiChar;
 use ncurseswwin::*;
 
+macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+
 fn main() {
     // We wrap all our use of ncurseswin with this function.
     ncursesw_init(|ncurses| {
@@ -45,7 +47,7 @@ fn main() {
     });
 }
 
-fn mouse_test(window: &Window) -> Result<(), NCurseswWinError> {
+fn mouse_test(window: &Window) -> result!(()) {
     curs_set(CursorType::Visible)?;
     set_echo(false)?;
 
@@ -121,7 +123,7 @@ fn mouse_test(window: &Window) -> Result<(), NCurseswWinError> {
     Ok(())
 }
 
-fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mouse_origin: MouseOrigin) -> Result<(), NCurseswWinError> {
+fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mouse_origin: MouseOrigin) -> result!(()) {
     clear_to_eol(window, origin)?;
 
     window.mvaddstr(origin, &format!("B{} {} @ {}", button, str, mouse_origin))?;
@@ -131,7 +133,7 @@ fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mo
     Ok(())
 }
 
-fn other_event(window: &Window, origin: Origin, str: &str) -> Result<(), NCurseswWinError> {
+fn other_event(window: &Window, origin: Origin, str: &str) -> result!(()) {
     clear_to_eol(window, origin)?;
 
     window.mvaddstr(origin, str)?;
@@ -139,7 +141,7 @@ fn other_event(window: &Window, origin: Origin, str: &str) -> Result<(), NCurses
     Ok(())
 }
 
-fn clear_to_eol(window: &Window, origin: Origin) -> Result<(), NCurseswWinError> {
+fn clear_to_eol(window: &Window, origin: Origin) -> result!(()) {
     window.set_cursor(origin)?;
     window.clrtoeol()?;
 
