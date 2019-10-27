@@ -1,3 +1,25 @@
+/*
+    examples/ripoff_line-test.rs
+
+    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom
+    the Software is furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+    IN THE SOFTWARE.
+*/
+
 extern crate ncurseswwin;
 
 use ncurseswwin::*;
@@ -19,7 +41,7 @@ fn main_routine() -> result!(()) {
     assert!(top_ripoff != bottom_ripoff);
 
     ncursesw_init(|ncurses| {
-        if let Err(e) = test_ripofflines(&ncurses.initial_window(), &top_ripoff, &bottom_ripoff) {
+        if let Err(e) = ripoff_line_test(&ncurses.initial_window(), &top_ripoff, &bottom_ripoff) {
             panic!(e.to_string())
         }
     }).unwrap_or_else(|e| match e {
@@ -30,7 +52,7 @@ fn main_routine() -> result!(()) {
     Ok(())
 }
 
-fn test_ripofflines(initial_window: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
+fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
     curs_set(CursorType::Invisible)?;
     set_echo(false)?;
 
@@ -44,23 +66,31 @@ fn test_ripofflines(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
 
     //  update the top ripoff line.
     top_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        ripoff_window.addstr(&format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns))?;
-        ripoff_window.noutrefresh()?;
-
-        Ok(())
+        update_top_ripoff(ripoff_window, columns)
     })?;
 
     //  update the bottom ripoff line.
     bottom_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        ripoff_window.addstr(&format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns))?;
-        ripoff_window.noutrefresh()?;
-
-        Ok(())
+        update_bottom_ripoff(ripoff_window, columns)
     })?;
 
-    ncursesw::doupdate()?;
+    doupdate()?;
 
     initial_window.getch()?;
+
+    Ok(())
+}
+
+fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) {
+    ripoff_window.addstr(&format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns))?;
+    ripoff_window.noutrefresh()?;
+
+    Ok(())
+}
+
+fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) {
+    ripoff_window.addstr(&format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns))?;
+    ripoff_window.noutrefresh()?;
 
     Ok(())
 }
