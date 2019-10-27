@@ -24,6 +24,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use std::{path, time};
+use std::convert::TryFrom;
 
 use ncursesw::{
     AttributesType, ColorPairType, ColorAttributeTypes,
@@ -34,6 +35,7 @@ use ncursesw::{
 use ncursesw::normal;
 use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
 use crate::ncurseswwinerror::NCurseswWinError;
+use ncursesw::NCurseswError;
 
 /// A ripoff line window canvas.
 ///
@@ -1272,23 +1274,29 @@ impl RipoffWindow {
     }
 
     /// get the non-blocking read timeout in milliseconds.
-    pub fn get_timeout(&self) -> result!(time::Duration) {
-        match ncursesw::wgetdelay(self.handle) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(timeout) => Ok(timeout)
+    pub fn get_timeout(&self) -> result!(Option<time::Duration>) {
+        match ncursesw::shims::ncurses::wgetdelay(self.handle) {
+            -1 => Ok(None),
+            rc => {
+                if rc < 0 {
+                    Err(NCurseswWinError::from(NCurseswError::NCursesFunction { func: "wgetdelay".to_string(), rc }))
+                } else {
+                    let delay = time::Duration::from_millis(u64::try_from(rc)?);
+
+                    Ok(Some(delay))
+                }
+            }
         }
     }
 
-    /// set the non-blocking read timeout in milliseconds, use `set_blocking_mode()` is set blocking read mode.
-    pub fn set_timeout(&self, ms: time::Duration) -> result!(()) {
-        ncursesw::wtimeout(self.handle, ms)?;
+    /// set the non-blocking read timeout in milliseconds, use `set_blocking_mode()` to set blocking read mode.
+    pub fn set_timeout(&self, ms: Option<time::Duration>) -> result!(()) {
+        match ms {
+            None     => self.set_blocking_mode(),
+            Some(ms) => ncursesw::wtimeout(self.handle, ms)?
+        }
 
         Ok(())
-    }
-
-    /// check if Window is blocking or non-blocking read mode.
-    pub fn is_blocking_mode(&self) -> bool {
-        ncursesw::shims::ncurses::wgetdelay(self.handle) == -1
     }
 
     /// set Window to be in blocking read mode.

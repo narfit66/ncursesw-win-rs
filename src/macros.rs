@@ -27,10 +27,9 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 macro_rules! nonblocking_get {
     ($fname: ident, $func: ident, $str: expr, $result: ident) => {
         pub fn $fname(&self, timeout: Option<time::Duration>) -> result!(Option<CharacterResult<$result>>) {
-            match timeout {
-                None       => self.timeout(time::Duration::new(0, 0))?,
-                Some(time) => self.timeout(time)?
-            }
+            let orig_timeout = self.get_timeout()?;
+
+            self.set_timeout(timeout)?;
 
             let result = match self.$func() {
                 Err(source) => {
@@ -43,7 +42,7 @@ macro_rules! nonblocking_get {
                 Ok(result) => Ok(Some(result))
             };
 
-            self.set_blocking_mode();
+            self.set_timeout(orig_timeout)?;
 
             result
         }
@@ -53,10 +52,9 @@ macro_rules! nonblocking_get {
 macro_rules! nonblocking_get_with_origin {
     ($fname: ident, $func: ident, $str: expr, $result: ident) => {
         pub fn $fname(&self, origin: Origin, timeout: Option<time::Duration>) -> result!(Option<CharacterResult<$result>>) {
-            match timeout {
-                None       => self.timeout(time::Duration::new(0, 0))?,
-                Some(time) => self.timeout(time)?
-            }
+            let orig_timeout = self.get_timeout()?;
+
+            self.set_timeout(timeout)?;
 
             let result = match self.$func(origin) {
                 Err(source) => {
@@ -69,7 +67,7 @@ macro_rules! nonblocking_get_with_origin {
                 Ok(result) => Ok(Some(result))
             };
 
-            self.set_blocking_mode();
+            self.set_timeout(orig_timeout)?;
 
             result
         }
