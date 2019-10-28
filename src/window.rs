@@ -38,6 +38,7 @@ use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
 use crate::graphics::{
     WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic
 };
+use crate::Timeout;
 use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::NCurseswError;
 
@@ -1250,7 +1251,7 @@ impl Window {
     }
 
     /// get the non-blocking read timeout in milliseconds.
-    pub fn get_timeout(&self) -> result!(Option<time::Duration>) {
+    pub fn get_timeout(&self) -> result!(Timeout) {
         match ncursesw::shims::ncurses::wgetdelay(self.handle) {
             -1 => Ok(None),
             rc => {
@@ -1266,7 +1267,7 @@ impl Window {
     }
 
     /// set the non-blocking read timeout in milliseconds, use `ms: None` to set blocking read mode.
-    pub fn set_timeout(&self, ms: Option<time::Duration>) -> result!(()) {
+    pub fn set_timeout(&self, ms: Timeout) -> result!(()) {
         match ms {
             None     => ncursesw::shims::ncurses::wtimeout(self.handle, -1),
             Some(ms) => ncursesw::wtimeout(self.handle, ms)?

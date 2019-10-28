@@ -27,6 +27,8 @@ extern crate lazy_static;
 extern crate strum;
 extern crate strum_macros;
 
+use std::time;
+
 mod macros;
 
 mod graphics;
@@ -82,6 +84,8 @@ pub use ncursesw::mouse::{
     has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,
     mouse_version, has_mouse_interface
 };
+
+pub type Timeout = Option<time::Duration>;
 
 use ncursesw::shims::constants::ERR;
 
