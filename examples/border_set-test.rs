@@ -101,22 +101,24 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
     // iterate over the box drawing types.
     for &box_drawing_type in &box_drawing_types {
         // extract the box drawing characters for the box drawing type.
+        let ls = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LeftVerticalLine, &attrs, &color_pair0)?;
+        let rs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::RightVerticalLine, &attrs, &color_pair0)?;
+        let ts = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperHorizontalLine, &attrs, &color_pair0)?;
+        let bs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerHorizontalLine, &attrs, &color_pair0)?;
         let ul = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &color_pair0)?;
-        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair0)?;
         let ur = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &color_pair0)?;
+        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair0)?;
         let lr = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair0)?;
-        let hl = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::HorizontalLine, &attrs, &color_pair0)?;
-        let vl = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::VerticalLine, &attrs, &color_pair0)?;
 
         // create a border on the inital window (stdscr).
-        initial_window.border_set(vl, vl, hl, hl, ul, ur, ll, lr)?;
+        initial_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
 
         // set our cursor position and clear to the end of line on our sub window.
         inner_window.set_cursor(origin)?;
         inner_window.clrtoeol()?;
 
         // create a border on the sub window.
-        inner_window.border_set(vl, vl, hl, hl, ul, ur, ll, lr)?;
+        inner_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
 
         // add the type of box drawing type on the sub window.
         inner_window.mvaddstr(origin, &format!("box drawing type {:?}", box_drawing_type))?;

@@ -59,7 +59,7 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
     let fg_color = Color::Light(BaseColor::Yellow);
     let bg_color = Color::Dark(BaseColor::Blue);
 
-    let color_pair1 = ColorPair::new(1, Colors::new(fg_color, bg_color))?;
+    let color_pair = ColorPair::new(1, Colors::new(fg_color, bg_color))?;
 
     //initial_window.color_set(color_pair1)?;
     // get the size of the initial window (stdscr).
@@ -97,15 +97,17 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
 
     // iterate over the box drawing types.
     for &box_drawing_type in &box_drawing_types {
-        // extract the box drawing characters for the box drawing type.
-        let ul = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &color_pair1)?;
-        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair1)?;
-        let ur = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &color_pair1)?;
-        let lr = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair1)?;
-        let hl = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::HorizontalLine, &attrs, &color_pair1)?;
-        let vl = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::VerticalLine, &attrs, &color_pair1)?;
+        let ls = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LeftVerticalLine, &attrs, &color_pair)?;
+        let rs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::RightVerticalLine, &attrs, &color_pair)?;
+        let ts = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperHorizontalLine, &attrs, &color_pair)?;
+        let bs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerHorizontalLine, &attrs, &color_pair)?;
+        let ul = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &color_pair)?;
+        let ur = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &color_pair)?;
+        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair)?;
+        let lr = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair)?;
 
-        initial_window.border_set(vl, vl, hl, hl, ul, ur, ll, lr)?;
+        // create a border on the inital window (stdscr).
+        initial_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
 
         initial_window.mvwbox_set(origin, size, box_drawing_type)?;
         initial_window.mvwbox_set(Origin { y: 5, x: 5 }, size, box_drawing_type)?;

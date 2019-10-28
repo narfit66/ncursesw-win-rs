@@ -110,10 +110,10 @@ lazy_static! {
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::Normal),        BoxDrawingGraphic::RightVerticalLine   ), 0x2502); // │
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::Normal),        BoxDrawingGraphic::Plus                ), 0x253c); // ┼
 
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperLeftCorner     ), 0x2577); // ╷
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerLeftCorner     ), 0x2576); // ╶
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperRightCorner    ), 0x2574); // ╴
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerRightCorner    ), 0x2575); // ╵
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperLeftCorner     ), 0x250c); // ┌
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerLeftCorner     ), 0x2514); // └
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperRightCorner    ), 0x2510); // ┐
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerRightCorner    ), 0x2518); // ┘
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::RightTee            ), 0x2518); // ┘
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LeftTee             ), 0x2514); // └
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerTee            ), 0x2514); // └
@@ -124,12 +124,12 @@ lazy_static! {
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::VerticalLine        ), 0x2577); // ╷
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LeftVerticalLine    ), 0x2577); // ╷
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::RightVerticalLine   ), 0x2575); // ╵
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::Plus                ), 0x2518); // ┘
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::Plus                ), 0x253c); // ┼
 
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperLeftCorner     ), 0x2575); // ╵
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerLeftCorner     ), 0x2574); // ╴
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperRightCorner    ), 0x2576); // ╶
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerRightCorner    ), 0x2577); // ╷
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperLeftCorner     ), 0x250c); // ┌
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerLeftCorner     ), 0x2514); // └
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperRightCorner    ), 0x2510); // ┐
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerRightCorner    ), 0x2518); // ┘
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::RightTee            ), 0x2510); // ┐
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LeftTee             ), 0x2514); // └
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerTee            ), 0x2518); // ┘
@@ -140,7 +140,8 @@ lazy_static! {
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::VerticalLine        ), 0x2575); // ╵
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LeftVerticalLine    ), 0x2575); // ╵
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::RightVerticalLine   ), 0x2577); // ╷
-        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::Plus                ), 0x2514); // └
+        graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::Plus                ), 0x253c); // ┼
+        //
 
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::DoubleDash),    BoxDrawingGraphic::UpperLeftCorner     ), 0x250c); // ┌
         graphics.insert(MatrixKey::new(BoxDrawingType::Light(BoxDrawingTypeDetail::DoubleDash),    BoxDrawingGraphic::LowerLeftCorner     ), 0x2514); // └
@@ -206,10 +207,10 @@ lazy_static! {
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::Normal),        BoxDrawingGraphic::RightVerticalLine   ), 0x2503); // ┃
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::Normal),        BoxDrawingGraphic::Plus                ), 0x254b); // ╋
 
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperLeftCorner     ), 0x257b); // ╻
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerLeftCorner     ), 0x257a); // ╺
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperRightCorner    ), 0x2578); // ╸
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerRightCorner    ), 0x2579); // ╹
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperLeftCorner     ), 0x250f); // ┏
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerLeftCorner     ), 0x2517); // ┗
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::UpperRightCorner    ), 0x2513); // ┓
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerRightCorner    ), 0x251b); // ┛
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::RightTee            ), 0x251b); // ┛
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LeftTee             ), 0x2517); // ┗
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LowerTee            ), 0x2517); // ┗
@@ -220,12 +221,12 @@ lazy_static! {
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::VerticalLine        ), 0x257b); // ╻
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::LeftVerticalLine    ), 0x257b); // ╻
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::RightVerticalLine   ), 0x2579); // ╹
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::Plus                ), 0x251b); // ┛
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::LeftDash),      BoxDrawingGraphic::Plus                ), 0x254b); // ╋
 
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperLeftCorner     ), 0x2579); // ╹
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerLeftCorner     ), 0x2578); // ╸
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperRightCorner    ), 0x257a); // ╺
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerRightCorner    ), 0x257b); // ╻
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperLeftCorner     ), 0x250f); // ┏
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerLeftCorner     ), 0x2517); // ┗
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::UpperRightCorner    ), 0x2513); // ┓
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerRightCorner    ), 0x251b); // ┛
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::RightTee            ), 0x2513); // ┓
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LeftTee             ), 0x2517); // ┗
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LowerTee            ), 0x251b); // ┛
@@ -236,7 +237,7 @@ lazy_static! {
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::VerticalLine        ), 0x2579); // ╹
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::LeftVerticalLine    ), 0x2579); // ╹
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::RightVerticalLine   ), 0x257b); // ╻
-        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::Plus                ), 0x2517); // ┗
+        graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::RightDash),     BoxDrawingGraphic::Plus                ), 0x254b); // ╋
 
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::DoubleDash),    BoxDrawingGraphic::UpperLeftCorner     ), 0x250f); // ┏
         graphics.insert(MatrixKey::new(BoxDrawingType::Heavy(BoxDrawingTypeDetail::DoubleDash),    BoxDrawingGraphic::LowerLeftCorner     ), 0x2517); // ┗
@@ -317,7 +318,14 @@ pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGra
 }
 
 /// Obtain the box drawing graphic of ComplexChar type.
-pub fn complex_box_graphic<A, P, T>(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic, attrs: &A, color_pair: &P) -> result!(ComplexChar) where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes {
+pub fn complex_box_graphic<A, P, T>(
+    box_drawing_type: BoxDrawingType,
+    graphic: BoxDrawingGraphic,
+    attrs: &A,
+    color_pair: &P
+) -> result!(ComplexChar)
+    where A: AttributesType<T>, P: ColorPairType<T>, T: ColorAttributeTypes
+{
     match ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, graphic), attrs, color_pair) {
         Err(source) => Err(NCurseswWinError::NCurseswError { source }),
         Ok(cc)      => Ok(cc)
