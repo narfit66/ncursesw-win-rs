@@ -23,20 +23,23 @@
 #![allow(deprecated)]
 #![allow(clippy::too_many_arguments)]
 
-use std::{path, time};
-use std::convert::TryFrom;
+use std::path;
+//use std::{path, time};
+//use std::convert::TryFrom;
 
 use ncursesw::{
     AttributesType, ColorPairType, ColorAttributeTypes,
-    Origin, Size, CharacterResult, AttributesColorPairSet, Region,
+    //Origin, Size, CharacterResult, AttributesColorPairSet, Region,
+    Origin, Size, AttributesColorPairSet, Region,
     Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString,
-    WideChar, WideString, WINDOW
+    //WideChar, WideString, WINDOW
+    WideString, WINDOW
 };
 use ncursesw::normal;
-use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
-use crate::Timeout;
+//use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
+//use crate::Timeout;
 use crate::ncurseswwinerror::NCurseswWinError;
-use ncursesw::NCurseswError;
+//use ncursesw::NCurseswError;
 
 /// A ripoff line window canvas.
 ///
@@ -363,12 +366,12 @@ impl RipoffWindow {
         }
     }
 
-    pub fn getch(&self) -> result!(CharacterResult<char>) {
+    /*pub fn getch(&self) -> result!(CharacterResult<char>) {
         match ncursesw::wgetch(self.handle) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(result)  => Ok(result)
         }
-    }
+    }*/
 
     pub fn getcurx(&self) -> result!(i32) {
         match ncursesw::getcurx(self.handle) {
@@ -392,13 +395,13 @@ impl RipoffWindow {
         }
     }
 
-    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_timeout() instead")]
+    /*#[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_timeout() instead")]
     pub fn getdelay(&self) -> result!(time::Duration) {
         match ncursesw::wgetdelay(self.handle) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(delay)   => Ok(delay)
         }
-    }
+    }*/
 
     pub fn getmaxx(&self) -> result!(i32) {
         match ncursesw::getmaxx(self.handle) {
@@ -422,7 +425,7 @@ impl RipoffWindow {
         }
     }
 
-    pub fn getnstr(&self, number: i32) -> result!(String) {
+    /*pub fn getnstr(&self, number: i32) -> result!(String) {
         match ncursesw::wgetnstr(self.handle, number) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
@@ -436,7 +439,7 @@ impl RipoffWindow {
         }
     }
 
-    /*/// returns the parent Window for subwindows, or None if their is no parent.
+    /// returns the parent Window for subwindows, or None if their is no parent.
     pub fn getparent(&self) -> Option<Self> {
         match ncursesw::wgetparent(self.handle) {
             None         => None,
@@ -472,7 +475,7 @@ impl RipoffWindow {
         }
     }
 
-    #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getnstr() instead")]
+    /*#[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getnstr() instead")]
     pub fn getstr(&self) -> result!(String) {
         match ncursesw::wgetstr(self.handle) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
@@ -495,7 +498,7 @@ impl RipoffWindow {
         }
     }
 
-    /*pub fn hline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
+    pub fn hline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
         ncursesw::whline(self.handle, ch, number)?;
 
         Ok(())
@@ -716,14 +719,14 @@ impl RipoffWindow {
         Ok(())
     }
 
-    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_cursor() instead")]
+    /*#[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_cursor() instead")]
     pub fn r#move(&self, origin: Origin) -> result!(()) {
         assert!(origin.y == 0);
 
         ncursesw::wmove(self.handle, origin)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, number: i32) -> result!(()) {
         assert!(origin.y == 0);
@@ -829,7 +832,7 @@ impl RipoffWindow {
         ncursesw::mvderwin(self.handle, origin)?;
 
         Ok(())
-    }*/
+    }
 
     pub fn mvgetch(&self, origin: Origin) -> result!(CharacterResult<char>) {
         assert!(origin.y == 0);
@@ -887,7 +890,7 @@ impl RipoffWindow {
         }
     }
 
-    /*pub fn mvhline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
+    pub fn mvhline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
         ncursesw::mvwhline(self.handle, origin, ch, number)?;
 
         Ok(())
@@ -1054,7 +1057,7 @@ impl RipoffWindow {
         ncursesw::mvwin(self.handle, origin)?;
 
         Ok(())
-    }*/
+    }
 
     pub fn nodelay(&self, bf: bool) -> result!(()) {
         ncursesw::nodelay(self.handle, bf)?;
@@ -1066,7 +1069,7 @@ impl RipoffWindow {
         ncursesw::notimeout(self.handle, bf)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn noutrefresh(&self) -> result!(()) {
         ncursesw::wnoutrefresh(self.handle)?;
@@ -1134,11 +1137,11 @@ impl RipoffWindow {
         Ok(())
     }
 
-    pub fn refresh(&self) -> result!(()) {
+    /*pub fn refresh(&self) -> result!(()) {
         ncursesw::wrefresh(self.handle)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn resize(&self, size: Size) -> result!(()) {
         ncursesw::wresize(self.handle, size)?;
@@ -1146,7 +1149,7 @@ impl RipoffWindow {
         Ok(())
     }
 
-    pub fn scrl(&self, n: i32) -> result!(()) {
+    /*pub fn scrl(&self, n: i32) -> result!(()) {
         ncursesw::wscrl(self.handle, n)?;
 
         Ok(())
@@ -1168,7 +1171,7 @@ impl RipoffWindow {
         ncursesw::wsetscrreg(self.handle, region)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn standend(&self) -> result!(()) {
         ncursesw::wstandend(self.handle)?;
@@ -1196,12 +1199,12 @@ impl RipoffWindow {
         ncursesw::wsyncup(self.handle);
     }
 
-    #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_timeout() instead")]
+    /*#[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_timeout() instead")]
     pub fn timeout(&self, ms: time::Duration) -> result!(()) {
         ncursesw::wtimeout(self.handle, ms)?;
 
         Ok(())
-    }
+    }*/
 
     pub fn touchline(&self, start: i32, count: i32) -> result!(()) {
         ncursesw::touchline(self.handle, start, count)?;
@@ -1274,7 +1277,7 @@ impl RipoffWindow {
         Ok(())
     }
 
-    /// get the non-blocking read timeout in milliseconds.
+    /*/// get the non-blocking read timeout in milliseconds.
     pub fn get_timeout(&self) -> result!(Timeout) {
         match ncursesw::shims::ncurses::wgetdelay(self.handle) {
             -1 => Ok(None),
@@ -1300,7 +1303,7 @@ impl RipoffWindow {
         Ok(())
     }
 
-    /*/// Draw a horizontal line at current cursor of a length using the box drawing type.
+    /// Draw a horizontal line at current cursor of a length using the box drawing type.
     ///
     /// The original attributes and color pairs are retained from characters that are overwritten.
     pub fn whline_set(&self, box_drawing_type: BoxDrawingType, length: i32) -> result!(()) {
@@ -1516,7 +1519,7 @@ impl RipoffWindow {
     }*/
 }
 
-impl RipoffWindow {
+/*impl RipoffWindow {
     pub fn enclose(&self, origin: Origin) -> bool {
         wenclose(self.handle, origin)
     }
@@ -1534,4 +1537,4 @@ impl RipoffWindow {
     nonblocking_get!(get_wch_nonblocking, get_wch, "wget_wch", WideChar);
 
     nonblocking_get_with_origin!(mvget_wch_nonblocking, mvget_wch, "mvwget_wch", WideChar);
-}
+}*/
