@@ -36,11 +36,11 @@ impl MouseButtonState {
         Self { button, event }
     }
 
-    pub fn button(&self) -> MouseButton {
+    pub fn button(self) -> MouseButton {
         self.button
     }
 
-    pub fn event(&self) -> MouseButtonEvent {
+    pub fn event(self) -> MouseButtonEvent {
         self.event
     }
 }

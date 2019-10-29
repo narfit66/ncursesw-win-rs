@@ -32,7 +32,7 @@ pub enum MouseButton {
 }
 
 impl MouseButton {
-    pub fn number(&self) -> u8 {
+    pub fn number(self) -> u8 {
         match self {
             MouseButton::One   => 1,
             MouseButton::Two   => 2,

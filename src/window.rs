@@ -22,6 +22,7 @@
 
 #![allow(deprecated)]
 #![allow(clippy::too_many_arguments)]
+#![allow(clippy::never_loop)]
 
 use std::{path, time};
 use std::convert::TryFrom;
@@ -1250,32 +1251,6 @@ impl Window {
 
         Ok(())
     }
-
-    /// get the non-blocking read timeout in milliseconds.
-    pub fn get_timeout(&self) -> result!(Timeout) {
-        match ncursesw::shims::ncurses::wgetdelay(self.handle) {
-            -1 => Ok(None),
-            rc => {
-                if rc < 0 {
-                    Err(NCurseswWinError::from(NCurseswError::NCursesFunction { func: "wgetdelay".to_string(), rc }))
-                } else {
-                    let delay = time::Duration::from_millis(u64::try_from(rc)?);
-
-                    Ok(Some(delay))
-                }
-            }
-        }
-    }
-
-    /// set the non-blocking read timeout in milliseconds, use `ms: None` to set blocking read mode.
-    pub fn set_timeout(&self, ms: Timeout) -> result!(()) {
-        match ms {
-            None     => ncursesw::shims::ncurses::wtimeout(self.handle, -1),
-            Some(ms) => ncursesw::wtimeout(self.handle, ms)?
-        }
-
-        Ok(())
-    }
 }
 
 /// Transformative box drawing.
@@ -1315,15 +1290,14 @@ impl Window {
 
             // iterate and filter wide character graphic characters of the specified box drawing type that have the same unicode value
             for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
-                // transform our selected graphic character with our default graphic character
-                box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
-
-                // if we've transformed into a plus or upper/lower tee graphic then...
-                if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::UpperTee ||
-                   box_drawing_graphic == BoxDrawingGraphic::LowerTee {
-                    // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-                    box_drawing_graphic = self.transform_by_position(box_drawing_graphic, line_origin, Direction::Horizontal)?;
-                }
+                // transform our selected graphic character with our default graphic character then...
+                // if we've transformed into a plus or left/right tee graphic then...
+                // if we are in the left or right edge of the window then change to the appropriate tee or corner character
+                box_drawing_graphic = self.transform_by_position(
+                    box_drawing_graphic.transform(key.box_drawing_graphic(), true),
+                    line_origin,
+                    Direction::Horizontal
+                )?;
 
                 break;
             }
@@ -1387,15 +1361,14 @@ impl Window {
 
             // iterate and filter wide character graphic characters of the specified box drawing type that have the same unicode value
             for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
-                // transform our selected graphic character with our default graphic character
-                box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
-
+                // transform our selected graphic character with our default graphic character then...
                 // if we've transformed into a plus or left/right tee graphic then...
-                if box_drawing_graphic == BoxDrawingGraphic::Plus || box_drawing_graphic == BoxDrawingGraphic::LeftTee ||
-                   box_drawing_graphic == BoxDrawingGraphic::RightTee {
-                    // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-                    box_drawing_graphic = self.transform_by_position(box_drawing_graphic, line_origin, Direction::Vertical)?;
-                }
+                // if we are in the left or right edge of the window then change to the appropriate tee or corner character
+                box_drawing_graphic = self.transform_by_position(
+                    box_drawing_graphic.transform(key.box_drawing_graphic(), true),
+                    line_origin,
+                    Direction::Vertical
+                )?;
 
                 break;
             }
@@ -1472,29 +1445,49 @@ impl Window {
     }
 
     // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-    fn transform_by_position(&self, box_drawing_graphic: BoxDrawingGraphic, origin: Origin, direction: Direction) -> result!(BoxDrawingGraphic) {
-        if origin.x == 0 {
-            if origin.y == 0 {
-                Ok(BoxDrawingGraphic::UpperLeftCorner)
-            } else if origin.y == self.getmaxx()? {
-                Ok(BoxDrawingGraphic::LowerLeftCorner)
-            } else {
-                Ok(match direction {
-                    Direction::Vertical   => BoxDrawingGraphic::UpperTee,
-                    Direction::Horizontal => BoxDrawingGraphic::LeftTee
-                })
+    fn transform_by_position(
+        &self,
+        box_drawing_graphic: BoxDrawingGraphic,
+        origin: Origin,
+        direction: Direction
+    ) -> result!(BoxDrawingGraphic) {
+        // can we transform our box_drawing_graphic
+        if if box_drawing_graphic == BoxDrawingGraphic::Plus {
+            true
+        } else {
+            match direction {
+                Direction::Vertical   => box_drawing_graphic == BoxDrawingGraphic::LeftTee || box_drawing_graphic == BoxDrawingGraphic::RightTee,
+                Direction::Horizontal => box_drawing_graphic == BoxDrawingGraphic::UpperTee || box_drawing_graphic == BoxDrawingGraphic::LowerTee
             }
-        } else if origin.y == self.getmaxy()? {
-            if origin.x == 0 {
-                Ok(BoxDrawingGraphic::UpperRightCorner)
-            } else if origin.x == self.getmaxx()? {
-                Ok(BoxDrawingGraphic::LowerRightCorner)
+        } {
+            let max_y = self.getmaxy()?;
+            let max_x = self.getmaxx()?;
+
+            Ok(if origin.x == 0 && origin.y != max_y {
+                if origin.y == 0 {
+                    BoxDrawingGraphic::UpperLeftCorner
+                } else if origin.y == max_y {
+                    BoxDrawingGraphic::LowerLeftCorner
+                } else {
+                    match direction {
+                        Direction::Vertical   => BoxDrawingGraphic::UpperTee,
+                        Direction::Horizontal => BoxDrawingGraphic::LeftTee
+                    }
+                }
+            } else if origin.y == max_y {
+                if origin.x == 0 {
+                    BoxDrawingGraphic::UpperRightCorner
+                } else if origin.x == max_x {
+                    BoxDrawingGraphic::LowerRightCorner
+                } else {
+                    match direction {
+                        Direction::Vertical   => BoxDrawingGraphic::LowerTee,
+                        Direction::Horizontal => BoxDrawingGraphic::RightTee
+                    }
+                }
             } else {
-                Ok(match direction {
-                    Direction::Vertical   => BoxDrawingGraphic::LowerTee,
-                    Direction::Horizontal => BoxDrawingGraphic::RightTee
-                })
-            }
+                box_drawing_graphic
+            })
         } else {
             Ok(box_drawing_graphic)
         }
@@ -1512,12 +1505,35 @@ impl Window {
 }
 
 impl Window {
+    /// get the non-blocking read timeout in milliseconds.
+    pub fn get_timeout(&self) -> result!(Timeout) {
+        match ncursesw::shims::ncurses::wgetdelay(self.handle) {
+            -1 => Ok(None),
+            rc => {
+                if rc < 0 {
+                    Err(NCurseswWinError::from(NCurseswError::NCursesFunction { func: "wgetdelay".to_string(), rc }))
+                } else {
+                    let delay = time::Duration::from_millis(u64::try_from(rc)?);
+
+                    Ok(Some(delay))
+                }
+            }
+        }
+    }
+
+    /// set the non-blocking read timeout in milliseconds, use `ms: None` to set blocking read mode.
+    pub fn set_timeout(&self, ms: Timeout) -> result!(()) {
+        match ms {
+            None     => ncursesw::shims::ncurses::wtimeout(self.handle, -1),
+            Some(ms) => ncursesw::wtimeout(self.handle, ms)?
+        }
+
+        Ok(())
+    }
+
     nonblocking_get!(getch_nonblocking, getch, "wgetch", char);
-
-    nonblocking_get_with_origin!(mvgetch_nonblocking, mvgetch, "mvwgetch", char);
-
     nonblocking_get!(get_wch_nonblocking, get_wch, "wget_wch", WideChar);
-
+    nonblocking_get_with_origin!(mvgetch_nonblocking, mvgetch, "mvwgetch", char);
     nonblocking_get_with_origin!(mvget_wch_nonblocking, mvget_wch, "mvwget_wch", WideChar);
 }
 

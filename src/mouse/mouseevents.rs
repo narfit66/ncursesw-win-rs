@@ -40,7 +40,7 @@ macro_rules! pub_getter {
 
 macro_rules! private_method {
     ($name: ident, $attr: ident) => {
-        fn $name(&self) -> bool {
+        fn $name(self) -> bool {
             let event_mask: mmask_t = MouseEvent::$attr.into();
 
             (self.mask & event_mask) > 0
@@ -58,7 +58,7 @@ impl MouseEvents {
         Self { mask }
     }
 
-    pub fn button_state(&self) -> Option<MouseButtonState> {
+    pub fn button_state(self) -> Option<MouseButtonState> {
         for button in MouseButton::iter() {
             for event in MouseButtonEvent::iter() {
                 let state = MouseButtonState::new(button, event);
@@ -72,7 +72,7 @@ impl MouseEvents {
         None
     }
 
-    pub fn is_button_state(&self, state: MouseButtonState) -> bool {
+    pub fn is_button_state(self, state: MouseButtonState) -> bool {
         match state.event() {
             MouseButtonEvent::Released      => self.released(state.button()),
             MouseButtonEvent::Pressed       => self.pressed(state.button()),
@@ -86,7 +86,7 @@ impl MouseEvents {
     pub_getter!(shift_button, ButtonShift);
     pub_getter!(alt_button, ButtonAlt);
 
-    fn released(&self, button: MouseButton) -> bool {
+    fn released(self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_released(),
             MouseButton::Two   => self.button_2_released(),
@@ -96,7 +96,7 @@ impl MouseEvents {
         }
     }
 
-    fn pressed(&self, button: MouseButton) -> bool {
+    fn pressed(self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_pressed(),
             MouseButton::Two   => self.button_2_pressed(),
@@ -106,7 +106,7 @@ impl MouseEvents {
         }
     }
 
-    fn clicked(&self, button: MouseButton) -> bool {
+    fn clicked(self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_clicked(),
             MouseButton::Two   => self.button_2_clicked(),
@@ -116,7 +116,7 @@ impl MouseEvents {
         }
     }
 
-    fn double_clicked(&self, button: MouseButton) -> bool {
+    fn double_clicked(self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_double_clicked(),
             MouseButton::Two   => self.button_2_double_clicked(),
@@ -126,7 +126,7 @@ impl MouseEvents {
         }
     }
 
-    fn triple_clicked(&self, button: MouseButton) -> bool {
+    fn triple_clicked(self, button: MouseButton) -> bool {
         match button {
             MouseButton::One   => self.button_1_triple_clicked(),
             MouseButton::Two   => self.button_2_triple_clicked(),

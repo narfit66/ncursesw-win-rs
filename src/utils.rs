@@ -29,11 +29,6 @@ use crate::{
     ColorsType, ColorType, ColorAttributeTypes, LcCategory, SoftLabelType
 };
 
-lazy_static! {
-    static ref START_COLOR_ALREADY_CALLED: &'static str = "ncursesw::start_color() has already been called!";
-    static ref START_COLOR_NOT_CALLED: &'static str = "ncursesw::start_color() has not been called!";
-}
-
 /// Set the locale to be used, required if using unicode representation.
 pub fn setlocale(lc: LcCategory, locale: &str) -> result!(String) {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
@@ -65,14 +60,12 @@ pub fn set_input_mode(mode: InputMode) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        let rc = match mode {
+        match match mode {
             InputMode::Character    => ncursesw::cbreak(),
             InputMode::Cooked       => ncursesw::nocbreak(),
             InputMode::RawCharacter => ncursesw::raw(),
             InputMode::RawCooked    => ncursesw::noraw()
-        };
-
-        match rc {
+        } {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(_)       => Ok(())
         }
@@ -88,13 +81,11 @@ pub fn set_echo(echoing: bool) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        let rc = if echoing {
+        match if echoing {
             ncursesw::echo()
         } else {
             ncursesw::noecho()
-        };
-
-        match rc {
+        } {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(_)       => Ok(())
         }
@@ -112,13 +103,11 @@ pub fn set_newline(newline: bool) -> result!(()) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        let rc = if newline {
+        match if newline {
             ncursesw::nl()
         } else {
             ncursesw::nonl()
-        };
-
-        match rc {
+        } {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(_)       => Ok(())
         }

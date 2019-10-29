@@ -21,9 +21,14 @@
 */
 
 extern crate ncurseswwin;
+extern crate rand;
+
+use std::time;
 
 use ncurseswwin::*;
 use ncurseswwin::normal::*;
+
+use rand::prelude::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
@@ -76,8 +81,11 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
 
     let window_size = initial_window.size()?;
 
-    let origin = Origin { y: 1, x: 1 };
-    let size = Size { lines: 20, columns: 20 };
+    let display_origin = Origin { y: 3, x: 40 };
+    let corner_box_size = Size { lines: 10, columns: 10 };
+
+    // make a handle to the thread-local generator.
+    let mut rng = thread_rng();
 
     // define all the default box drawing types.
     let box_drawing_types: [BoxDrawingType; 14] = [BoxDrawingType::Ascii,
@@ -109,22 +117,36 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
         // create a border on the inital window (stdscr).
         initial_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
 
-        initial_window.mvtbox_set(origin, size, box_drawing_type)?;
-        initial_window.mvtbox_set(Origin { y: 5, x: 5 }, size, box_drawing_type)?;
-        initial_window.mvtbox_set(Origin { y: 2, x: 0 }, size, box_drawing_type)?;
-        initial_window.mvtbox_set(Origin { y: 10, x: 10 }, size, box_drawing_type)?;
-        initial_window.mvtbox_set(Origin { y: 0, x: 10 }, size, box_drawing_type)?;
+        // top-left corner box
+        initial_window.mvtbox_set(Origin { y: 0, x: 0 }, corner_box_size, box_drawing_type)?;
+        // top-right corner box
+        initial_window.mvtbox_set(Origin { y: 0, x: window_size.columns - corner_box_size.columns }, corner_box_size, box_drawing_type)?;
+        // bottom-left corner box
+        initial_window.mvtbox_set(Origin { y: window_size.lines - corner_box_size.lines, x: 0 }, corner_box_size, box_drawing_type)?;
+        // bottom-right corner box
+        initial_window.mvtbox_set(Origin { y: window_size.lines - corner_box_size.lines, x: window_size.columns - corner_box_size.columns }, corner_box_size, box_drawing_type)?;
 
-        initial_window.mvtbox_set(Origin { y: window_size.lines - size.lines, x: window_size.columns - size.columns }, size, box_drawing_type)?;
+        // generate 20 random sized box's and add them with a random origin.
+        for _ in 0..20 {
+            let lines = rng.gen_range(10, window_size.lines - 10);
+            let columns = rng.gen_range(10, window_size.columns - 10);
+
+            let box_size = Size { lines, columns };
+
+            let y = rng.gen_range(0, window_size.lines - box_size.lines);
+            let x = rng.gen_range(0, window_size.columns - box_size.columns);
+
+            initial_window.mvtbox_set(Origin { y, x }, box_size, box_drawing_type)?;
+        }
 
         // add the type of box drawing type on the sub window.
-        inner_window.set_cursor(Origin { y: 3, x: 40 })?;
-        inner_window.clrtoeol()?;
-        inner_window.mvaddstr(Origin { y: 3, x: 40 }, &format!("box drawing type {:?}", box_drawing_type))?;
+        inner_window.mvaddstr(display_origin, &format!("box drawing type {:?}", box_drawing_type))?;
 
-        initial_window.refresh()?;
+        // press a key or wait for 5 seconds
+        initial_window.getch_nonblocking(Some(time::Duration::new(5, 0)))?;
 
-        initial_window.getch()?;
+        // clear the window
+        initial_window.clear()?;
     }
 
     Ok(())

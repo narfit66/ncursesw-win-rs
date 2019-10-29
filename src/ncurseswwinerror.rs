@@ -37,11 +37,7 @@ pub NCurseswWinError
 impl PartialEq for NCurseswWinError {
     fn eq(&self, rhs: &Self) -> bool {
         // TODO: must be a better way of doing this!!!
-        if format!("{}", self) == format!("{}", rhs) {
-            true
-        } else {
-            false
-        }
+        format!("{}", self) == format!("{}", rhs)
     }
 }
 
