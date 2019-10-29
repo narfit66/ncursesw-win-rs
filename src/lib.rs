@@ -66,7 +66,7 @@ pub use ncursesw::{
 pub use ncursesw::{
     AttributesColorPairType, AttributesGeneric, AttributesType,
     ColorAttributeTypes, ColorPairColors, ColorPairType, ColorType,
-    ColorsType, RawWithNul
+    ColorsType
 };
 pub use ncursesw::{
     COLORS, COLOR_PAIRS, COLS, ESCDELAY, LINES, TABSIZE, baudrate,
