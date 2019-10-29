@@ -1,5 +1,5 @@
 /*
-    src/graphics/mod.rs
+    src/graphics/horizontalgraphic.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,16 +20,16 @@
     IN THE SOFTWARE.
 */
 
-mod boxdrawing;
-mod boxdrawinggraphic;
-mod boxdrawingtypedetail;
-mod boxdrawingtype;
-mod horizontalgraphic;
-mod verticalgraphic;
+/// Horizontal box drawing graphic type.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum HorizontalGraphic {
+    Upper,
+    Center,
+    Lower
+}
 
-pub use crate::graphics::boxdrawing::*;
-pub use crate::graphics::boxdrawinggraphic::*;
-pub use crate::graphics::boxdrawingtypedetail::*;
-pub use crate::graphics::boxdrawingtype::*;
-pub use crate::graphics::horizontalgraphic::*;
-pub use crate::graphics::verticalgraphic::*;
+impl Default for HorizontalGraphic {
+    fn default() -> Self {
+        HorizontalGraphic::Center
+    }
+}
