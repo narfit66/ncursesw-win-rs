@@ -44,6 +44,9 @@ use crate::Timeout;
 use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::NCurseswError;
 
+// constant to control remaping during BoxDrawingGraphic.transform()
+const BOX_DRAWING_GRAPHIC_REMAP: bool = true;
+
 /// A moveable window canvas.
 ///
 /// All methods are either there original ncurses name or were specificlly passed a pointer
@@ -1292,9 +1295,9 @@ impl Window {
             for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
                 // transform our selected graphic character with our default graphic character then...
                 // if we've transformed into a plus or left/right tee graphic then...
-                // if we are in the left or right edge of the window then change to the appropriate tee or corner character
+                // if we are in the upper or lower edge of the window then change to the appropriate tee or corner character
                 box_drawing_graphic = self.transform_by_position(
-                    box_drawing_graphic.transform(key.box_drawing_graphic(), true),
+                    box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP),
                     line_origin,
                     Direction::Horizontal
                 )?;
@@ -1365,7 +1368,7 @@ impl Window {
                 // if we've transformed into a plus or left/right tee graphic then...
                 // if we are in the left or right edge of the window then change to the appropriate tee or corner character
                 box_drawing_graphic = self.transform_by_position(
-                    box_drawing_graphic.transform(key.box_drawing_graphic(), true),
+                    box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP),
                     line_origin,
                     Direction::Vertical
                 )?;
@@ -1406,7 +1409,7 @@ impl Window {
             let mut box_drawing_graphic = graphic;
 
             for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == WideChar::into(char_attr_pair.character())) {
-                box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), true);
+                box_drawing_graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP);
 
                 break;
             }
