@@ -131,28 +131,30 @@ impl TryFrom<u16> for BoxDrawingGraphic {
 }
 
 impl BoxDrawingGraphic {
-    pub fn transform(self, rhs: Self, remap: bool) -> Self {
-        let into_value = |raw: Self| -> u16 {
-            Self::into(match raw {
+    pub(in crate) fn transform(self, rhs: Self, remap: bool) -> Self {
+        let into_value = |box_drawing_graphic: Self| -> u16 {
+            Self::into(match box_drawing_graphic {
                 BoxDrawingGraphic::UpperHorizontalLine |
                 BoxDrawingGraphic::LowerHorizontalLine => if remap {
                     BoxDrawingGraphic::HorizontalLine
                 } else {
-                    raw
+                    box_drawing_graphic
                 },
                 BoxDrawingGraphic::LeftVerticalLine |
                 BoxDrawingGraphic::RightVerticalLine   => if remap {
                     BoxDrawingGraphic::VerticalLine
                 } else {
-                    raw
+                    box_drawing_graphic
                 },
-                _ => raw
+                _                                      => {
+                    box_drawing_graphic
+                }
             })
         };
 
         match Self::try_from(into_value(self) | into_value(rhs)) {
-            Err(_) => self,
-            Ok(g)  => g
+            Err(_)                  => self,
+            Ok(box_drawing_graphic) => box_drawing_graphic
         }
     }
 }
