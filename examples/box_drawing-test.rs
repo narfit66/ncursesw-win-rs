@@ -109,13 +109,13 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
         // create a border on the inital window (stdscr).
         initial_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
 
-        initial_window.mvwbox_set(origin, size, box_drawing_type)?;
-        initial_window.mvwbox_set(Origin { y: 5, x: 5 }, size, box_drawing_type)?;
-        initial_window.mvwbox_set(Origin { y: 2, x: 0 }, size, box_drawing_type)?;
-        initial_window.mvwbox_set(Origin { y: 10, x: 10 }, size, box_drawing_type)?;
-        initial_window.mvwbox_set(Origin { y: 0, x: 10 }, size, box_drawing_type)?;
+        initial_window.mvtbox_set(origin, size, box_drawing_type)?;
+        initial_window.mvtbox_set(Origin { y: 5, x: 5 }, size, box_drawing_type)?;
+        initial_window.mvtbox_set(Origin { y: 2, x: 0 }, size, box_drawing_type)?;
+        initial_window.mvtbox_set(Origin { y: 10, x: 10 }, size, box_drawing_type)?;
+        initial_window.mvtbox_set(Origin { y: 0, x: 10 }, size, box_drawing_type)?;
 
-        initial_window.mvwbox_set(Origin { y: window_size.lines - size.lines, x: window_size.columns - size.columns }, size, box_drawing_type)?;
+        initial_window.mvtbox_set(Origin { y: window_size.lines - size.lines, x: window_size.columns - size.columns }, size, box_drawing_type)?;
 
         // add the type of box drawing type on the sub window.
         inner_window.set_cursor(Origin { y: 3, x: 40 })?;
