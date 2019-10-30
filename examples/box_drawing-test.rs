@@ -54,32 +54,23 @@ fn main_routine() -> result!(()) {
     Ok(())
 }
 
-fn box_drawing_test(initial_window: &Window) -> result!(()) {
+fn box_drawing_test(window: &Window) -> result!(()) {
     curs_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     start_color()?;
     use_default_colors()?;
 
-    let fg_color = Color::Light(BaseColor::Yellow);
-    let bg_color = Color::Dark(BaseColor::Blue);
+    let light_yellow = Color::Light(BaseColor::Yellow);
+    let dark_blue = Color::Dark(BaseColor::Blue);
+    let dark_red = Color::Dark(BaseColor::Red);
+    let dark_green = Color::Dark(BaseColor::Green);
 
-    let color_pair = ColorPair::new(1, Colors::new(fg_color, bg_color))?;
-
-    //initial_window.color_set(color_pair1)?;
-    // get the size of the initial window (stdscr).
-    let initial_size = initial_window.size()?;
-
-    // workout the size of a inner window have a 1 character spacing all the way around.
-    let inner_size = Size { lines: initial_size.lines - 2, columns: initial_size.columns - 2 };
-    let inner_origin = Origin { y: 1, x: 1 };
-
-    // create our sub window with the inital window.
-    let inner_window = initial_window.subwin(inner_size, inner_origin)?;
-
+    let border_color_pair = ColorPair::new(1, Colors::new(light_yellow, dark_blue))?;
+    let display_color_pair = ColorPair::new(2, Colors::new(dark_red, dark_green))?;
     let attrs = Attributes::default();
 
-    let window_size = initial_window.size()?;
+    let window_size = window.size()?;
 
     let display_origin = Origin { y: 3, x: 40 };
     let corner_box_size = Size { lines: 10, columns: 10 };
@@ -105,26 +96,26 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
 
     // iterate over the box drawing types.
     for &box_drawing_type in &box_drawing_types {
-        let ls = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LeftVerticalLine, &attrs, &color_pair)?;
-        let rs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::RightVerticalLine, &attrs, &color_pair)?;
-        let ts = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperHorizontalLine, &attrs, &color_pair)?;
-        let bs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerHorizontalLine, &attrs, &color_pair)?;
-        let ul = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &color_pair)?;
-        let ur = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &color_pair)?;
-        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair)?;
-        let lr = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair)?;
+        let ls = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LeftVerticalLine, &attrs, &border_color_pair)?;
+        let rs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::RightVerticalLine, &attrs, &border_color_pair)?;
+        let ts = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperHorizontalLine, &attrs, &border_color_pair)?;
+        let bs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerHorizontalLine, &attrs, &border_color_pair)?;
+        let ul = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &border_color_pair)?;
+        let ur = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &border_color_pair)?;
+        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &border_color_pair)?;
+        let lr = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &border_color_pair)?;
 
         // create a border on the inital window (stdscr).
-        initial_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
+        window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
 
         // top-left corner box
-        initial_window.mvtbox_set(Origin { y: 0, x: 0 }, corner_box_size, box_drawing_type)?;
+        window.mvtbox_set(Origin { y: 0, x: 0 }, corner_box_size, box_drawing_type)?;
         // top-right corner box
-        initial_window.mvtbox_set(Origin { y: 0, x: window_size.columns - corner_box_size.columns }, corner_box_size, box_drawing_type)?;
+        window.mvtbox_set(Origin { y: 0, x: window_size.columns - corner_box_size.columns }, corner_box_size, box_drawing_type)?;
         // bottom-left corner box
-        initial_window.mvtbox_set(Origin { y: window_size.lines - corner_box_size.lines, x: 0 }, corner_box_size, box_drawing_type)?;
+        window.mvtbox_set(Origin { y: window_size.lines - corner_box_size.lines, x: 0 }, corner_box_size, box_drawing_type)?;
         // bottom-right corner box
-        initial_window.mvtbox_set(Origin { y: window_size.lines - corner_box_size.lines, x: window_size.columns - corner_box_size.columns }, corner_box_size, box_drawing_type)?;
+        window.mvtbox_set(Origin { y: window_size.lines - corner_box_size.lines, x: window_size.columns - corner_box_size.columns }, corner_box_size, box_drawing_type)?;
 
         // generate 20 random sized box's and add them with a random origin.
         for _ in 0..20 {
@@ -136,17 +127,18 @@ fn box_drawing_test(initial_window: &Window) -> result!(()) {
             let y = rng.gen_range(0, window_size.lines - box_size.lines);
             let x = rng.gen_range(0, window_size.columns - box_size.columns);
 
-            initial_window.mvtbox_set(Origin { y, x }, box_size, box_drawing_type)?;
+            window.mvtbox_set(Origin { y, x }, box_size, box_drawing_type)?;
         }
 
-        // add the type of box drawing type on the sub window.
-        inner_window.mvaddstr(display_origin, &format!("box drawing type {:?}", box_drawing_type))?;
+        // add the type of box drawing type on the window.
+        let display_str = &format!("box drawing type {:?}", box_drawing_type);
+        window.mvadd_wchstr(display_origin, &ComplexString::from_str(display_str, &attrs, &display_color_pair)?)?;
 
         // press a key or wait for 5 seconds
-        initial_window.getch_nonblocking(Some(time::Duration::new(5, 0)))?;
+        window.getch_nonblocking(Some(time::Duration::new(5, 0)))?;
 
         // clear the window
-        initial_window.clear()?;
+        window.clear()?;
     }
 
     Ok(())
