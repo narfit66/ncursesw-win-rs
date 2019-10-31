@@ -29,7 +29,7 @@ use std::time;
 use std::collections::HashMap;
 
 use ncurseswwin::*;
-use ncurseswwin::extend::*;
+use ncurseswwin::normal::*;
 
 use rand::prelude::*;
 use strum_macros::{Display, EnumIter};
