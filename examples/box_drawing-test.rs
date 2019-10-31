@@ -168,6 +168,15 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         //  initial match).
         match window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
             Err(err)  => return Err(err),
+            #[cfg(feature = "key_resize_as_error")]
+            Ok(value) => {
+                if let Some(CharacterResult::Character(ch)) = value {
+                    if ch == 'q' || ch == 'Q' {
+                        break;
+                    }
+                }
+            }
+            #[cfg(not(feature = "key_resize_as_error"))]
             Ok(value) => {
                 if let Some(char_result) = value {
                     match char_result {

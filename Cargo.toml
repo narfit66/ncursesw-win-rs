@@ -26,14 +26,6 @@ rand = "0.7"
 ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
 #ncursesw = { path = "../ncursesw-rs" }
 
-[features]
-# conditional compulation of KEY_RESIZE to return as a NCurseswError::KeyResize for getch(), mvgetch(),
-# mvwgetch(), wgetch(), get_wch(), mvget_wch(), mvwget_wch() and wget_ch().
-key_resize_as_error = []
-# conditional compulation of KEY_EVENT to return as a NCurseswError::KeyEvent for getch(), mvgetch(),
-# mvwgetch(), wgetch(), get_wch(), mvget_wch(), mvwget_wch() and wget_ch().
-key_event_as_error = []
-
 [lib]
 name = "ncurseswwin"
 
