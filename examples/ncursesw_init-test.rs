@@ -20,8 +20,6 @@
     IN THE SOFTWARE.
 */
 
-#![allow(deprecated)]
-
 extern crate ascii;
 extern crate ncurseswwin;
 
