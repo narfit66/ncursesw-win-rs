@@ -28,10 +28,15 @@ macro_rules! character_result { ($t: ty) => { Option<CharacterResult<$t>> } }
 macro_rules! nonblocking_get {
     ($fname: ident, $func: ident, $str: expr, $result: ty) => {
         pub fn $fname(&self, timeout: Timeout) -> result!(character_result!($result)) {
+            // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 
+            // set the timeout to what has been specified.
             self.set_timeout(timeout)?;
 
+            // call $func, if it returned Err and the error is a timeout error
+            // then return Ok(None) otherwise return the error.
+            // if $func returned Ok then return Ok(Some(result))
             let result = match self.$func() {
                 Err(source) => {
                     if source == crate::timeout_error(&$str) {
@@ -43,7 +48,11 @@ macro_rules! nonblocking_get {
                 Ok(result) => Ok(Some(result))
             };
 
-            self.set_timeout(orig_timeout)?;
+            // if we didn't error above then set the timeout back to what it
+            // originally was.
+            if let Ok(_) = result {
+                self.set_timeout(orig_timeout)?
+            }
 
             result
         }
@@ -53,10 +62,15 @@ macro_rules! nonblocking_get {
 macro_rules! nonblocking_get_with_origin {
     ($fname: ident, $func: ident, $str: expr, $result: ident) => {
         pub fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(character_result!($result)) {
+            // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 
+            // set the timeout to what has been specified.
             self.set_timeout(timeout)?;
 
+            // call $func, if it returned Err and the error is a timeout error
+            // then return Ok(None) otherwise return the error.
+            // if $func returned Ok then return Ok(Some(result))
             let result = match self.$func(origin) {
                 Err(source) => {
                     if source == crate::timeout_error(&$str) {
@@ -68,7 +82,11 @@ macro_rules! nonblocking_get_with_origin {
                 Ok(result) => Ok(Some(result))
             };
 
-            self.set_timeout(orig_timeout)?;
+            // if we didn't error above then set the timeout back to what it
+            // originally was.
+            if let Ok(_) = result {
+                self.set_timeout(orig_timeout)?
+            }
 
             result
         }
