@@ -25,8 +25,8 @@ use std::sync::atomic::Ordering;
 use crate::inputmode::InputMode;
 use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED};
 use crate::ncurseswwinerror::NCurseswWinError;
-use crate::{
-    ColorsType, ColorType, ColorAttributeTypes, LcCategory, SoftLabelType
+use ncursesw::{
+    ColorsType, ColorType, ColorAttributeTypes, CursorType, LcCategory, SoftLabelType
 };
 
 /// Set the locale to be used, required if using unicode representation.
@@ -173,5 +173,16 @@ pub fn slk_init(fmt: SoftLabelType) -> result!(()) {
         ncursesw::slk_init(fmt)?;
 
         Ok(())
+    }
+}
+
+/// Set the cursor type.
+pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        let old_cursor = ncursesw::curs_set(cursor)?;
+
+        Ok(old_cursor)
     }
 }
