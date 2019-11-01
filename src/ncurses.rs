@@ -20,8 +20,6 @@
     IN THE SOFTWARE.
 */
 
-#![allow(deprecated)]
-
 use std::panic::{UnwindSafe, catch_unwind};
 use std::sync::atomic::{AtomicBool, Ordering};
 
