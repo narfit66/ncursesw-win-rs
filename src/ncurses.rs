@@ -34,7 +34,7 @@ lazy_static! {
 }
 
 /// NCurses context.
-pub struct NCurses {
+struct NCurses {
     handle: WINDOW
 }
 
