@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(deprecated)]
+
 extern crate ascii;
 extern crate ncurseswwin;
 
@@ -28,23 +30,21 @@ use ncurseswwin::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
+// run ncursesw_init_test(), the error returned by ncursesw_init_test_fail()
+// will be caught as an error.
 fn main() {
     // We wrap all our use of ncurseswin with this function.
-    ncursesw_init(|ncurses| {
-        // In here we get an initialized NCurses window(stdscr) and then proceed
-        // to use it exactly like we normally would use it.
-        panic!(match ncursesw_init_test(&ncurses.initial_window()) {
-            Err(e) => e.to_string(),
-            Ok(_)  => "this is the end my friend, the only end!!!".to_string()
-        })
-    }).unwrap_or_else(|e| match e {
-        // This block only runs if there was an error. We might or might not
-        // have been able to recover an error message. You technically can pass
-        // any value into a panic, but we only get an error message if the panic
-        // value was a `String` or `&str`.
-        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
-        None         => println!("There was an error, but no error message."),
-    });
+    match ncursesw_init(|window| {
+        ncursesw_init_test(&window)
+    }) {
+        Err(e) => {
+            match e {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                error                               => eprintln!("error: {}", error)
+            }
+        },
+        _      => ()
+    }
 }
 
 fn ncursesw_init_test(initial_window: &Window) -> result!(()) {
@@ -73,7 +73,7 @@ fn ncursesw_init_test_pass(window: &Window) -> result!(()) {
     Ok(())
 }
 
-// the following will cause an NCurseswError to be returned!!!
+// this will cause an NCurseswError to be returned!!!
 fn ncursesw_init_test_fail(window: &Window) -> result!(()) {
     window.mvaddch(Origin { y: LINES() + 1, x: COLS() + 1 }, ChtypeChar::new(AsciiChar::Asterisk))?;
 

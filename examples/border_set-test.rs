@@ -29,24 +29,14 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     if let Err(e) = main_routine() {
-        println!("error: {}", e);
+        println!("{}", e);
     }
 }
 
 fn main_routine() -> result!(()) {
     setlocale(LcCategory::All, "")?;
 
-    ncursesw_init(|ncurses| {
-        // initialize ncurses in a safe way.
-        if let Err(e) = border_set_test(&ncurses.initial_window()) {
-            panic!(e.to_string());
-        }
-    }).unwrap_or_else(|e| match e {
-        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
-        None         => println!("There was an error, but no error message."),
-    });
-
-    Ok(())
+    ncursesw_init(|window| { border_set_test(&window) })?
 }
 
 fn border_set_test(initial_window: &Window) -> result!(()) {
