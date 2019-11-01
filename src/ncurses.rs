@@ -77,8 +77,8 @@ impl Drop for NCurses {
 /// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
 pub fn ncursesw_init<F: FnOnce(&Window) -> T + UnwindSafe, T>(user_function: F) -> result!(T) {
     fn _init_ncurses<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(func: F) -> Result<R, Option<String>> {
-        let result = catch_unwind(|| {
-            let ncurses = match NCurses::initscr() {
+        catch_unwind(|| {
+            func(match &NCurses::initscr() {
                 Err(source)  => {
                     panic!(match source {
                         NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
@@ -86,12 +86,8 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> T + UnwindSafe, T>(user_function: F) 
                     })
                 },
                 Ok(ptr) => ptr
-            };
-
-            func(&ncurses)
-        });
-
-        result.map_err(|e| match e.downcast_ref::<&str>() {
+            })
+        }).map_err(|e| match e.downcast_ref::<&str>() {
             Some(andstr) => Some(andstr.to_string()),
             None         => match e.downcast_ref::<String>() {
                 Some(string) => Some(string.to_string()),
