@@ -29,13 +29,12 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     // We wrap all our use of ncurseswin with this function.
-    ncursesw_init(|ncurses| {
-        // In here we get an initialized NCurses window(stdscr) and then proceed
+    ncursesw_init(|window| {
+        // In here we get an initialized Window structure (stdscr) and then proceed
         // to use it exactly like we normally would use it.
-        panic!(match ncursesw_init_test(&ncurses.initial_window()) {
-            Err(e) => e.to_string(),
-            Ok(_)  => "this is the end my friend, the only end!!!".to_string()
-        })
+        if let Err(e) = ncursesw_init_test(&window) {
+            panic!(e.to_string());
+        }
     }).unwrap_or_else(|e| match e {
         // This block only runs if there was an error. We might or might not
         // have been able to recover an error message. You technically can pass
@@ -51,6 +50,7 @@ fn ncursesw_init_test(initial_window: &Window) -> result!(()) {
     set_echo(false)?;
 
     ncursesw_init_test_pass(initial_window)?;
+    ncursesw_init_test_panic(initial_window)?;
     ncursesw_init_test_fail(initial_window)?;
 
     Ok(())
@@ -70,6 +70,10 @@ fn ncursesw_init_test_pass(window: &Window) -> result!(()) {
     window.getch()?;
 
     Ok(())
+}
+
+fn ncursesw_init_test_panic(_window: &Window) -> result!(()) {
+    panic!("ncursesw_init_test_panic() paniced!")
 }
 
 // the following will cause an NCurseswError to be returned!!!

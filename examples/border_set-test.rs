@@ -36,9 +36,9 @@ fn main() {
 fn main_routine() -> result!(()) {
     setlocale(LcCategory::All, "")?;
 
-    ncursesw_init(|ncurses| {
-        // initialize ncurses in a safe way.
-        if let Err(e) = border_set_test(&ncurses.initial_window()) {
+    // initialize ncurses in a safe way.
+    ncursesw_init(|window| {
+        if let Err(e) = border_set_test(&window) {
             panic!(e.to_string());
         }
     }).unwrap_or_else(|e| match e {

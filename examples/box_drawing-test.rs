@@ -54,11 +54,11 @@ fn main() {
 fn main_routine() -> result!(()) {
     setlocale(LcCategory::All, "")?;
 
-    ncursesw_init(|ncurses| {
-        panic!(match box_drawing_test(&ncurses.initial_window()) {
-            Err(e) => e.to_string(),
-            _      => "this is the end my friend, the only end!!!".to_string()
-        })
+    // initialize ncurses in a safe way.
+    ncursesw_init(|window| {
+        if let Err(e) = box_drawing_test(&window) {
+            panic!(e.to_string());
+        }
     }).unwrap_or_else(|e| match e {
         Some(errmsg) => eprintln!("{}", errmsg),
         None         => eprintln!("There was an error, but no error message."),

@@ -40,8 +40,9 @@ fn main_routine() -> result!(()) {
 
     assert!(top_ripoff != bottom_ripoff);
 
-    ncursesw_init(|ncurses| {
-        if let Err(e) = ripoff_line_test(&ncurses.initial_window(), &top_ripoff, &bottom_ripoff) {
+    // initialize ncurses in a safe way.
+    ncursesw_init(|window| {
+        if let Err(e) = ripoff_line_test(&window, &top_ripoff, &bottom_ripoff) {
             panic!(e.to_string())
         }
     }).unwrap_or_else(|e| match e {

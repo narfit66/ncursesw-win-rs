@@ -34,14 +34,14 @@ lazy_static! {
 }
 
 /// NCurses context.
-pub struct NCurses {
+struct NCurses {
     handle: WINDOW
 }
 
 /// NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
     /// Initialise ncurses.
-    pub fn initscr() -> result!(Self) {
+    fn initscr() -> result!(Self) {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
 
             let handle = ncursesw::initscr()?;
@@ -56,7 +56,7 @@ impl NCurses {
     }
 
     /// Returns the initial window(stdscr) after initialisation.
-    pub fn initial_window(&self) -> Window {
+    fn initial_window(&self) -> Window {
         Window::from(self.handle, true)
     }
 }
@@ -75,8 +75,8 @@ impl Drop for NCurses {
 }
 
 /// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
-pub fn ncursesw_init<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
-    let result = catch_unwind(|| {
+pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
+    catch_unwind(|| {
         let ncurses = match NCurses::initscr() {
             Err(e)  => {
                 panic!(match e {
@@ -87,10 +87,8 @@ pub fn ncursesw_init<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(user_function: F)
             Ok(ptr) => ptr
         };
 
-        user_function(&ncurses)
-    });
-
-    result.map_err(|e| match e.downcast_ref::<&str>() {
+        user_function(&ncurses.initial_window())
+    }).map_err(|e| match e.downcast_ref::<&str>() {
         Some(andstr) => Some(andstr.to_string()),
         None         => match e.downcast_ref::<String>() {
             Some(string) => Some(string.to_string()),
