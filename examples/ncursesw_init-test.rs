@@ -47,7 +47,7 @@ fn main() {
 }
 
 fn ncursesw_init_test(initial_window: &Window) -> result!(()) {
-    cursor_set(CursorType::Invisible)?;
+    curs_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     ncursesw_init_test_pass(initial_window)?;

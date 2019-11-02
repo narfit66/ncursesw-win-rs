@@ -48,7 +48,7 @@ fn main_routine() -> result!(()) {
 
 fn border_test(initial_window: &Window) -> result!(()) {
     // set the cursor to invisible and switch echoing off.
-    cursor_set(CursorType::Invisible)?;
+    curs_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     // extract the box drawing characters for the box drawing type.

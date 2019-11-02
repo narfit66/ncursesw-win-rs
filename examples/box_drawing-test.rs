@@ -68,7 +68,7 @@ fn main_routine() -> result!(()) {
 }
 
 fn box_drawing_test(window: &Window) -> result!(()) {
-    cursor_set(CursorType::Invisible)?;
+    curs_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     start_color()?;

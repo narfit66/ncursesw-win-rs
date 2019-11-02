@@ -51,7 +51,7 @@ fn main_routine() -> result!(()) {
 
 fn border_set_test(initial_window: &Window) -> result!(()) {
     // set the cursor to invisible and switch echoing off.
-    cursor_set(CursorType::Invisible)?;
+    curs_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     // start colors and use the default color pair of white on black.

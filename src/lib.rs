@@ -70,7 +70,7 @@ pub use ncursesw::{
 };
 pub use ncursesw::{
     COLORS, COLOR_PAIRS, COLS, ESCDELAY, LINES, TABSIZE, baudrate,
-    beep, can_change_color, def_prog_mode, def_shell_mode,
+    beep, can_change_color, curs_set, def_prog_mode, def_shell_mode,
     define_key, delay_output, doupdate, erasechar, erasewchar,
     flash, get_escdelay, getcchar, halfdelay, has_colors, has_ic,
     has_il, has_key, is_term_resized, key_defined, key_name,
