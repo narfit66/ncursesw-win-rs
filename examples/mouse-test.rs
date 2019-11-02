@@ -29,11 +29,22 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(e) = ncursesw_init(|window| {
-        mouse_test(&window)
-    }) {
-        println!("{}", e);
-    }
+    // We wrap all our use of ncurseswin with this function.
+    ncursesw_init(|ncurses| {
+        // In here we get an initialized NCurses window(stdscr) and then proceed
+        // to use it exactly like we normally would use it.
+        panic!(match mouse_test(&ncurses.initial_window()) {
+            Err(e) => e.to_string(),
+            Ok(_)  => "this is the end my friend, the only end!!!".to_string()
+        })
+    }).unwrap_or_else(|e| match e {
+        // This block only runs if there was an error. We might or might not
+        // have been able to recover an error message. You technically can pass
+        // any value into a panic, but we only get an error message if the panic
+        // value was a `String` or `&str`.
+        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
+        None         => println!("There was an error, but no error message."),
+    });
 }
 
 fn mouse_test(window: &Window) -> result!(()) {

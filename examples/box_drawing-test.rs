@@ -46,21 +46,25 @@ enum Corner {
 }
 
 fn main() {
-    match main_routine() {
-        Err(e) => {
-            match e {
-                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-                error                               => eprintln!("error: {}", error)
-            }
-        },
-        _      => ()
+    if let Err(e) = main_routine() {
+        println!("error: {}", e);
     }
 }
 
 fn main_routine() -> result!(()) {
     setlocale(LcCategory::All, "")?;
 
-    ncursesw_init(|window| { box_drawing_test(&window) })?
+    ncursesw_init(|ncurses| {
+        panic!(match box_drawing_test(&ncurses.initial_window()) {
+            Err(e) => e.to_string(),
+            _      => "this is the end my friend, the only end!!!".to_string()
+        })
+    }).unwrap_or_else(|e| match e {
+        Some(errmsg) => eprintln!("{}", errmsg),
+        None         => eprintln!("There was an error, but no error message."),
+    });
+
+    Ok(())
 }
 
 fn box_drawing_test(window: &Window) -> result!(()) {

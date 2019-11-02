@@ -27,11 +27,23 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(e) = ncursesw_init(|window| {
-        border_test(&window)
-    }) {
-        println!("{}", e);
+    if let Err(e) = main_routine() {
+        println!("error: {}", e);
     }
+}
+
+fn main_routine() -> result!(()) {
+    ncursesw_init(|ncurses| {
+        // initialize ncurses in a safe way.
+        if let Err(e) = border_test(&ncurses.initial_window()) {
+            panic!(e.to_string())
+        }
+    }).unwrap_or_else(|e| match e {
+        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
+        None         => println!("There was an error, but no error message."),
+    });
+
+    Ok(())
 }
 
 fn border_test(initial_window: &Window) -> result!(()) {

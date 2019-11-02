@@ -28,7 +28,7 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     if let Err(e) = main_routine() {
-        println!("{}", e);
+        println!("error: {}", e);
     }
 }
 
@@ -40,9 +40,16 @@ fn main_routine() -> result!(()) {
 
     assert!(top_ripoff != bottom_ripoff);
 
-    ncursesw_init(|window| {
-        ripoff_line_test(&window, &top_ripoff, &bottom_ripoff)
-    })?
+    ncursesw_init(|ncurses| {
+        if let Err(e) = ripoff_line_test(&ncurses.initial_window(), &top_ripoff, &bottom_ripoff) {
+            panic!(e.to_string())
+        }
+    }).unwrap_or_else(|e| match e {
+        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
+        None         => println!("There was an error, but no error message."),
+    });
+
+    Ok(())
 }
 
 fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {

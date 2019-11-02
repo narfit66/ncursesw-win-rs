@@ -34,14 +34,14 @@ lazy_static! {
 }
 
 /// NCurses context.
-struct NCurses {
+pub struct NCurses {
     handle: WINDOW
 }
 
 /// NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
     /// Initialise ncurses.
-    fn initscr() -> result!(Self) {
+    pub fn initscr() -> result!(Self) {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
 
             let handle = ncursesw::initscr()?;
@@ -56,7 +56,7 @@ impl NCurses {
     }
 
     /// Returns the initial window(stdscr) after initialisation.
-    fn initial_window(&self) -> Window {
+    pub fn initial_window(&self) -> Window {
         Window::from(self.handle, true)
     }
 }
@@ -75,36 +75,26 @@ impl Drop for NCurses {
 }
 
 /// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
-pub fn ncursesw_init<F: FnOnce(&Window) -> T + UnwindSafe, T>(user_function: F) -> result!(T) {
-    fn _init_ncurses<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(func: F) -> Result<R, Option<String>> {
-        catch_unwind(|| {
-            func(match &NCurses::initscr() {
-                Err(source)  => {
-                    panic!(match source {
-                        NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
-                        _                                      => "ncursesw::initscr() has failed!."
-                    })
-                },
-                Ok(ptr) => ptr
-            })
-        }).map_err(|e| match e.downcast_ref::<&str>() {
-            Some(andstr) => Some(andstr.to_string()),
-            None         => match e.downcast_ref::<String>() {
-                Some(string) => Some(string.to_string()),
-                None         => None
-            }
-        })
-    }
+pub fn ncursesw_init<F: FnOnce(&NCurses) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
+    let result = catch_unwind(|| {
+        let ncurses = match NCurses::initscr() {
+            Err(e)  => {
+                panic!(match e {
+                    NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
+                    _                                      => "ncursesw::initscr() has failed!."
+                })
+            },
+            Ok(ptr) => ptr
+        };
 
-    match _init_ncurses(|ncurses| {
-        user_function(&ncurses.initial_window())
-    }) {
-        Ok(result) => Ok(result),
-        Err(e)     => {
-            Err(match e {
-                Some(message) => NCurseswWinError::Panic { message },
-                None          => NCurseswWinError::Panic { message: "There was a panic, but no message!".to_string() }
-            })
+        user_function(&ncurses)
+    });
+
+    result.map_err(|e| match e.downcast_ref::<&str>() {
+        Some(andstr) => Some(andstr.to_string()),
+        None         => match e.downcast_ref::<String>() {
+            Some(string) => Some(string.to_string()),
+            None         => None
         }
-    }
+    })
 }
