@@ -27,7 +27,16 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    match main_routine() {
+    match ncursesw_entry(|window| {
+        cursor_set(CursorType::Visible)?;
+        set_echo(false)?;
+
+        ncursesw_entry_test_pass(window)?;
+
+        let rc = ncursesw_entry_test_fail(window)?;
+
+        Ok(rc)
+    }) {
         Err(source) => match source {
             NCurseswWinError::Panic { message } => println!("panic: {}", message),
             _                                   => println!("error: {}", source)
@@ -38,29 +47,6 @@ fn main() {
             println!("return: {}", value)
         }
     }
-}
-
-fn main_routine() -> result!(i32) {
-    // We wrap all our use of ncurseswin with this function.
-    ncursesw_entry(|window| {
-        // In here we get an initialized Window structure (stdscr) and then proceed
-        // to use it exactly like we normally would use it.
-        match ncursesw_entry_test(&window) {
-            Err(source) => Ok(Err(source)),
-            Ok(value)   => Ok(Ok(value))
-        }
-    })?
-}
-
-fn ncursesw_entry_test(initial_window: &Window) -> result!(i32) {
-    cursor_set(CursorType::Invisible)?;
-    set_echo(false)?;
-
-    ncursesw_entry_test_pass(initial_window)?;
-
-    let rc = ncursesw_entry_test_fail(initial_window)?;
-
-    Ok(rc)
 }
 
 fn ncursesw_entry_test_pass(window: &Window) -> result!(()) {
