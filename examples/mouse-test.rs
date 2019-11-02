@@ -48,7 +48,7 @@ fn main() {
 }
 
 fn mouse_test(window: &Window) -> result!(()) {
-    curs_set(CursorType::Visible)?;
+    cursor_set(CursorType::Visible)?;
     set_echo(false)?;
 
     window.keypad(true)?;
@@ -64,7 +64,7 @@ fn mouse_test(window: &Window) -> result!(()) {
 
     window.getch()?;
 
-    curs_set(CursorType::Invisible)?;
+    cursor_set(CursorType::Invisible)?;
 
     if !has_mouse_interface() {  // check if ncursesw supports a mouse pointer
         panic!("no mouse interface detected!!!");

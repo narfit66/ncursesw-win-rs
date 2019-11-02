@@ -53,7 +53,7 @@ fn main_routine() -> result!(()) {
 }
 
 fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
-    curs_set(CursorType::Invisible)?;
+    cursor_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     let mut origin = Origin { y: 1, x: 0};
