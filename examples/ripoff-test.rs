@@ -45,25 +45,9 @@ fn main_routine() -> result!(()) {
     assert!(top_ripoff != bottom_ripoff);
 
     // We wrap all our use of ncurseswin with this function.
-    match ncursesw_init(|window| {
-        match ripoff_line_test(&window, &top_ripoff, &bottom_ripoff) {
-            Err(source) => Ok(Err(source)),
-            Ok(value)   => Ok(Ok(value))
-        }
-    }).unwrap_or_else(|e| Err(match e {
-        Some(message) => NCurseswWinError::Panic { message },
-        None          => NCurseswWinError::Panic { message: "There was a panic, but no message!".to_string() }
-    })) {
-        Err(source) => Err(source),
-        Ok(result)  => {
-            match result {
-                Err(source) => Err(source),
-                Ok(value)   => Ok(value)
-            }
-        }
-    }?;
-
-    Ok(())
+    ncursesw_entry(|window| {
+        ripoff_line_test(&window, &top_ripoff, &bottom_ripoff)
+    })
 }
 
 fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {

@@ -1,5 +1,5 @@
 /*
-    examples/border-test.rs
+    examples/ncursesw_entry-test.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -27,46 +27,61 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    // initialize ncurses in a safe way.
-    match ncursesw_entry(|window| {
-        border_test(&window)
-    }) {
+    match main_routine() {
         Err(source) => match source {
             NCurseswWinError::Panic { message } => println!("panic: {}", message),
             _                                   => println!("error: {}", source)
         },
-        _           => ()
+        Ok(value)   => {
+            assert!(value == -1);
+
+            println!("return: {}", value)
+        }
     }
 }
 
-fn border_test(initial_window: &Window) -> result!(()) {
-    // set the cursor to invisible and switch echoing off.
+fn main_routine() -> result!(i32) {
+    // We wrap all our use of ncurseswin with this function.
+    ncursesw_entry(|window| {
+        // In here we get an initialized Window structure (stdscr) and then proceed
+        // to use it exactly like we normally would use it.
+        match ncursesw_entry_test(&window) {
+            Err(source) => Ok(Err(source)),
+            Ok(value)   => Ok(Ok(value))
+        }
+    })?
+}
+
+fn ncursesw_entry_test(initial_window: &Window) -> result!(i32) {
     cursor_set(CursorType::Invisible)?;
     set_echo(false)?;
 
-    // extract the box drawing characters for the box drawing type.
-    let ul = chtype_box_graphic(BoxDrawingGraphic::UpperLeftCorner);
-    let ll = chtype_box_graphic(BoxDrawingGraphic::LowerLeftCorner);
-    let ur = chtype_box_graphic(BoxDrawingGraphic::UpperRightCorner);
-    let lr = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
-    let hl = chtype_box_graphic(BoxDrawingGraphic::HorizontalLine);
-    let vl = chtype_box_graphic(BoxDrawingGraphic::VerticalLine);
+    ncursesw_entry_test_pass(initial_window)?;
 
-    // create a border on the inital window (stdscr).
-    initial_window.border(vl, vl, hl, hl, ul, ur, ll, lr)?;
+    let rc = ncursesw_entry_test_fail(initial_window)?;
 
-    // add some default text to the inner window.
-    let mut origin = Origin { y: 1, x: 2 };
+    Ok(rc)
+}
 
-    initial_window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
+fn ncursesw_entry_test_pass(window: &Window) -> result!(()) {
+    let mut origin = Origin { y: 0, x: 0};
+
+    window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;
-    initial_window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
+    window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
+    origin.y += 2;
+    window.mvaddstr(origin, "Press <Return> to continue: ")?;
 
-    // refresh our window.
-    initial_window.refresh()?;
+    window.refresh()?;
 
-    // wait for user input (or an event).
-    initial_window.getch()?;
+    window.getch()?;
 
     Ok(())
+}
+
+// leave un-commented what needs testing
+fn ncursesw_entry_test_fail(_window: &Window) -> result!(i32) {
+    //panic!("there was a panic!");        // cause a panic
+    Err(NCurseswWinError::InternalError) // return an error
+    //Ok(-1)                               // return a value
 }

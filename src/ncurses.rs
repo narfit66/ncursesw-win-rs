@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(deprecated)]
+
 use std::panic::{UnwindSafe, catch_unwind};
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -74,6 +76,41 @@ impl Drop for NCurses {
     }
 }
 
+/// Safely initialise ncurses, panic's will be caught correctly and
+/// passed back as `NCurseswWinError::Panic`.
+/// ncurses should free (as best it can) memory etc correctly.
+pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_function: F) -> result!(T) {
+    // We wrap all our use of ncurseswin with this function.
+    match ncursesw_init(|window| {
+        // In here we get an initialized Window structure (stdscr) and then proceed
+        // to use it exactly like we normally would use it.
+        match user_function(&window) {
+            Err(source) => Ok(Err(source)),
+            Ok(value)   => Ok(Ok(value))
+        }
+    }).unwrap_or_else(|e| Err(match e {
+        // This block only runs if there was an error. We might or might not
+        // have been able to recover an error message. You technically can pass
+        // any value into a panic, but we only get an error message if the panic
+        // value was a `String` or `&str`.
+        Some(message) => NCurseswWinError::Panic { message },
+        None          => NCurseswWinError::Panic { message: "There was a panic, but no message!".to_string() }
+    })) {
+        // The Err branch matches against the NCurseswWinError::Panic error
+        // from the above unwrap_or_else()
+        Err(source) => Err(source),
+        // The Ok branch unwraps and matches against ncursesw_init_test error
+        // or return value
+        Ok(result)  => {
+            match result {
+                Err(source) => Err(source),
+                Ok(value)   => Ok(value)
+            }
+        }
+    }
+}
+
+#[deprecated(since = "0.3.0", note = "Use ncursesw_entry() instead")]
 /// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
 pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
     catch_unwind(|| {

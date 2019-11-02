@@ -28,8 +28,13 @@ use ncurseswwin::extend::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(e) = main_routine() {
-        println!("error: {}", e);
+    // initialize ncurses in a safe way.
+    match main_routine() {
+        Err(source) => match source {
+            NCurseswWinError::Panic { message } => println!("panic: {}", message),
+            _                                   => println!("error: {}", source)
+        },
+        _           => ()
     }
 }
 
@@ -37,16 +42,9 @@ fn main_routine() -> result!(()) {
     setlocale(LcCategory::All, "")?;
 
     // initialize ncurses in a safe way.
-    ncursesw_init(|window| {
-        if let Err(e) = border_set_test(&window) {
-            panic!(e.to_string());
-        }
-    }).unwrap_or_else(|e| match e {
-        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
-        None         => println!("There was an error, but no error message."),
-    });
-
-    Ok(())
+    ncursesw_entry(|window| {
+        border_set_test(&window)
+    })
 }
 
 fn border_set_test(initial_window: &Window) -> result!(()) {
