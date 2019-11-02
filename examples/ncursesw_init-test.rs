@@ -28,32 +28,59 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
+    match main_routine() {
+        Err(source) => match source {
+            NCurseswWinError::Panic { message } => println!("panic: {}", message),
+            _                                   => println!("error: {}", source)
+        },
+        Ok(value)   => {
+            assert!(value == -1);
+
+            println!("return: {}", value)
+        }
+    }
+}
+
+fn main_routine() -> result!(i32) {
     // We wrap all our use of ncurseswin with this function.
-    ncursesw_init(|window| {
+    match ncursesw_init(|window| {
         // In here we get an initialized Window structure (stdscr) and then proceed
         // to use it exactly like we normally would use it.
-        if let Err(e) = ncursesw_init_test(&window) {
-            panic!(e.to_string());
+        match ncursesw_init_test(&window) {
+            Err(source) => Ok(Err(source)),
+            Ok(value)   => Ok(Ok(value))
         }
-    }).unwrap_or_else(|e| match e {
+    }).unwrap_or_else(|e| Err(match e {
         // This block only runs if there was an error. We might or might not
         // have been able to recover an error message. You technically can pass
         // any value into a panic, but we only get an error message if the panic
         // value was a `String` or `&str`.
-        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
-        None         => println!("There was an error, but no error message."),
-    });
+        Some(message) => NCurseswWinError::Panic { message },
+        None          => NCurseswWinError::Panic { message: "There was a panic, but no message!".to_string() }
+    })) {
+        // The Err branch matches against the NCurseswWinError::Panic error
+        // from the above unwrap_or_else()
+        Err(source) => Err(source),
+        // The Ok branch unwraps and matches against ncursesw_init_test error
+        // or return value
+        Ok(result)  => {
+            match result {
+                Err(source) => Err(source),
+                Ok(value)   => Ok(value)
+            }
+        }
+    }
 }
 
-fn ncursesw_init_test(initial_window: &Window) -> result!(()) {
+fn ncursesw_init_test(initial_window: &Window) -> result!(i32) {
     cursor_set(CursorType::Invisible)?;
     set_echo(false)?;
 
     ncursesw_init_test_pass(initial_window)?;
-    ncursesw_init_test_panic(initial_window)?;
-    ncursesw_init_test_fail(initial_window)?;
 
-    Ok(())
+    let rc = ncursesw_init_test_fail(initial_window)?;
+
+    Ok(rc)
 }
 
 fn ncursesw_init_test_pass(window: &Window) -> result!(()) {
@@ -72,11 +99,9 @@ fn ncursesw_init_test_pass(window: &Window) -> result!(()) {
     Ok(())
 }
 
-fn ncursesw_init_test_panic(_window: &Window) -> result!(()) {
-    panic!("ncursesw_init_test_panic() paniced!")
-}
-
-// the following will cause an NCurseswError to be returned!!!
-fn ncursesw_init_test_fail(_window: &Window) -> result!(()) {
-    Err(NCurseswWinError::InternalError)
+// leave un-commented what needs testing
+fn ncursesw_init_test_fail(_window: &Window) -> result!(i32) {
+    //panic!("there was a panic!");        // cause a panic
+    Err(NCurseswWinError::InternalError) // return an error
+    //Ok(-1)                               // return a value
 }

@@ -27,8 +27,12 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(e) = main_routine() {
-        println!("error: {}", e);
+    match main_routine() {
+        Err(source) => match source {
+            NCurseswWinError::Panic { message } => println!("panic: {}", message),
+            _                                   => println!("error: {}", source)
+        },
+        _           => ()
     }
 }
 
@@ -40,15 +44,24 @@ fn main_routine() -> result!(()) {
 
     assert!(top_ripoff != bottom_ripoff);
 
-    // initialize ncurses in a safe way.
-    ncursesw_init(|window| {
-        if let Err(e) = ripoff_line_test(&window, &top_ripoff, &bottom_ripoff) {
-            panic!(e.to_string())
+    // We wrap all our use of ncurseswin with this function.
+    match ncursesw_init(|window| {
+        match ripoff_line_test(&window, &top_ripoff, &bottom_ripoff) {
+            Err(source) => Ok(Err(source)),
+            Ok(value)   => Ok(Ok(value))
         }
-    }).unwrap_or_else(|e| match e {
-        Some(errmsg) => println!("A Panic Occurred: {}", errmsg),
-        None         => println!("There was an error, but no error message."),
-    });
+    }).unwrap_or_else(|e| Err(match e {
+        Some(message) => NCurseswWinError::Panic { message },
+        None          => NCurseswWinError::Panic { message: "There was a panic, but no message!".to_string() }
+    })) {
+        Err(source) => Err(source),
+        Ok(result)  => {
+            match result {
+                Err(source) => Err(source),
+                Ok(value)   => Ok(value)
+            }
+        }
+    }?;
 
     Ok(())
 }
