@@ -101,12 +101,7 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
         Err(source) => Err(source),
         // The Ok branch unwraps and matches against ncursesw_init_test error
         // or return value
-        Ok(result)  => {
-            match result {
-                Err(source) => Err(source),
-                Ok(value)   => Ok(value)
-            }
-        }
+        Ok(result)  => result
     }
 }
 
@@ -115,13 +110,11 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
 pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
     catch_unwind(|| {
         let ncurses = match NCurses::initscr() {
-            Err(e)  => {
-                panic!(match e {
-                    NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
-                    _                                      => "ncursesw::initscr() has failed!."
-                })
-            },
-            Ok(ptr) => ptr
+            Err(source)  => panic!(match source {
+                NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
+                _                                      => "ncursesw::initscr() has failed!"
+            }),
+            Ok(ptr)      => ptr
         };
 
         user_function(&ncurses.initial_window())
