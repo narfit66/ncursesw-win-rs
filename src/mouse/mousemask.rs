@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(deprecated)]
+
 use std::convert::TryInto;
 
 use ncursesw::mouse::{mmask_t, REPORT_MOUSE_POSITION, ALL_MOUSE_EVENTS};
@@ -29,6 +31,7 @@ use crate::ncurseswwinerror::NCurseswWinError;
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MouseMask {
     /// Report mouse position/origin only.
+    #[deprecated(since = "0.3.1", note = "currently unsupported")]
     ReportMousePosition,
     /// Report all mouse event.
     AllMouseEvents
