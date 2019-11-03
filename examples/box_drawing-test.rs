@@ -166,23 +166,19 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         match window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
             Err(err)  => return Err(err),
             #[cfg(feature = "key_resize_as_error")]
-            Ok(value) => {
-                if let Some(CharacterResult::Character(ch)) = value {
-                    if ch == 'q' || ch == 'Q' {
-                        break;
-                    }
+            Ok(value) => if let Some(CharacterResult::Character(character)) = value {
+                if character == 'q' || character == 'Q' {
+                    break;
                 }
             }
             #[cfg(not(feature = "key_resize_as_error"))]
-            Ok(value) => {
-                if let Some(char_result) = value {
-                    match char_result {
-                        CharacterResult::Key(key)      => if key == KeyBinding::ResizeEvent {
-                            return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
-                        },
-                        CharacterResult::Character(ch) => if ch == 'q' || ch == 'Q' {
-                            break;
-                        }
+            Ok(value) => if let Some(char_result) = value {
+                match char_result {
+                    CharacterResult::Key(key_binding)     => if key_binding == KeyBinding::ResizeEvent {
+                        return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                    },
+                    CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
+                        break;
                     }
                 }
             }

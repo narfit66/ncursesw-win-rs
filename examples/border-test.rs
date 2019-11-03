@@ -45,15 +45,17 @@ fn border_test(initial_window: &Window) -> result!(()) {
     set_echo(false)?;
 
     // extract the box drawing characters for the box drawing type.
-    let ul = chtype_box_graphic(BoxDrawingGraphic::UpperLeftCorner);
-    let ll = chtype_box_graphic(BoxDrawingGraphic::LowerLeftCorner);
-    let ur = chtype_box_graphic(BoxDrawingGraphic::UpperRightCorner);
-    let lr = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
-    let hl = chtype_box_graphic(BoxDrawingGraphic::HorizontalLine);
-    let vl = chtype_box_graphic(BoxDrawingGraphic::VerticalLine);
+    let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
+    let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);
+    let top_side    = chtype_box_graphic(BoxDrawingGraphic::UpperHorizontalLine);
+    let bottom_side = chtype_box_graphic(BoxDrawingGraphic::LowerHorizontalLine);
+    let upper_left  = chtype_box_graphic(BoxDrawingGraphic::UpperLeftCorner);
+    let upper_right = chtype_box_graphic(BoxDrawingGraphic::UpperRightCorner);
+    let lower_left  = chtype_box_graphic(BoxDrawingGraphic::LowerLeftCorner);
+    let lower_right = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
 
     // create a border on the inital window (stdscr).
-    initial_window.border(vl, vl, hl, hl, ul, ur, ll, lr)?;
+    initial_window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
     // add some default text to the inner window.
     let mut origin = Origin { y: 1, x: 2 };

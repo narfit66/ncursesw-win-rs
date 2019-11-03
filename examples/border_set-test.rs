@@ -22,13 +22,14 @@
 
 extern crate ncurseswwin;
 
+use std::time;
+
 use ncurseswwin::*;
 use ncurseswwin::extend::*;
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    // initialize ncurses in a safe way.
     match main_routine() {
         Err(source) => match source {
             NCurseswWinError::Panic { message } => println!("panic: {}", message),
@@ -124,32 +125,16 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
         // by refreshing the initial_window we also refresh our inner_window which is a sub window of inital_window
         initial_window.refresh()?;
 
-        // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
-        // if a resize event happens then error this back up the call chain.
-        // (to achive the same thing automatically without having to code
-        //  for KeyBinding::ResizeEvent have the ncursesw.key_resize_as_error
-        //  feature enabled and this will bubble up through the Err on the
-        //  initial match).
+        // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds.
         match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
-            Err(err)  => return Err(err),
-            #[cfg(feature = "key_resize_as_error")]
-            Ok(value) => {
-                if let Some(CharacterResult::Character(ch)) = value {
-                    if ch == 'q' || ch == 'Q' {
+            Err(source) => return Err(source),
+            Ok(value)   => if let Some(char_result) = value {
+                match char_result {
+                    CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
+                        return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                    },
+                    CharacterResult::Character(chracter) => if chracter == 'q' || chracter == 'Q' {
                         break;
-                    }
-                }
-            }
-            #[cfg(not(feature = "key_resize_as_error"))]
-            Ok(value) => {
-                if let Some(char_result) = value {
-                    match char_result {
-                        CharacterResult::Key(key)      => if key == KeyBinding::ResizeEvent {
-                            return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
-                        },
-                        CharacterResult::Character(ch) => if ch == 'q' || ch == 'Q' {
-                            break;
-                        }
                     }
                 }
             }

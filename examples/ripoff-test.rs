@@ -54,7 +54,20 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
     cursor_set(CursorType::Invisible)?;
     set_echo(false)?;
 
-    let mut origin = Origin { y: 1, x: 0};
+    // extract the box drawing characters for the box drawing type.
+    let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
+    let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);
+    let top_side    = chtype_box_graphic(BoxDrawingGraphic::UpperHorizontalLine);
+    let bottom_side = chtype_box_graphic(BoxDrawingGraphic::LowerHorizontalLine);
+    let upper_left  = chtype_box_graphic(BoxDrawingGraphic::UpperLeftCorner);
+    let upper_right = chtype_box_graphic(BoxDrawingGraphic::UpperRightCorner);
+    let lower_left  = chtype_box_graphic(BoxDrawingGraphic::LowerLeftCorner);
+    let lower_right = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
+
+    // create a border on the inital window (stdscr).
+    initial_window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
+
+    let mut origin = Origin { y: 1, x: 2};
 
     initial_window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;
