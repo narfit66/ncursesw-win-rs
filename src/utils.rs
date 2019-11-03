@@ -164,7 +164,7 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
     }
 }
 
-/// Set the cursor type to display
+/// Set the cursor type to display.
 pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)

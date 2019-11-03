@@ -23,8 +23,11 @@
 /// Horizontal box drawing graphic type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum HorizontalGraphic {
+    /// Upper graphic.
     Upper,
+    /// Center graphic.
     Center,
+    /// Lower graphic.
     Lower
 }
 

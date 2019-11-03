@@ -21,8 +21,6 @@
 */
 
 /// The various input modes that you can set for the terminal.
-///
-/// Use this with `set_input_mode`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum InputMode {
     /// Line buffering (special character processing)

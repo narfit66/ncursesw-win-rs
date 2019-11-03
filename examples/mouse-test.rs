@@ -72,8 +72,8 @@ fn mouse_test(window: &Window) -> result!(()) {
 
     loop {
         match window.getch()? {
-            CharacterResult::Key(kb)      => {
-                match kb {
+            CharacterResult::Key(key_binding)     => {
+                match key_binding {
                     KeyBinding::MouseEvent => {
                         if let Ok(registered_mouse) = mouse.refresh() {  // get the mouse event
                             if registered_mouse {                        // is the mouse event for our mouse
@@ -101,13 +101,13 @@ fn mouse_test(window: &Window) -> result!(()) {
                             }
                         }
                     },
-                    _                      => other_event(window, origin, &format!("{:?}", kb))?
+                    _                      => other_event(window, origin, &format!("{:?}", key_binding))?
                 }
             },
-            CharacterResult::Character(c) => {
-                other_event(window, origin, &format!("{}", c))?;
+            CharacterResult::Character(character) => {
+                other_event(window, origin, &format!("{}", character))?;
 
-                if c == 'q' || c == 'Q' {
+                if character == 'q' || character == 'Q' {
                     break;
                 }
             }

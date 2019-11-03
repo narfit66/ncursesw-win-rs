@@ -57,7 +57,7 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
     use_default_colors()?;
 
     // define color pair 0 and normal attriburs.
-    let color_pair0 = ColorPair::default();
+    let color_pair = ColorPair::default();
     let attrs = Attributes::default();
 
     // get the size of the initial window (stdscr).
@@ -99,24 +99,24 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
     // iterate over the box drawing types.
     for &box_drawing_type in &box_drawing_types {
         // extract the box drawing characters for the box drawing type.
-        let ls = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LeftVerticalLine, &attrs, &color_pair0)?;
-        let rs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::RightVerticalLine, &attrs, &color_pair0)?;
-        let ts = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperHorizontalLine, &attrs, &color_pair0)?;
-        let bs = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerHorizontalLine, &attrs, &color_pair0)?;
-        let ul = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &color_pair0)?;
-        let ur = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &color_pair0)?;
-        let ll = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair0)?;
-        let lr = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair0)?;
+        let left_side   = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LeftVerticalLine, &attrs, &color_pair)?;
+        let right_side  = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::RightVerticalLine, &attrs, &color_pair)?;
+        let top_side    = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperHorizontalLine, &attrs, &color_pair)?;
+        let bottom_side = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerHorizontalLine, &attrs, &color_pair)?;
+        let upper_left  = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperLeftCorner, &attrs, &color_pair)?;
+        let upper_right = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::UpperRightCorner, &attrs, &color_pair)?;
+        let lower_left  = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &color_pair)?;
+        let lower_right = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair)?;
 
         // create a border on the inital window (stdscr).
-        initial_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
+        initial_window.border_set(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
         // set our cursor position and clear to the end of line on our sub window.
         inner_window.set_cursor(origin)?;
         inner_window.clrtoeol()?;
 
         // create a border on the sub window.
-        inner_window.border_set(ls, rs, ts, bs, ul, ur, ll, lr)?;
+        inner_window.border_set(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
         // add the type of box drawing type on the sub window.
         inner_window.mvaddstr(origin, &format!("box drawing type {:?}", box_drawing_type))?;
@@ -124,8 +124,36 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
         // by refreshing the initial_window we also refresh our inner_window which is a sub window of inital_window
         initial_window.refresh()?;
 
-        // wait for user input (or an event).
-        inner_window.getch()?;
+        // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
+        // if a resize event happens then error this back up the call chain.
+        // (to achive the same thing automatically without having to code
+        //  for KeyBinding::ResizeEvent have the ncursesw.key_resize_as_error
+        //  feature enabled and this will bubble up through the Err on the
+        //  initial match).
+        match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
+            Err(err)  => return Err(err),
+            #[cfg(feature = "key_resize_as_error")]
+            Ok(value) => {
+                if let Some(CharacterResult::Character(ch)) = value {
+                    if ch == 'q' || ch == 'Q' {
+                        break;
+                    }
+                }
+            }
+            #[cfg(not(feature = "key_resize_as_error"))]
+            Ok(value) => {
+                if let Some(char_result) = value {
+                    match char_result {
+                        CharacterResult::Key(key)      => if key == KeyBinding::ResizeEvent {
+                            return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                        },
+                        CharacterResult::Character(ch) => if ch == 'q' || ch == 'Q' {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Ok(())

@@ -85,10 +85,5 @@ pub use ncursesw::mouse::{
     mouse_version, has_mouse_interface
 };
 
+/// Timeout type, None represents blocking mode.
 pub type Timeout = Option<time::Duration>;
-
-use ncursesw::shims::constants::ERR;
-
-pub(crate) fn timeout_error(func: &str) -> NCurseswWinError {
-    NCurseswWinError::from(NCurseswError::NCursesFunction { func: func.to_string(), rc: ERR })
-}

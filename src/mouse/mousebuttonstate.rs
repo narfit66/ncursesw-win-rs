@@ -25,6 +25,7 @@ use std::fmt::{Display, Formatter, Result};
 use crate::mouse::mousebutton::MouseButton;
 use crate::mouse::mousebuttonevent::MouseButtonEvent;
 
+/// A mouse button's state.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct MouseButtonState {
     button: MouseButton,
@@ -32,14 +33,17 @@ pub struct MouseButtonState {
 }
 
 impl MouseButtonState {
+    /// Create a new `MouseButtonState`.
     pub fn new(button: MouseButton, event: MouseButtonEvent) -> Self {
         Self { button, event }
     }
 
+    /// The mouse button.
     pub fn button(self) -> MouseButton {
         self.button
     }
 
+    /// The mouse event.
     pub fn event(self) -> MouseButtonEvent {
         self.event
     }

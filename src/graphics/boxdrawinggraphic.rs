@@ -24,23 +24,38 @@ use std::convert::{TryFrom, Into};
 
 use crate::ncurseswwinerror::NCurseswWinError;
 
-/// The boxdrawing graphic characters.
+/// The box drawing graphic characters.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BoxDrawingGraphic {
+    /// Upper-left corner.
     UpperLeftCorner,
+    /// Lower-left corner.
     LowerLeftCorner,
+    /// Upper-right corner.
     UpperRightCorner,
+    /// Lower-right corner.
     LowerRightCorner,
+    /// Right-side tee.
     RightTee,
+    /// Left-side tee.
     LeftTee,
+    /// Lower-side tee.
     LowerTee,
+    /// Upper-side tee.
     UpperTee,
+    /// Horizontal line.
     HorizontalLine,
+    /// Upper-horizontal line.
     UpperHorizontalLine,
+    /// Lower-horizontal line.
     LowerHorizontalLine,
+    /// Vertical line.
     VerticalLine,
+    /// Left-vertical line.
     LeftVerticalLine,
+    /// Right-vertical line.
     RightVerticalLine,
+    /// Plus/Cross.
     Plus
 }
 
@@ -146,9 +161,7 @@ impl BoxDrawingGraphic {
                 } else {
                     box_drawing_graphic
                 },
-                _                                      => {
-                    box_drawing_graphic
-                }
+                _                                      => box_drawing_graphic
             })
         };
 

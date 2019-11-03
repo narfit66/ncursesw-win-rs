@@ -22,16 +22,23 @@
 
 use strum_macros::{Display, EnumIter};
 
+/// A mouse button.
 #[derive(Copy, Clone, Debug, Display, EnumIter, PartialEq, Eq, Hash)]
 pub enum MouseButton {
+    /// Mouse button number 1.
     One,
+    /// Mouse button number 2.
     Two,
+    /// Mouse button number 3.
     Three,
+    /// Mouse button number 4.
     Four,
+    /// Mouse button number 5.
     Five
 }
 
 impl MouseButton {
+    /// A mouse button number as a `u8`.
     pub fn number(self) -> u8 {
         match self {
             MouseButton::One   => 1,

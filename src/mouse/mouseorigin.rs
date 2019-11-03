@@ -24,6 +24,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use ncursesw::Origin;
 
+/// The type of origin as reported by a mouse.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct MouseOrigin {
     origin: Origin,
@@ -35,18 +36,22 @@ impl MouseOrigin {
         Self { origin: Origin { y, x }, z }
     }
 
+    /// Mouse Y-X axis.
     pub fn origin(&self) -> Origin {
         self.origin
     }
 
+    /// Y-axis.
     pub fn y(&self) -> i32 {
         self.origin.y
     }
 
+    /// X-axis.
     pub fn x(&self) -> i32 {
         self.origin.x
     }
 
+    /// Z-axis.
     pub fn z(&self) -> i32 {
         self.z
     }

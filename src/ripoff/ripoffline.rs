@@ -59,12 +59,14 @@ ripoff_init_fn!(ripoff_init2, 2);
 ripoff_init_fn!(ripoff_init3, 3);
 ripoff_init_fn!(ripoff_init4, 4);
 
+/// A type of ripoff line.
 #[derive(PartialEq, Eq, Hash)]
 pub struct RipoffLine {
     number: usize
 }
 
 impl RipoffLine {
+    /// Create a new instance of a RipoffLine (ncurses allows for a maximum of 5 ripoff lines.
     pub fn new(orientation: Orientation) -> result!(Self) {
         // check that initscr() has not been called.
         if INITSCR_CALLED.load(Ordering::SeqCst) {
@@ -76,12 +78,12 @@ impl RipoffLine {
             // call the ncurses ripoff function with one of our pre-defined call-back function.
             // ncurses allows for a maximum of 5 ripoff lines.
             match ncursesw::ripoffline(orientation, match number {
-                0      => ripoff_init0,
-                1      => ripoff_init1,
-                2      => ripoff_init2,
-                3      => ripoff_init3,
-                4      => ripoff_init4,
-                number => return Err(NCurseswWinError::MaximumRipoffLines { number })
+                0 => ripoff_init0,
+                1 => ripoff_init1,
+                2 => ripoff_init2,
+                3 => ripoff_init3,
+                4 => ripoff_init4,
+                _ => return Err(NCurseswWinError::MaximumRipoffLines { number })
             }) {
                 Err(source) => Err(NCurseswWinError::NCurseswError { source }),
                 _           => Ok(Self { number })
@@ -89,13 +91,13 @@ impl RipoffLine {
         }
     }
 
+    /// The number of the ripoff.
     pub fn number(&self) -> usize {
         self.number
     }
 
-    pub fn update<F, T>(&self, func: F) -> result!(T)
-        where F: Fn(&RipoffWindow, i32) -> result!(T)
-    {
+    /// Update the ripoff line.
+    pub fn update<F: Fn(&RipoffWindow, i32) -> result!(T), T>(&self, user_function: F) -> result!(T) {
         // check that initscr() has been called.
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
             Err(NCurseswWinError::InitscrNotCalled)
@@ -109,7 +111,7 @@ impl RipoffLine {
                 Err(NCurseswWinError::RipoffNotInitialized { number: self.number })
             } else {
                 // call the passed closure to process against the ripoff.
-                func(&ripoff_window, *ripoff_columns)
+                user_function(&ripoff_window, *ripoff_columns)
             }
         }
     }

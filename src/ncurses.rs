@@ -35,14 +35,14 @@ lazy_static! {
     pub(crate) static ref COLOR_STARTED: AtomicBool = AtomicBool::new(false);
 }
 
-/// NCurses context.
+// NCurses context.
 struct NCurses {
     handle: WINDOW
 }
 
-/// NCurses context, initialise and when out of scope drop ncurses structure.
+// NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
-    /// Initialise ncurses.
+    // Initialise ncurses.
     fn initscr() -> result!(Self) {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
 
@@ -57,14 +57,14 @@ impl NCurses {
         }
     }
 
-    /// Returns the initial window(stdscr) after initialisation.
+    // Returns the initial window(stdscr) after initialisation.
     fn initial_window(&self) -> Window {
         Window::from(self.handle, true)
     }
 }
 
 impl Drop for NCurses {
-    /// Unallocate the initialised ncurses instance.
+    // Unallocate the initialised ncurses instance.
     fn drop(&mut self) {
         match ncursesw::endwin() {
             Err(e) => panic!(e.to_string()),
@@ -82,8 +82,10 @@ impl Drop for NCurses {
 pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_function: F) -> result!(T) {
     // We wrap all our use of ncurseswin with this function.
     match ncursesw_init(|window| {
-        // In here we get an initialized Window structure (stdscr) and then proceed
-        // to use it exactly like we normally would use it.
+        // In here we get an initialized Window structure (stdscr) and pass that
+        // to our closure, `catch_unwind()` as called in `ncursesw_init()` will
+        // return a `Result` of Ok so we will wrap our return of `user_function()`
+        // in that.
         match user_function(&window) {
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
@@ -108,7 +110,10 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
 #[deprecated(since = "0.3.0", note = "Use ncursesw_entry() instead")]
 /// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
 pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
+    // use `catch_unwind()` to catch panic's, an error will be a panic
+    // so try and convert it into a string.
     catch_unwind(|| {
+        // initilise ncurses.
         let ncurses = match NCurses::initscr() {
             Err(source)  => panic!(match source {
                 NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",

@@ -22,11 +22,17 @@
 
 use strum_macros::{Display, EnumIter};
 
+/// A type of mouse button event.
 #[derive(Copy, Clone, Debug, Display, EnumIter, PartialEq, Eq, Hash)]
 pub enum MouseButtonEvent {
+    /// Button has been released.
     Released,
+    /// Button has been pressed.
     Pressed,
+    /// Button has been clicked.
     Clicked,
+    /// Button has been double clicked.
     DoubleClicked,
+    /// Button has been triple clicked.
     TripleClicked
 }

@@ -20,6 +20,9 @@
     IN THE SOFTWARE.
 */
 
+use ncursesw::shims::constants::ERR;
+use ncursesw::NCurseswError;
+
 custom_error::custom_error! {
 /// NCurseswWin Errors.
 pub NCurseswWinError
@@ -43,3 +46,7 @@ impl PartialEq for NCurseswWinError {
 }
 
 impl Eq for NCurseswWinError { }
+
+pub(crate) fn timeout_error(func: &str) -> NCurseswWinError {
+    NCurseswWinError::from(NCurseswError::NCursesFunction { func: func.to_string(), rc: ERR })
+}

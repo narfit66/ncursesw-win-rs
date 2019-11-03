@@ -64,12 +64,7 @@ fn main_routine() -> result!(i32) {
         Err(source) => Err(source),
         // The Ok branch unwraps and matches against ncursesw_init_test error
         // or return value
-        Ok(result)  => {
-            match result {
-                Err(source) => Err(source),
-                Ok(value)   => Ok(value)
-            }
-        }
+        Ok(result)  => result
     }
 }
 

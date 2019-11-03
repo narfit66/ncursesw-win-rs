@@ -59,8 +59,8 @@ impl Panel {
 impl Drop for Panel {
     fn drop(&mut self) {
         if self.free_on_drop {
-            if let Err(e) = panels::del_panel(self.handle) {
-                panic!(e.to_string())
+            if let Err(source) = panels::del_panel(self.handle) {
+                panic!(source.to_string())
             }
         }
     }

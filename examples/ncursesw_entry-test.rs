@@ -27,6 +27,8 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
+    // initialise ncurses safely, this should trap panic's and
+    // pass them as a `NCurseswWinError::Panic`.
     match ncursesw_entry(|window| {
         cursor_set(CursorType::Visible)?;
         set_echo(false)?;

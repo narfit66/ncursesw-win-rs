@@ -22,13 +22,17 @@
 
 use crate::graphics::BoxDrawingTypeDetail;
 
-/// Boxdrawing type.
+/// Box drawing type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum BoxDrawingType {
+    /// Ascii.
     Ascii,
+    /// Light BoxDrawingTypeDetail.
     Light(BoxDrawingTypeDetail),
+    /// Heavy BoxDrawingTypeDetail.
     Heavy(BoxDrawingTypeDetail),
+    /// Double lines.
     Double
 }
 

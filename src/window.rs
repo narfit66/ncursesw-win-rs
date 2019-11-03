@@ -31,7 +31,7 @@ use ncursesw::{
     AttributesType, ColorPairType, ColorAttributeTypes, AttributesColorPairType,
     Origin, Size, CharacterResult, AttributesColorPairSet, Region,
     Changed, ChtypeChar, ChtypeString, ComplexChar, ComplexString,
-    WideChar, WideString, WINDOW,
+    WideChar, WideString, WINDOW, NCurseswError,
     getcchar
 };
 use ncursesw::normal;
@@ -42,7 +42,6 @@ use crate::graphics::{
 };
 use crate::Timeout;
 use crate::ncurseswwinerror::NCurseswWinError;
-use ncursesw::NCurseswError;
 
 // constant to control remaping during BoxDrawingGraphic.transform()
 const BOX_DRAWING_GRAPHIC_REMAP: bool = true;

@@ -23,8 +23,11 @@
 /// Vertical box drawing graphic type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum VerticalGraphic {
+    /// Left graphic.
     Left,
+    /// Center graphic.
     Center,
+    /// Right graphic.
     Right
 }
 

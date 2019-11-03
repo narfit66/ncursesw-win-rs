@@ -29,8 +29,8 @@ use crate::mouse::mouseevent::MouseEvent;
 use ncursesw::mouse::mmask_t;
 
 macro_rules! pub_getter {
-    ($name: ident, $attr: ident) => {
-        pub fn $name(&self) -> bool {
+    ($fname: ident, $attr: ident) => {
+        pub fn $fname(&self) -> bool {
             let event_mask: mmask_t = MouseEvent::$attr.into();
 
             (self.mask & event_mask) > 0
@@ -39,8 +39,8 @@ macro_rules! pub_getter {
 }
 
 macro_rules! private_method {
-    ($name: ident, $attr: ident) => {
-        fn $name(self) -> bool {
+    ($fname: ident, $attr: ident) => {
+        fn $fname(self) -> bool {
             let event_mask: mmask_t = MouseEvent::$attr.into();
 
             (self.mask & event_mask) > 0
@@ -48,6 +48,7 @@ macro_rules! private_method {
     };
 }
 
+/// The mouse event that occurred.
 #[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 pub struct MouseEvents {
     mask: mmask_t
@@ -58,6 +59,7 @@ impl MouseEvents {
         Self { mask }
     }
 
+    /// The button state that occurred. A None indicates no mouse event.
     pub fn button_state(self) -> Option<MouseButtonState> {
         for button in MouseButton::iter() {
             for event in MouseButtonEvent::iter() {
@@ -72,6 +74,7 @@ impl MouseEvents {
         None
     }
 
+    /// Does the current mouse event match the passed state.
     pub fn is_button_state(self, state: MouseButtonState) -> bool {
         match state.event() {
             MouseButtonEvent::Released      => self.released(state.button()),
@@ -82,8 +85,11 @@ impl MouseEvents {
         }
     }
 
+    /// Was Ctrl-Button pressed during the mouse event.
     pub_getter!(ctrl_button, ButtonCtrl);
+    /// Was Shift-Button pressed during the mouse event.
     pub_getter!(shift_button, ButtonShift);
+    /// Was Alt-Button pressed during the mouse event.
     pub_getter!(alt_button, ButtonAlt);
 
     fn released(self, button: MouseButton) -> bool {

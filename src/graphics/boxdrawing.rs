@@ -314,7 +314,7 @@ pub fn chtype_box_graphic(graphic: BoxDrawingGraphic) -> ChtypeChar {
 
 /// Obtain the box drawing graphic of WideChar type.
 pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic) -> WideChar {
-    WideChar::from(*WIDEBOXDRAWING.get(&MatrixKey::new(box_drawing_type, graphic)).unwrap_or_else(|| panic!("wide_box_graphic() : unable to retrive {:?} {:?}", box_drawing_type, graphic)) as wchar_t)
+    WideChar::from(*WIDEBOXDRAWING.get(&MatrixKey::new(box_drawing_type, graphic)).unwrap_or_else(|| panic!("wide_box_graphic() : unable to retrive {:?}, {:?}", box_drawing_type, graphic)) as wchar_t)
 }
 
 /// Obtain the box drawing graphic of ComplexChar type.

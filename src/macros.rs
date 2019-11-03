@@ -39,7 +39,7 @@ macro_rules! nonblocking_get {
             // if $func returned Ok then return Ok(Some(result))
             let result = match self.$func() {
                 Err(source) => {
-                    if source == crate::timeout_error(&$str) {
+                    if source == crate::ncurseswwinerror::timeout_error(&$str) {
                         Ok(None)
                     } else {
                         Err(source)
@@ -73,7 +73,7 @@ macro_rules! nonblocking_get_with_origin {
             // if $func returned Ok then return Ok(Some(result))
             let result = match self.$func(origin) {
                 Err(source) => {
-                    if source == crate::timeout_error(&$str) {
+                    if source == crate::ncurseswwinerror::timeout_error(&$str) {
                         Ok(None)
                     } else {
                         Err(source)

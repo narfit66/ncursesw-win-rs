@@ -94,6 +94,6 @@ impl Into<mmask_t> for MouseEvent {
             MouseEvent::ButtonCtrl           => BUTTON_CTRL,
             MouseEvent::ButtonShift          => BUTTON_SHIFT,
             MouseEvent::ButtonAlt            => BUTTON_ALT
-        }.try_into().unwrap()
+        }.try_into().unwrap_or_else(|_| panic!("MouseEvent.into() out of bounds!"))
     }
 }

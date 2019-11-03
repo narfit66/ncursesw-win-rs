@@ -20,15 +20,21 @@
     IN THE SOFTWARE.
 */
 
-/// Boxdrawing type detail.
+/// Box drawing type detail.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum BoxDrawingTypeDetail {
+    /// Normal.
     Normal,
+    /// Left dash.
     LeftDash,
+    /// Right dash.
     RightDash,
+    /// Double dash.
     DoubleDash,
+    /// Triple dash.
     TripleDash,
+    /// Quadruple dash.
     QuadrupleDash
 }
 
