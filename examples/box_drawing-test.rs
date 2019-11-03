@@ -46,13 +46,10 @@ enum Corner {
 }
 
 fn main() {
-    match main_routine() {
-        Err(source) => match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
-        },
-        _           => ()
-    }
+    if let Err(source) = main_routine() { match source {
+        NCurseswWinError::Panic { message } => println!("panic: {}", message),
+        _                                   => println!("error: {}", source)
+    }}
 }
 
 fn main_routine() -> result!(()) {
