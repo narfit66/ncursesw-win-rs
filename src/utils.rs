@@ -27,7 +27,7 @@ use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED};
 use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes,
-    CursorType, LcCategory, SoftLabelType
+    CursorType, LcCategory
 };
 
 /// Set the locale to be used, required if using unicode representation.
@@ -172,18 +172,5 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
         let old_cursor = ncursesw::curs_set(cursor)?;
 
         Ok(old_cursor)
-    }
-}
-
-/// Define the softlabels line at the bottom of the screen.
-///
-/// This will be initialised when ncurses is initialised.
-pub fn slk_init(fmt: SoftLabelType) -> result!(()) {
-    if INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrAlreadyCalled)
-    } else {
-        ncursesw::slk_init(fmt)?;
-
-        Ok(())
     }
 }

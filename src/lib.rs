@@ -61,7 +61,7 @@ pub use ncursesw::{
 pub use ncursesw::{
     AttributesColorPairSet, BaseColor, Changed, CharacterResult,
     CursorType, Justification, KeyBinding, LcCategory, Legacy,
-    NCursesColorType, NCurseswError, Orientation, SoftLabelType
+    NCursesColorType, NCurseswError, Orientation
 };
 pub use ncursesw::{
     AttributesColorPairType, AttributesGeneric, AttributesType,
@@ -77,7 +77,7 @@ pub use ncursesw::{
     keybound, keyname, keyok, killchar, killwchar, longname,
     ncurses_colortype, ncurses_colortype_set, ncurses_version,
     reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
-    resize_term, resizeterm, setcchar, timeout, use_legacy_coding
+    resize_term, resizeterm, setcchar, use_legacy_coding
 };
 pub use ncursesw::mouse::OriginResult;
 pub use ncursesw::mouse::{
