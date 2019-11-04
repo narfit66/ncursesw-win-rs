@@ -59,11 +59,6 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
 
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
-        // if a resize event happens then error this back up the call chain.
-        // (to achive the same thing automatically without having to code
-        //  for KeyBinding::ResizeEvent have the ncursesw.key_resize_as_error
-        //  feature enabled and this will bubble up through the Err on the
-        //  initial match).
         let getch_result = match window.mvgetch_nonblocking(getch_origin, Some(time::Duration::new(5, 0))) {
             Err(err)  => return Err(err),
             Ok(value) => match value {
