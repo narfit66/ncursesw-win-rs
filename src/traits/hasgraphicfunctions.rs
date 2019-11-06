@@ -20,6 +20,9 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::never_loop)]
+#![allow(clippy::too_many_arguments)]
+
 use ncursesw::{
     AttributesColorPairType, AttributesColorPairSet, ChtypeChar, ComplexChar,
     ComplexString, Origin, Size, WideChar, getcchar

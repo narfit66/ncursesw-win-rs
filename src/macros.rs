@@ -50,7 +50,7 @@ macro_rules! nonblocking_get {
 
             // if we didn't error above then set the timeout back to what it
             // originally was.
-            if let Ok(_) = result {
+            if result.is_ok() {
                 self.set_timeout(orig_timeout)?
             }
 
@@ -84,7 +84,7 @@ macro_rules! nonblocking_get_with_origin {
 
             // if we didn't error above then set the timeout back to what it
             // originally was.
-            if let Ok(_) = result {
+            if result.is_ok() {
                 self.set_timeout(orig_timeout)?
             }
 

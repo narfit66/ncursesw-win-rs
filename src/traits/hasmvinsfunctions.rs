@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin, WideString};
+use ncursesw::{ChtypeChar, ComplexChar, Origin, WideString};
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
