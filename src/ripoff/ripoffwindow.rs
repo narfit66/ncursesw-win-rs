@@ -20,7 +20,8 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::WINDOW;
+use ncursesw::{Origin, WINDOW};
+use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
 /// A ripoff line window canvas.
@@ -61,6 +62,21 @@ impl RipoffWindow {
     // get the ncurses _win_st pointer for this Window structure.
     pub(in crate::ripoff) fn handle(&self) -> WINDOW {
         self.handle
+    }
+
+    /// get the cursor column on the ripoff window.
+    pub fn column(&self) -> result!(i32) {
+        match ncursesw::getcurx(self._handle()) {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(x)       => Ok(x)
+        }
+    }
+
+    /// set the cursor column on the ripoff window.
+    pub fn set_column(&self, column: i32) -> result!(()) {
+        ncursesw::wmove(self._handle(), Origin { y: 0, x: column })?;
+
+        Ok(())
     }
 }
 

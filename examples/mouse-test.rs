@@ -30,15 +30,15 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     // initialize ncurses in a safe way.
-    match ncursesw_entry(|window| {
+    if let Err(source) = ncursesw_entry(|window| {
         mouse_test(&window)
     }) {
-        Err(source) => match source {
+        match source {
             NCurseswWinError::Panic { message } => println!("panic: {}", message),
             _                                   => println!("error: {}", source)
-        },
-        _           => ()
+        }
     }
+
 }
 
 fn mouse_test(window: &Window) -> result!(()) {
