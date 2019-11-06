@@ -1,5 +1,5 @@
 /*
-    src/traits/hasadd.rs
+    src/traits/hasaddfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -25,7 +25,7 @@ use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw add functions.
-pub trait HasAdd: HasHandle {
+pub trait HasAddFunctions: HasHandle {
     fn addchnstr(&self, chstr: &ChtypeString, number: i32) -> result!(()) {
         ncursesw::waddchnstr(self._handle(), chstr, number)?;
 

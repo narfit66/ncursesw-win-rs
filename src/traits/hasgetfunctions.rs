@@ -1,5 +1,5 @@
 /*
-    src/traits/hasget.rs
+    src/traits/hasgetfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -28,7 +28,7 @@ use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw get functions.
-pub trait HasGet: HasHandle + HasNonBlocking {
+pub trait HasGetFunctions: HasHandle + HasNonBlocking {
     fn getch(&self) -> result!(CharacterResult<char>) {
         match ncursesw::wgetch(self._handle()) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),

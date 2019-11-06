@@ -31,7 +31,7 @@ pub enum _Direction {
     Vertical
 }
 
-pub trait GraphicsTransform: HasYXAxis + HasMvAdd + HasMvIn + HasMvIns {
+pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + HasMvInsFunctions {
     // if we are in the left or right edge of the window then change to the appropriate tee or corner character
     fn _transform_by_position(
         &self,

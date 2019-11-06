@@ -1,5 +1,5 @@
 /*
-    src/traits/hasmvdel.rs
+    src/traits/hasinsfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,14 +20,44 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::Origin;
+use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
-/// Does the window canvas type have ncursesw delete origin functions.
-pub trait HasMvDel: HasHandle + HasYXAxis {
-    fn mvdelch(&self, origin: Origin) -> result!(()) {
-        ncursesw::mvwdelch(self._handle(), origin)?;
+/// Does the window canvas type have ncursesw insert functions.
+pub trait HasInsFunctions: HasHandle {
+    fn insch(&self, ch: ChtypeChar) -> result!(()) {
+        ncursesw::winsch(self._handle(), ch)?;
+
+        Ok(())
+    }
+
+    fn insnstr(&self, str: &str, number: i32) -> result!(()) {
+        ncursesw::winsnstr(self._handle(), str, number)?;
+
+        Ok(())
+    }
+
+    fn ins_nwstr(&self, wstr: &WideString, number: i32) -> result!(()) {
+        ncursesw::wins_nwstr(self._handle(), wstr, number)?;
+
+        Ok(())
+    }
+
+    fn insstr(&self, str: &str) -> result!(()) {
+        ncursesw::winsstr(self._handle(), str)?;
+
+        Ok(())
+    }
+
+    fn ins_wch(&self, wch: ComplexChar) -> result!(()) {
+        ncursesw::wins_wch(self._handle(), wch)?;
+
+        Ok(())
+    }
+
+    fn ins_wstr(&self, wstr: &WideString) -> result!(()) {
+        ncursesw::wins_wstr(self._handle(), wstr)?;
 
         Ok(())
     }

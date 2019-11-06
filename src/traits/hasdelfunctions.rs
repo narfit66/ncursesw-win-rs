@@ -1,5 +1,5 @@
 /*
-    src/traits/hasdel.rs
+    src/traits/hasdelfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -24,7 +24,7 @@ use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw delete functions.
-pub trait HasDel: HasHandle {
+pub trait HasDelFunctions: HasHandle {
     fn delch(&self) -> result!(()) {
         ncursesw::wdelch(self._handle())?;
 

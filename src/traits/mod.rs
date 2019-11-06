@@ -20,17 +20,17 @@
     IN THE SOFTWARE.
 */
 
-mod hasadd;
-mod hasmvadd;
-mod hasdel;
-mod hasmvdel;
+mod hasaddfunctions;
+mod hasmvaddfunctions;
+mod hasdelfunctions;
+mod hasmvdelfunctions;
 mod graphicstransform;
-mod hasgraphics;
+mod hasgraphicfunctions;
 mod hashandle;
-mod hasin;
-mod hasmvin;
-mod hasins;
-mod hasmvins;
+mod hasinfunctions;
+mod hasmvinfunctions;
+mod hasinsfunctions;
+mod hasmvinsfunctions;
 mod hasyaxis;
 mod hasyxaxis;
 mod hasxaxis;
@@ -44,8 +44,8 @@ mod hasattributes;
 mod hasmvattributes;
 
 mod hasnonblocking;
-mod hasget;
-mod hasmvget;
+mod hasgetfunctions;
+mod hasmvgetfunctions;
 
 mod mouseable;
 
@@ -56,17 +56,17 @@ mod cansubwindow;
 mod ispad;
 mod iswindow;
 
-pub use crate::traits::hasadd::*;
-pub use crate::traits::hasmvadd::*;
-pub use crate::traits::hasdel::*;
-pub use crate::traits::hasmvdel::*;
+pub use crate::traits::hasaddfunctions::*;
+pub use crate::traits::hasmvaddfunctions::*;
+pub use crate::traits::hasdelfunctions::*;
+pub use crate::traits::hasmvdelfunctions::*;
 pub(in crate) use crate::traits::graphicstransform::*;
-pub use crate::traits::hasgraphics::*;
+pub use crate::traits::hasgraphicfunctions::*;
 pub(in crate) use crate::traits::hashandle::*;
-pub use crate::traits::hasin::*;
-pub use crate::traits::hasmvin::*;
-pub use crate::traits::hasins::*;
-pub use crate::traits::hasmvins::*;
+pub use crate::traits::hasinfunctions::*;
+pub use crate::traits::hasmvinfunctions::*;
+pub use crate::traits::hasinsfunctions::*;
+pub use crate::traits::hasmvinsfunctions::*;
 pub use crate::traits::hasyaxis::*;
 pub use crate::traits::hasyxaxis::*;
 pub use crate::traits::hasxaxis::*;
@@ -80,8 +80,8 @@ pub use crate::traits::hasattributes::*;
 pub use crate::traits::hasmvattributes::*;
 
 pub use crate::traits::hasnonblocking::*;
-pub use crate::traits::hasget::*;
-pub use crate::traits::hasmvget::*;
+pub use crate::traits::hasgetfunctions::*;
+pub use crate::traits::hasmvgetfunctions::*;
 
 pub use crate::traits::mouseable::*;
 

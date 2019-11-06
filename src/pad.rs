@@ -1,5 +1,5 @@
 /*
-    src/ripoff/ripoffwindow.rs
+    src/pad.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -23,54 +23,56 @@
 use ncursesw::WINDOW;
 use crate::traits::*;
 
-/// A ripoff line window canvas.
+/// A pad canvas.
 ///
 /// All methods are either there original ncurses name or were specificlly passed a pointer
 /// to `_win_st` the 'w' has been removed for example the ncurses function `mvwgetn_wstr()`
 /// has become the method `self.mvgetn_wstr()`.
-pub struct RipoffWindow {
-    handle: WINDOW // pointer to ncurses _win_st internal structure
+pub struct Pad {
+    handle:       WINDOW, // pointer to ncurses _win_st internal structure
+    free_on_drop: bool    // free WINDOW handle on drop of structure
 }
 
-impl HasHandle for RipoffWindow {
+impl HasHandle for Pad {
     fn _handle(&self) -> WINDOW {
-        self.handle()
-    }
-}
-
-impl IsWindow for RipoffWindow { }
-impl BaseCanvas for RipoffWindow { }
-impl Mouseable for RipoffWindow { }
-
-impl HasXAxis for RipoffWindow { }
-impl HasBackground for RipoffWindow { }
-impl HasAttributes for RipoffWindow { }
-impl HasAddFunctions for RipoffWindow { }
-impl HasDelFunctions for RipoffWindow { }
-impl HasInFunctions for RipoffWindow { }
-impl HasInsFunctions for RipoffWindow { }
-impl HasNonBlocking for RipoffWindow { }
-impl HasGetFunctions for RipoffWindow { }
-
-impl RipoffWindow {
-    // make a new instance from the passed ncurses _win_st pointer.
-    pub(in crate::ripoff) fn from(handle: WINDOW) -> Self {
-        Self { handle }
-    }
-
-    // get the ncurses _win_st pointer for this Window structure.
-    pub(in crate::ripoff) fn handle(&self) -> WINDOW {
         self.handle
     }
 }
 
-impl Drop for RipoffWindow {
+impl IsPad for Pad { }
+impl BaseCanvas for Pad { }
+impl Mouseable for Pad { }
+impl Scrollable for Pad { }
+
+impl HasYAxis for Pad { }
+impl HasYXAxis for Pad { }
+impl HasXAxis for Pad { }
+impl GraphicsTransform for Pad { }
+impl HasGraphicFunctions for Pad { }
+impl HasBackground for Pad { }
+impl HasAttributes for Pad { }
+impl HasMvAttributes for Pad { }
+impl HasAddFunctions for Pad { }
+impl HasMvAddFunctions for Pad { }
+impl HasDelFunctions for Pad { }
+impl HasMvDelFunctions for Pad { }
+impl HasInFunctions for Pad { }
+impl HasMvInFunctions for Pad { }
+impl HasInsFunctions for Pad { }
+impl HasMvInsFunctions for Pad { }
+impl HasNonBlocking for Pad { }
+impl HasGetFunctions for Pad { }
+impl HasMvGetFunctions for Pad { }
+
+impl Drop for Pad {
     fn drop(&mut self) {
-        if let Err(e) = ncursesw::delwin(self.handle) {
-            panic!(e.to_string())
+        if self.free_on_drop {
+            if let Err(e) = ncursesw::delwin(self.handle) {
+                panic!(e.to_string())
+            }
         }
     }
 }
 
-unsafe impl Send for RipoffWindow { } // too make thread safe
-unsafe impl Sync for RipoffWindow { } // too make thread safe
+unsafe impl Send for Pad { } // too make thread safe
+unsafe impl Sync for Pad { } // too make thread safe

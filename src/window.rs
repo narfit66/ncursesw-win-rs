@@ -52,21 +52,21 @@ impl HasYAxis for Window { }
 impl HasYXAxis for Window { }
 impl HasXAxis for Window { }
 impl GraphicsTransform for Window { }
-impl HasGraphics for Window { }
+impl HasGraphicFunctions for Window { }
 impl HasBackground for Window { }
 impl HasAttributes for Window { }
 impl HasMvAttributes for Window { }
-impl HasAdd for Window { }
-impl HasMvAdd for Window { }
-impl HasDel for Window { }
-impl HasMvDel for Window { }
-impl HasIn for Window { }
-impl HasMvIn for Window { }
-impl HasIns for Window { }
-impl HasMvIns for Window { }
+impl HasAddFunctions for Window { }
+impl HasMvAddFunctions for Window { }
+impl HasDelFunctions for Window { }
+impl HasMvDelFunctions for Window { }
+impl HasInFunctions for Window { }
+impl HasMvInFunctions for Window { }
+impl HasInsFunctions for Window { }
+impl HasMvInsFunctions for Window { }
 impl HasNonBlocking for Window { }
-impl HasGet for Window { }
-impl HasMvGet for Window { }
+impl HasGetFunctions for Window { }
+impl HasMvGetFunctions for Window { }
 
 impl Window {
     // make a new instance from the passed ncurses _win_st pointer and specify

@@ -1,5 +1,5 @@
 /*
-    src/traits/hasgraphics.rs
+    src/traits/hasgraphicfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{AttributesColorPairType, AttributesColorPairSet, ChtypeChar, ComplexChar, ComplexString, Origin, Size, WideChar, getcchar};
+use ncursesw::{
+    AttributesColorPairType, AttributesColorPairSet, ChtypeChar, ComplexChar,
+    ComplexString, Origin, Size, WideChar, getcchar
+};
 use crate::graphics::{
     WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic,
     HorizontalGraphic, VerticalGraphic
@@ -32,7 +35,7 @@ use crate::traits::*;
 const BOX_DRAWING_GRAPHIC_REMAP: bool = true;
 
 /// Does the window canvas type have ncursesw graphics functions.
-pub trait HasGraphics: HasYXAxis + HasMvAdd + HasMvIn + HasMvIns + GraphicsTransform {
+pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + HasMvInsFunctions + GraphicsTransform {
     fn border(
         &self,
         ls: ChtypeChar,

@@ -1,5 +1,5 @@
 /*
-    src/traits/hasmvadd.rs
+    src/traits/hasmvaddfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -25,7 +25,7 @@ use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw origin add functions.
-pub trait HasMvAdd: HasHandle + HasYXAxis {
+pub trait HasMvAddFunctions: HasHandle + HasYXAxis {
     fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, number: i32) -> result!(()) {
         ncursesw::mvwaddchnstr(self._handle(), origin, chstr, number)?;
 

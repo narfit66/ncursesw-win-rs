@@ -1,5 +1,5 @@
 /*
-    src/traits/hasmvins.rs
+    src/traits/hasmvdelfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,44 +20,14 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin, WideString};
+use ncursesw::Origin;
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
-/// Does the window canvas type have ncursesw insert origin functions.
-pub trait HasMvIns: HasHandle + HasYXAxis {
-    fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
-        ncursesw::mvwinsch(self._handle(), origin, ch)?;
-
-        Ok(())
-    }
-
-    fn mvinsnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
-        ncursesw::mvwinsnstr(self._handle(), origin, str, number)?;
-
-        Ok(())
-    }
-
-    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
-        ncursesw::mvwins_nwstr(self._handle(), origin, wstr, number)?;
-
-        Ok(())
-    }
-
-    fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
-        ncursesw::mvwinsstr(self._handle(), origin, str)?;
-
-        Ok(())
-    }
-
-    fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
-        ncursesw::mvwins_wch(self._handle(), origin, wch)?;
-
-        Ok(())
-    }
-
-    fn mvins_wstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
-        ncursesw::mvwins_wstr(self._handle(), origin, wstr)?;
+/// Does the window canvas type have ncursesw delete origin functions.
+pub trait HasMvDelFunctions: HasHandle + HasYXAxis {
+    fn mvdelch(&self, origin: Origin) -> result!(()) {
+        ncursesw::mvwdelch(self._handle(), origin)?;
 
         Ok(())
     }

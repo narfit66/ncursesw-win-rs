@@ -1,5 +1,5 @@
 /*
-    src/traits/hasins.rs
+    src/traits/hasmvinsfunctions.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,44 +20,44 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
+use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin, WideString};
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
-/// Does the window canvas type have ncursesw insert functions.
-pub trait HasIns: HasHandle {
-    fn insch(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::winsch(self._handle(), ch)?;
+/// Does the window canvas type have ncursesw insert origin functions.
+pub trait HasMvInsFunctions: HasHandle + HasYXAxis {
+    fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
+        ncursesw::mvwinsch(self._handle(), origin, ch)?;
 
         Ok(())
     }
 
-    fn insnstr(&self, str: &str, number: i32) -> result!(()) {
-        ncursesw::winsnstr(self._handle(), str, number)?;
+    fn mvinsnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
+        ncursesw::mvwinsnstr(self._handle(), origin, str, number)?;
 
         Ok(())
     }
 
-    fn ins_nwstr(&self, wstr: &WideString, number: i32) -> result!(()) {
-        ncursesw::wins_nwstr(self._handle(), wstr, number)?;
+    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
+        ncursesw::mvwins_nwstr(self._handle(), origin, wstr, number)?;
 
         Ok(())
     }
 
-    fn insstr(&self, str: &str) -> result!(()) {
-        ncursesw::winsstr(self._handle(), str)?;
+    fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
+        ncursesw::mvwinsstr(self._handle(), origin, str)?;
 
         Ok(())
     }
 
-    fn ins_wch(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::wins_wch(self._handle(), wch)?;
+    fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
+        ncursesw::mvwins_wch(self._handle(), origin, wch)?;
 
         Ok(())
     }
 
-    fn ins_wstr(&self, wstr: &WideString) -> result!(()) {
-        ncursesw::wins_wstr(self._handle(), wstr)?;
+    fn mvins_wstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
+        ncursesw::mvwins_wstr(self._handle(), origin, wstr)?;
 
         Ok(())
     }
