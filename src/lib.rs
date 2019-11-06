@@ -38,6 +38,7 @@ mod ncurses;
 mod ncurseswwinerror;
 mod panel;
 mod ripoff;
+mod traits;
 mod utils;
 mod window;
 
@@ -48,6 +49,7 @@ pub use ncurses::*;
 pub use ncurseswwinerror::*;
 pub use panel::*;
 pub use ripoff::*;
+pub use traits::*;
 pub use utils::*;
 pub use window::*;
 

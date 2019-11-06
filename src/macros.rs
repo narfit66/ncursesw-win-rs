@@ -27,7 +27,7 @@ macro_rules! character_result { ($t: ty) => { Option<CharacterResult<$t>> } }
 
 macro_rules! nonblocking_get {
     ($fname: ident, $func: ident, $str: expr, $result: ty) => {
-        pub fn $fname(&self, timeout: Timeout) -> result!(character_result!($result)) {
+        fn $fname(&self, timeout: Timeout) -> result!(character_result!($result)) {
             // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 
@@ -61,7 +61,7 @@ macro_rules! nonblocking_get {
 
 macro_rules! nonblocking_get_with_origin {
     ($fname: ident, $func: ident, $str: expr, $result: ident) => {
-        pub fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(character_result!($result)) {
+        fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(character_result!($result)) {
             // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 
