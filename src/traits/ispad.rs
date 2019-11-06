@@ -68,6 +68,12 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
         }
     }
 
+    fn putwin(&self, path: &path::Path) -> result!(()) {
+        ncursesw::putwin(self._handle(), path)?;
+
+        Ok(())
+    }
+
     fn overlay(&self, srcwin: &Pad) -> result!(()) {
         ncursesw::overlay(srcwin._handle(), self._handle())?;
 
