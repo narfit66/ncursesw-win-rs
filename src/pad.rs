@@ -64,6 +64,18 @@ impl HasNonBlocking for Pad { }
 impl HasGetFunctions for Pad { }
 impl HasMvGetFunctions for Pad { }
 
+impl Pad {
+    // make a new instance from the passed ncurses _win_st pointer and specify
+    // if the handle is to be free'd when the structure is dropped.
+    //
+    // free_on_drop is false in call's such as getparent(&self) where we are
+    // 'peeking' the Pad but it would be invalid to free the handle when
+    // our instance goes out of scope.
+    pub(crate) fn from(handle: WINDOW, free_on_drop: bool) -> Self {
+        Self { handle, free_on_drop }
+    }
+}
+
 impl Drop for Pad {
     fn drop(&mut self) {
         if self.free_on_drop {

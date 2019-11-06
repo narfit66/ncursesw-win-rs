@@ -20,6 +20,55 @@
     IN THE SOFTWARE.
 */
 
+use ncursesw::{Origin, Size};
+use crate::Window;
+use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
-pub trait NCurseswWindow: HasHandle + IsWindow { }
+/// Is the window canvas a ncursesw window type.
+pub trait NCurseswWindow: HasHandle + IsWindow {
+    /// Create a new instance of a Window
+    fn new(size: Size, origin: Origin) -> result!(Window) {
+        match ncursesw::newwin(size, origin) {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(handle)  => Ok(Window::from(handle, true))
+        }
+    }
+
+    #[deprecated(since = "0.3.1", note = "Use Window::new() instead")]
+    /// Create a new instance of a Window
+    fn newwin(size: Size, origin: Origin) -> result!(Window) {
+        Window::new(size, origin)
+    }
+
+    fn copywin(
+        &self,
+        dstwin: &Window,
+        smin: Origin,
+        dmin: Origin,
+        dmax: Origin,
+        overlay: bool) -> result!(())
+    {
+        ncursesw::copywin(self._handle(), dstwin._handle(), smin, dmin, dmax, overlay)?;
+
+        Ok(())
+    }
+
+    fn overlay(&self, srcwin: &Window) -> result!(()) {
+        ncursesw::overlay(srcwin._handle(), self._handle())?;
+
+        Ok(())
+    }
+
+    fn overwrite(&self, srcwin: &Window) -> result!(()) {
+        ncursesw::overwrite(srcwin._handle(), self._handle())?;
+
+        Ok(())
+    }
+
+    fn refresh(&self) -> result!(()) {
+        ncursesw::wrefresh(self._handle())?;
+
+        Ok(())
+    }
+}

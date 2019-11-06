@@ -86,7 +86,7 @@ pub use crate::traits::hasmvgetfunctions::*;
 pub use crate::traits::mouseable::*;
 
 pub use crate::traits::basecanvas::*;
-pub(in crate) use crate::traits::ncurseswwindow::*;
+pub use crate::traits::ncurseswwindow::*;
 pub use crate::traits::cansubwindow::*;
 
 pub use crate::traits::ispad::*;

@@ -25,64 +25,60 @@ use std::path;
 use ncursesw::{ChtypeChar, ComplexChar, Origin, Size};
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
-use crate::window::*;
+use crate::pad::*;
 
 /// is the window canvas type a pad.
-pub trait IsPad: HasHandle + Drop {
+pub trait IsPad: HasHandle + Drop + Sync + Send {
     /// Create a new instance of a Window that will act as a pad.
-    // TODO: change result to Pad when it's done.
-    fn newpad(size: Size) -> result!(Window) {
+    fn new(size: Size) -> result!(Pad) {
         match ncursesw::newpad(size) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Pad::from(handle, true))
         }
     }
 
-    // TODO: change result to Pad when it's done.
-    fn subpad(&self, size: Size, origin: Origin) -> result!(Window) {
+    #[deprecated(since = "0.3.1", note = "Use Pad::new() instead")]
+    /// Create a new instance of a Window that will act as a pad.
+    fn newpad(size: Size) -> result!(Pad) {
+        Pad::new(size)
+    }
+
+    fn subpad(&self, size: Size, origin: Origin) -> result!(Pad) {
         match ncursesw::subpad(self._handle(), size, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Pad::from(handle, true))
         }
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
-    // TODO: change result to Pad when it's done.
-    fn getparent(&self) -> Option<Window> {
+    fn getparent(&self) -> Option<Pad> {
         match ncursesw::wgetparent(self._handle()) {
             None         => None,
-            Some(handle) => Some(Window::from(handle, false))
+            Some(handle) => Some(Pad::from(handle, false))
         }
     }
 
     /// Create a Window instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
-    // TODO: change result to Pad when it's done.
-    fn getwin(path: &path::Path) -> result!(Window) {
+    fn getwin(path: &path::Path) -> result!(Pad) {
         match ncursesw::getwin(path) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Pad::from(handle, true))
         }
     }
 
-    // TODO: change result to Pad when it's done.
-    fn overlay(&self, srcwin: &Window) -> result!(()) {
+    fn overlay(&self, srcwin: &Pad) -> result!(()) {
         ncursesw::overlay(srcwin._handle(), self._handle())?;
 
         Ok(())
     }
 
-    // TODO: change result to Pad when it's done.
-    fn overwrite(&self, srcwin: &Window) -> result!(()) {
+    fn overwrite(&self, srcwin: &Pad) -> result!(()) {
         ncursesw::overwrite(srcwin._handle(), self._handle())?;
 
         Ok(())
     }
-
-    // make all the following deperciated and use Window equivilants
-    // eg. pechochar() -> echochar() but still calls ncursesw::pechochar().
-    // maybe move Window::echochar() to IsWindow.
 
     fn pechochar(&self, ch: ChtypeChar) -> result!(()) {
         ncursesw::pechochar(self._handle(), ch)?;

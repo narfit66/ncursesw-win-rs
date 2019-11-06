@@ -38,11 +38,17 @@ pub struct Panel {
 
 impl Panel {
     /// Create a new Panel instance with it's associated Window.
-    pub fn new_panel(window: &Window) -> result!(Self) {
+    pub fn new(window: &Window) -> result!(Self) {
         match panels::new_panel(window.handle()) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(handle)  => Ok(Self::from(handle, true))
         }
+    }
+
+    #[deprecated(since = "0.3.1", note = "Use Panel::new() instead")]
+    /// Create a new Panel instance with it's associated Window.
+    pub fn new_panel(window: &Window) -> result!(Self) {
+        Panel::new(window)
     }
 
     // make a new instance from the passed panel structure pointer and specify

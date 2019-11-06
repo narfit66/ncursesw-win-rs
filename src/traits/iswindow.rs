@@ -22,39 +22,18 @@
 
 use std::path;
 
-use ncursesw::{ChtypeChar, ComplexChar, Size, Origin};
+use ncursesw::{ChtypeChar, ComplexChar};
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 use crate::window::*;
 
 /// is the window canvas type a window.
 pub trait IsWindow: HasHandle + Drop {
-    /// Create a new instance of a Window
-    fn newwin(size: Size, origin: Origin) -> result!(Window) {
-        match ncursesw::newwin(size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
-        }
-    }
-
     fn dupwin(&self) -> result!(Window) {
         match ncursesw::dupwin(self._handle()) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(handle)  => Ok(Window::from(handle, true))
         }
-    }
-
-    fn copywin(
-        &self,
-        dstwin: &Window,
-        smin: Origin,
-        dmin: Origin,
-        dmax: Origin,
-        overlay: bool) -> result!(())
-    {
-        ncursesw::copywin(self._handle(), dstwin._handle(), smin, dmin, dmax, overlay)?;
-
-        Ok(())
     }
 
     /// Create a Window instance from a previous saved file.
@@ -65,18 +44,6 @@ pub trait IsWindow: HasHandle + Drop {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(handle)  => Ok(Window::from(handle, true))
         }
-    }
-
-    fn overlay(&self, srcwin: &Window) -> result!(()) {
-        ncursesw::overlay(srcwin._handle(), self._handle())?;
-
-        Ok(())
-    }
-
-    fn overwrite(&self, srcwin: &Window) -> result!(()) {
-        ncursesw::overwrite(srcwin._handle(), self._handle())?;
-
-        Ok(())
     }
 
     fn putwin(&self, path: &path::Path) -> result!(()) {
@@ -99,12 +66,6 @@ pub trait IsWindow: HasHandle + Drop {
 
     fn noutrefresh(&self) -> result!(()) {
         ncursesw::wnoutrefresh(self._handle())?;
-
-        Ok(())
-    }
-
-    fn refresh(&self) -> result!(()) {
-        ncursesw::wrefresh(self._handle())?;
 
         Ok(())
     }
