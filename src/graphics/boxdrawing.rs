@@ -39,15 +39,15 @@ pub(crate) struct MatrixKey {
 }
 
 impl MatrixKey {
-    fn new(box_drawing_type: BoxDrawingType, box_drawing_graphic: BoxDrawingGraphic) -> Self {
+    pub fn new(box_drawing_type: BoxDrawingType, box_drawing_graphic: BoxDrawingGraphic) -> Self {
         Self { box_drawing_type, box_drawing_graphic }
     }
 
-    pub(crate) fn box_drawing_type(&self) -> BoxDrawingType {
+    pub fn box_drawing_type(&self) -> BoxDrawingType {
         self.box_drawing_type
     }
 
-    pub(crate) fn box_drawing_graphic(&self) -> BoxDrawingGraphic {
+    pub fn box_drawing_graphic(&self) -> BoxDrawingGraphic {
         self.box_drawing_graphic
     }
 }

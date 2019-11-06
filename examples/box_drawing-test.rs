@@ -161,9 +161,9 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         //  feature enabled and this will bubble up through the Err on the
         //  initial match).
         match window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
-            Err(err)  => return Err(err),
+            Err(source) => return Err(source),
             #[cfg(feature = "key_resize_as_error")]
-            Ok(value) => if let Some(CharacterResult::Character(character)) = value {
+            Ok(value)   => if let Some(CharacterResult::Character(character)) = value {
                 if character == 'q' || character == 'Q' {
                     break;
                 }

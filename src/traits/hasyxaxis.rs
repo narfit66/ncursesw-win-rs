@@ -54,17 +54,12 @@ pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
 
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use cursor() instead")]
     fn getcuryx(&self) -> result!(Origin) {
-        match ncursesw::getcuryx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(origin)  => Ok(origin)
-        }
+        self.cursor()
     }
 
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_cursor() instead")]
     fn r#move(&self, origin: Origin) -> result!(()) {
-        ncursesw::wmove(self._handle(), origin)?;
-
-        Ok(())
+        self.set_cursor(origin)
     }
 
     fn redrawln(&self, region: Region) -> result!(()) {
