@@ -57,10 +57,7 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
                 } else if origin.y == max_y {
                     BoxDrawingGraphic::LowerLeftCorner
                 } else {
-                    match direction {
-                        _Direction::Vertical   => BoxDrawingGraphic::UpperTee,
-                        _Direction::Horizontal => BoxDrawingGraphic::LeftTee
-                    }
+                    box_drawing_graphic
                 }
             } else if origin.y == max_y {
                 if origin.x == 0 {
@@ -68,10 +65,7 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
                 } else if origin.x == max_x {
                     BoxDrawingGraphic::LowerRightCorner
                 } else {
-                    match direction {
-                        _Direction::Vertical   => BoxDrawingGraphic::LowerTee,
-                        _Direction::Horizontal => BoxDrawingGraphic::RightTee
-                    }
+                    box_drawing_graphic
                 }
             } else {
                 box_drawing_graphic
