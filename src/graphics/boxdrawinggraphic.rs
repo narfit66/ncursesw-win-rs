@@ -85,22 +85,6 @@ pub enum BoxDrawingGraphic {
 // of the window we will calculate a Plus with horizontal and vertical line types so we
 // will need to take this into account.
 
-/*
-   synopsis of TODO issue (can see it with top-left-corner and left-vertical-line).
-
-   what is happening:
-   const UPPERLEFTCORNER: u16     = 0b_000_011_010;
-   const LEFTVERTICALLINE: u16    = 0b_100_100_100;
-                                 0b_100_111_110 = ? = UPPERLEFTCORNER
-
-   what should be happening:
-   const UPPERLEFTCORNER: u16     = 0b_000_011_010;
-   const VERTICALLINE: u16        = 0b_010_010_010;
-                                 0b_010_011_010 = LEFTTEE
-
-   remapping of left/right/upper/lower not working
-*/
-
 const UPPERLEFTCORNER: u16     = 0b_000_011_010;
 const LOWERLEFTCORNER: u16     = 0b_010_011_000;
 const UPPERRIGHTCORNER: u16    = 0b_000_110_010;

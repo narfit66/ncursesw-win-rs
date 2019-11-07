@@ -48,10 +48,14 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
                 _Direction::Horizontal => box_drawing_graphic == BoxDrawingGraphic::UpperTee || box_drawing_graphic == BoxDrawingGraphic::LowerTee
             }
         } {
+            // as we have lready transformed our box drawing graphic before calling
+            // this routine let's just make sure that the graphic we are dealing with
+            // should be changed dependent on the position on the window.
+
             let max_y = self.getmaxy()?;
             let max_x = self.getmaxx()?;
 
-            Ok(if origin.x == 0 && origin.y != max_y {
+            Ok(if origin.x == 0 {
                 if origin.y == 0 {
                     BoxDrawingGraphic::UpperLeftCorner
                 } else if origin.y == max_y {
