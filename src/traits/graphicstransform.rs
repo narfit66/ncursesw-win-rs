@@ -20,8 +20,15 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{Origin};
-use crate::graphics::BoxDrawingGraphic;
+#![allow(clippy::never_loop)]
+
+use ncursesw::{
+    AttributesColorPairType, AttributesColorPairSet, ComplexChar,
+    Origin, WideChar, getcchar
+};
+use crate::graphics::{
+    WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic
+};
 use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
@@ -31,13 +38,46 @@ pub enum _Direction {
     Vertical
 }
 
+// constant to control remaping during BoxDrawingGraphic.transform()
+const BOX_DRAWING_GRAPHIC_REMAP: bool = true;
+
 pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + HasMvInsFunctions {
+    fn _transform_graphic(
+        &self,
+        current_complex_char: ComplexChar,
+        box_drawing_type:     BoxDrawingType,
+        box_drawing_graphic:  BoxDrawingGraphic,
+        origin:               Origin,
+        direction:            Option<_Direction>
+    ) -> result!(ComplexChar) {
+        let mut box_drawing_graphic = box_drawing_graphic;
+
+        let char_attr_pair = getcchar(current_complex_char)?;
+        let wchar: u32 = WideChar::into(char_attr_pair.character());
+
+        for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
+            let graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP);
+
+            box_drawing_graphic = match direction {
+                None            => graphic,
+                Some(direction) => self.__transform_by_position(graphic, origin, direction)?
+            };
+
+            break;
+        }
+
+        match char_attr_pair.attributes_and_color_pair() {
+            AttributesColorPairSet::Normal(set)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair()),
+            AttributesColorPairSet::Extended(set) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair())
+        }
+    }
+
     // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-    fn _transform_by_position(
+    fn __transform_by_position(
         &self,
         box_drawing_graphic: BoxDrawingGraphic,
-        origin: Origin,
-        direction: _Direction
+        origin:              Origin,
+        direction:           _Direction
     ) -> result!(BoxDrawingGraphic) {
         // can we transform our box_drawing_graphic
         if if box_drawing_graphic == BoxDrawingGraphic::Plus {
@@ -48,25 +88,25 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
                 _Direction::Horizontal => box_drawing_graphic == BoxDrawingGraphic::UpperTee || box_drawing_graphic == BoxDrawingGraphic::LowerTee
             }
         } {
-            // as we have lready transformed our box drawing graphic before calling
+            // as we have already transformed our box drawing graphic before calling
             // this routine let's just make sure that the graphic we are dealing with
-            // should be changed dependent on the position on the window.
+            // should be changed dependent it's position on the virtual window.
 
-            let max_y = self.getmaxy()?;
-            let max_x = self.getmaxx()?;
+            let max_y_axis = self.getmaxy()?;
+            let max_x_axis = self.getmaxx()?;
 
             Ok(if origin.x == 0 {
                 if origin.y == 0 {
                     BoxDrawingGraphic::UpperLeftCorner
-                } else if origin.y == max_y {
+                } else if origin.y == max_y_axis {
                     BoxDrawingGraphic::LowerLeftCorner
                 } else {
                     box_drawing_graphic
                 }
-            } else if origin.y == max_y {
+            } else if origin.y == max_y_axis {
                 if origin.x == 0 {
                     BoxDrawingGraphic::UpperRightCorner
-                } else if origin.x == max_x {
+                } else if origin.x == max_x_axis {
                     BoxDrawingGraphic::LowerRightCorner
                 } else {
                     box_drawing_graphic
@@ -77,5 +117,30 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         } else {
             Ok(box_drawing_graphic)
         }
+    }
+
+    // put a complex chr on a virtual window (self) at a given origin.
+    fn _put_complex_char(
+        &self,
+        origin:                     Origin,
+        current_complex_char:       ComplexChar,
+        new_complex_char:           ComplexChar
+    ) -> result!(()) {
+        // only update our virtual screen if required.
+        if current_complex_char != new_complex_char {
+            // define the bottom right origin of the screen.
+            let screen_bottom_right_origin = Origin { y: ncursesw::LINES() - 1, x: ncursesw::COLS() - 1 };
+
+            // if we are at the bottom right origin of the screen then
+            // insert our new graphic otherwise add the character
+            // (mvadd_wch() will error otherwise!).
+            if origin == screen_bottom_right_origin {
+                self.mvins_wch(origin, new_complex_char)?;
+            } else {
+                self.mvadd_wch(origin, new_complex_char)?;
+            }
+        }
+
+        Ok(())
     }
 }

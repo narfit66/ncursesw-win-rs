@@ -27,10 +27,9 @@ extern crate lazy_static;
 extern crate strum;
 extern crate strum_macros;
 
-use std::time;
-
 mod macros;
 
+mod funcs;
 mod graphics;
 mod inputmode;
 mod mouse;
@@ -39,10 +38,11 @@ mod ncurseswwinerror;
 mod pad;
 mod panel;
 mod ripoff;
+mod timeout;
 mod traits;
-mod utils;
 mod window;
 
+pub use funcs::*;
 pub use graphics::*;
 pub use inputmode::*;
 pub use mouse::*;
@@ -51,8 +51,8 @@ pub use ncurseswwinerror::*;
 pub use pad::*;
 pub use panel::*;
 pub use ripoff::*;
+pub use timeout::*;
 pub use traits::*;
-pub use utils::*;
 pub use window::*;
 
 pub use ncursesw::normal;
@@ -87,6 +87,3 @@ pub use ncursesw::mouse::{
     has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,
     mouse_version, has_mouse_interface
 };
-
-/// Timeout type, None represents blocking mode.
-pub type Timeout = Option<time::Duration>;

@@ -27,6 +27,9 @@ use std::collections::HashMap;
 
 use crate::ncurseswwinerror::NCurseswWinError;
 
+// Uniform the size of the mask for BoxDrawingGraphic.
+type GraphicMask = u16;
+
 /// The box drawing graphic characters.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BoxDrawingGraphic {
@@ -85,24 +88,24 @@ pub enum BoxDrawingGraphic {
 // of the window we will calculate a Plus with horizontal and vertical line types so we
 // will need to take this into account.
 
-const UPPERLEFTCORNER: u16     = 0b_000_011_010;
-const LOWERLEFTCORNER: u16     = 0b_010_011_000;
-const UPPERRIGHTCORNER: u16    = 0b_000_110_010;
-const LOWERRIGHTCORNER: u16    = 0b_010_110_000;
-const RIGHTTEE: u16            = 0b_010_110_010;
-const LEFTTEE: u16             = 0b_010_011_010;
-const LOWERTEE: u16            = 0b_010_111_000;
-const UPPERTEE: u16            = 0b_000_111_010;
-const HORIZONTALLINE: u16      = 0b_000_111_000;
-const UPPERHORIZONTALLINE: u16 = 0b_111_000_000;
-const LOWERHORIZONTALLINE: u16 = 0b_000_000_111;
-const VERTICALLINE: u16        = 0b_010_010_010;
-const LEFTVERTICALLINE: u16    = 0b_100_100_100;
-const RIGHTVERTICALLINE: u16   = 0b_001_001_001;
-const PLUS: u16                = 0b_010_111_010;
+const UPPERLEFTCORNER: GraphicMask     = 0b_000_011_010;
+const LOWERLEFTCORNER: GraphicMask     = 0b_010_011_000;
+const UPPERRIGHTCORNER: GraphicMask    = 0b_000_110_010;
+const LOWERRIGHTCORNER: GraphicMask    = 0b_010_110_000;
+const RIGHTTEE: GraphicMask            = 0b_010_110_010;
+const LEFTTEE: GraphicMask             = 0b_010_011_010;
+const LOWERTEE: GraphicMask            = 0b_010_111_000;
+const UPPERTEE: GraphicMask            = 0b_000_111_010;
+const HORIZONTALLINE: GraphicMask      = 0b_000_111_000;
+const UPPERHORIZONTALLINE: GraphicMask = 0b_111_000_000;
+const LOWERHORIZONTALLINE: GraphicMask = 0b_000_000_111;
+const VERTICALLINE: GraphicMask        = 0b_010_010_010;
+const LEFTVERTICALLINE: GraphicMask    = 0b_100_100_100;
+const RIGHTVERTICALLINE: GraphicMask   = 0b_001_001_001;
+const PLUS: GraphicMask                = 0b_010_111_010;
 
-impl Into<u16> for BoxDrawingGraphic {
-    fn into(self) -> u16 {
+impl Into<GraphicMask> for BoxDrawingGraphic {
+    fn into(self) -> GraphicMask {
         match self {
             BoxDrawingGraphic::UpperLeftCorner     => UPPERLEFTCORNER,
             BoxDrawingGraphic::LowerLeftCorner     => LOWERLEFTCORNER,
@@ -123,10 +126,10 @@ impl Into<u16> for BoxDrawingGraphic {
     }
 }
 
-impl TryFrom<u16> for BoxDrawingGraphic {
+impl TryFrom<GraphicMask> for BoxDrawingGraphic {
     type Error = NCurseswWinError;
 
-    fn try_from(raw: u16) -> Result<Self, Self::Error> {
+    fn try_from(raw: GraphicMask) -> Result<Self, Self::Error> {
         match raw {
             UPPERLEFTCORNER     => Ok(BoxDrawingGraphic::UpperLeftCorner),
             LOWERLEFTCORNER     => Ok(BoxDrawingGraphic::LowerLeftCorner),
@@ -150,7 +153,7 @@ impl TryFrom<u16> for BoxDrawingGraphic {
 
 impl BoxDrawingGraphic {
     pub(in crate) fn transform(self, rhs: Self, remap: bool) -> Self {
-        let into_value = |box_drawing_graphic: Self| -> u16 {
+        let into_value = |box_drawing_graphic: Self| -> GraphicMask {
             Self::into(match box_drawing_graphic {
                 BoxDrawingGraphic::UpperHorizontalLine |
                 BoxDrawingGraphic::LowerHorizontalLine => if remap {

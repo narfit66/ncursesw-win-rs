@@ -27,37 +27,25 @@ use crate::traits::*;
 /// Does the window canvas have an x and y axis.
 pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use origin() instead")]
+    /// get the origin of the window.
     fn getbegyx(&self) -> result!(Origin) {
         self.origin()
     }
 
-    /// get the origin of the window.
-    fn origin(&self) -> result!(Origin) {
-        match ncursesw::getbegyx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(origin)  => Ok(origin)
-        }
-    }
-
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use size() instead")]
+    /// get the size of the window.
     fn getmaxyx(&self) -> result!(Size) {
         self.size()
     }
 
-    /// get the size of the window.
-    fn size(&self) -> result!(Size) {
-        match ncursesw::getmaxyx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(size)    => Ok(size)
-        }
-    }
-
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use cursor() instead")]
+    /// get the cursor origin on the window.
     fn getcuryx(&self) -> result!(Origin) {
         self.cursor()
     }
 
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_cursor() instead")]
+    /// set the cursor origin on the window.
     fn r#move(&self, origin: Origin) -> result!(()) {
         self.set_cursor(origin)
     }
@@ -74,6 +62,34 @@ pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
         Ok(())
     }
 
+    fn touchline(&self, region: Region) -> result!(()) {
+        ncursesw::touchline(self._handle(), region.top, region.bottom - region.top)?;
+
+        Ok(())
+    }
+
+    fn touchln(&self, region: Region, changed: Changed) -> result!(()) {
+        ncursesw::wtouchln(self._handle(), region.top, region.bottom - region.top, changed)?;
+
+        Ok(())
+    }
+
+    /// get the origin of the window.
+    fn origin(&self) -> result!(Origin) {
+        match ncursesw::getbegyx(self._handle()) {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(origin)  => Ok(origin)
+        }
+    }
+
+    /// get the size of the window.
+    fn size(&self) -> result!(Size) {
+        match ncursesw::getmaxyx(self._handle()) {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(size)    => Ok(size)
+        }
+    }
+
     /// get the cursor origin on the window.
     fn cursor(&self) -> result!(Origin) {
         match ncursesw::getcuryx(self._handle()) {
@@ -85,18 +101,6 @@ pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
     /// set the cursor origin on the window.
     fn set_cursor(&self, origin: Origin) -> result!(()) {
         ncursesw::wmove(self._handle(), origin)?;
-
-        Ok(())
-    }
-
-    fn touchline(&self, region: Region) -> result!(()) {
-        ncursesw::touchline(self._handle(), region.top, region.bottom - region.top)?;
-
-        Ok(())
-    }
-
-    fn touchln(&self, region: Region, changed: Changed) -> result!(()) {
-        ncursesw::wtouchln(self._handle(), region.top, region.bottom - region.top, changed)?;
 
         Ok(())
     }

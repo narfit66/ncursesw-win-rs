@@ -1,5 +1,5 @@
 /*
-    src/utils.rs
+    src/funcs.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
