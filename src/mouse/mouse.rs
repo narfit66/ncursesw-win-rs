@@ -23,9 +23,7 @@
 use std::hash::{Hash, Hasher};
 
 use crate::mouse::mouseevents::MouseEvents;
-use crate::mouse::mousemask::MouseMask;
-use crate::mouse::mouseorigin::MouseOrigin;
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{MouseMask, MouseOrigin, NCurseswWinError};
 use ncursesw::mouse::{MEVENT, mousemask, getmouse, ungetmouse};
 
 /// A mouse pointer device.

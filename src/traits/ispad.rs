@@ -23,9 +23,8 @@
 use std::path;
 
 use ncursesw::{ChtypeChar, ComplexChar, Origin, Size};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{Pad, NCurseswWinError};
 use crate::traits::*;
-use crate::pad::*;
 
 /// is the window canvas type a pad.
 pub trait IsPad: HasHandle + Drop + Sync + Send {

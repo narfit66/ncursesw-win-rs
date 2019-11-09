@@ -21,7 +21,7 @@
 */
 
 use ncursesw::{AttributesType, ColorPairType, ColorAttributeTypes, Origin};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw attribute origin functions.

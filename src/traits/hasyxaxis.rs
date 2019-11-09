@@ -21,7 +21,7 @@
 */
 
 use ncursesw::{Changed, Origin, Region, Size};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas have an x and y axis.

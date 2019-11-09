@@ -20,12 +20,8 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::panels;
-use ncursesw::panels::PANEL;
-use ncursesw::Origin;
-
-use crate::window::Window;
-use crate::ncurseswwinerror::NCurseswWinError;
+use ncursesw::{panels, panels::PANEL, Origin};
+use crate::{Window, NCurseswWinError};
 
 /// A raw pointer that can be user defined.
 pub type PanelUserPtr = panels::PANEL_USERPTR;

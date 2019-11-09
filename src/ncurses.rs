@@ -27,8 +27,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use ncursesw;
 use ncursesw::WINDOW;
-use crate::window::Window;
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{Window, NCurseswWinError};
 
 lazy_static! {
     pub(crate) static ref INITSCR_CALLED: AtomicBool = AtomicBool::new(false);

@@ -25,7 +25,7 @@
 use std::convert::{TryFrom, Into};
 use std::collections::HashMap;
 
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 
 // Uniform the size of the mask for BoxDrawingGraphic.
 type GraphicMask = u16;

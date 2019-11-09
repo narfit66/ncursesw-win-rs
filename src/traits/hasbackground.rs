@@ -21,7 +21,7 @@
 */
 
 use ncursesw::{ChtypeChar, ComplexChar};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw background functions.

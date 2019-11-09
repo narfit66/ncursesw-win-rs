@@ -23,11 +23,10 @@
 #![macro_use]
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
-macro_rules! character_result { ($t: ty) => { Option<CharacterResult<$t>> } }
 
 macro_rules! nonblocking_get {
-    ($fname: ident, $func: ident, $str: expr, $result: ty) => {
-        fn $fname(&self, timeout: Timeout) -> result!(character_result!($result)) {
+    ($fname: ident, $func: ident, $str: expr, $type: ty) => {
+        fn $fname(&self, timeout: Timeout) -> result!(NonBlockingResult<$type>) {
             // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 
@@ -60,8 +59,8 @@ macro_rules! nonblocking_get {
 }
 
 macro_rules! nonblocking_get_with_origin {
-    ($fname: ident, $func: ident, $str: expr, $result: ident) => {
-        fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(character_result!($result)) {
+    ($fname: ident, $func: ident, $str: expr, $type: ident) => {
+        fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(NonBlockingResult<$type>) {
             // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 

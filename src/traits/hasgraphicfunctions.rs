@@ -25,10 +25,10 @@
 use ncursesw::{
     ChtypeChar, ComplexChar, ComplexString, Origin, Size
 };
-use crate::graphics::{
-    BoxDrawingType, BoxDrawingGraphic, HorizontalGraphic, VerticalGraphic
+use crate::{
+    BoxDrawingType, BoxDrawingGraphic, HorizontalGraphic, VerticalGraphic,
+    NCurseswWinError
 };
-use crate::ncurseswwinerror::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw graphics functions.

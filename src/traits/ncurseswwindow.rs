@@ -21,8 +21,7 @@
 */
 
 use ncursesw::{Origin, Size};
-use crate::Window;
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{Window, NCurseswWinError};
 use crate::traits::*;
 
 /// Is the window canvas a ncursesw window type.

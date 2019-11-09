@@ -29,7 +29,7 @@ use ncursesw::{
 use crate::graphics::{
     WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic
 };
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

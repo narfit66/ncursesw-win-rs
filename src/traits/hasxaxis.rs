@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas have an x-axis.

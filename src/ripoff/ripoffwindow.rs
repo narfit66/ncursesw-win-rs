@@ -21,7 +21,7 @@
 */
 
 use ncursesw::{Origin, WINDOW};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// A ripoff line window canvas.

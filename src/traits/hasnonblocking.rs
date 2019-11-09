@@ -23,9 +23,8 @@
 use std::time;
 use std::convert::TryFrom;
 
-use crate::Timeout;
 use ncursesw::NCurseswError;
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{Timeout, NCurseswWinError};
 use crate::traits::*;
 
 /// Does the window canvas type support non-blocking functions.

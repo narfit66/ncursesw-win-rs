@@ -25,9 +25,8 @@ use std::sync::Mutex;
 
 use ncursesw;
 use ncursesw::{WINDOW, Orientation};
-use crate::ripoff::RipoffWindow;
+use crate::{RipoffWindow, NCurseswWinError};
 use crate::ncurses::INITSCR_CALLED;
-use crate::ncurseswwinerror::NCurseswWinError;
 
 pub(crate) const MAX_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
 

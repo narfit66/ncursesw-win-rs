@@ -1,5 +1,5 @@
 /*
-    src/mouse/mousebuttonstate.rs
+    src/nonblockingresult.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,36 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::fmt::{Display, Formatter, Result};
+use ncursesw::CharacterResult;
 
-use crate::{MouseButton, MouseButtonEvent};
-
-/// A mouse button's state.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct MouseButtonState {
-    button: MouseButton,
-    event:  MouseButtonEvent
-}
-
-impl MouseButtonState {
-    /// Create a new `MouseButtonState`.
-    pub fn new(button: MouseButton, event: MouseButtonEvent) -> Self {
-        Self { button, event }
-    }
-
-    /// The mouse button.
-    pub fn button(self) -> MouseButton {
-        self.button
-    }
-
-    /// The mouse event.
-    pub fn event(self) -> MouseButtonEvent {
-        self.event
-    }
-}
-
-impl Display for MouseButtonState {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "(button: {}, event: {})", self.button, self.event)
-    }
-}
+/// Non-Blocking get function return type, None is a timeout.
+pub type NonBlockingResult<T> = Option<CharacterResult<T>>;

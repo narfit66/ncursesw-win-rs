@@ -23,7 +23,7 @@
 #![allow(deprecated)]
 
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw in functions.

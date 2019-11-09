@@ -20,12 +20,9 @@
     IN THE SOFTWARE.
 */
 
-#![allow(clippy::never_loop)]
-
 use std::collections::HashMap;
 
-use crate::graphics::{BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic, NCurseswWinError};
 use ncursesw::{
     ChtypeChar, WideChar, ComplexChar,
     AttributesType, ColorPairType, ColorAttributeTypes

@@ -20,9 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType};
-use ncursesw::normal;
-use crate::ncurseswwinerror::NCurseswWinError;
+use ncursesw::{
+    AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType, normal
+};
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw attribute type functions.

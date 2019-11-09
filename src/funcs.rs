@@ -22,9 +22,8 @@
 
 use std::sync::atomic::Ordering;
 
-use crate::inputmode::InputMode;
+use crate::{InputMode, NCurseswWinError};
 use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED};
-use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes,
     CursorType, LcCategory

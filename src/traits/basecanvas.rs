@@ -22,7 +22,7 @@
 
 use std::path;
 
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw add functions.

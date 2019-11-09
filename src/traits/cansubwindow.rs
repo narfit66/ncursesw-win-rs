@@ -21,7 +21,7 @@
 */
 
 use ncursesw::{Origin, Size};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::window::*;
 use crate::traits::*;
 

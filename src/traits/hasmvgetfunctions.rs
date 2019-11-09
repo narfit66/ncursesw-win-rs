@@ -22,9 +22,8 @@
 
 #![allow(deprecated)]
 
-use crate::Timeout;
 use ncursesw::{CharacterResult, Origin, WideChar, WideString};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::{NonBlockingResult, Timeout, NCurseswWinError};
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw get origin functions.

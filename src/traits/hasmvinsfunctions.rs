@@ -21,7 +21,7 @@
 */
 
 use ncursesw::{ChtypeChar, ComplexChar, Origin, WideString};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Does the window canvas type have ncursesw insert origin functions.

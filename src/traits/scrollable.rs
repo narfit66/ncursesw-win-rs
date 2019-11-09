@@ -21,7 +21,7 @@
 */
 
 use ncursesw::Region;
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use crate::traits::*;
 
 /// Is the window canvas type scrollable.

@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use crate::graphics::BoxDrawingTypeDetail;
+use crate::BoxDrawingTypeDetail;
 
 /// Box drawing type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]

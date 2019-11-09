@@ -25,7 +25,7 @@
 use std::convert::TryInto;
 
 use ncursesw::mouse::{mmask_t, REPORT_MOUSE_POSITION, ALL_MOUSE_EVENTS};
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 
 /// The type of events the mouse will report.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
