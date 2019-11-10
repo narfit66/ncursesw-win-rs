@@ -57,9 +57,7 @@ pub use timeout::*;
 pub use traits::*;
 pub use window::*;
 
-pub use ncursesw::normal;
-pub use ncursesw::extend;
-
+pub use ncursesw::{normal, extend};
 pub use ncursesw::{
     ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin,
     Region, Size, WideChar, WideCharAndAttributes, WideString

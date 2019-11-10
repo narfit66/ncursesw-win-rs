@@ -77,50 +77,86 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         Ok(())
     }
 
-    fn hline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
-        ncursesw::whline(self._handle(), ch, number)?;
+    fn hline(&self, ch: ChtypeChar, length: i32) -> result!(()) {
+        assert!(length > 0, "hline() : length={} > 0", length);
+
+        ncursesw::whline(self._handle(), ch, length)?;
 
         Ok(())
     }
 
-    fn hline_set(&self, wch: ComplexChar, number: i32) -> result!(()) {
-        ncursesw::whline_set(self._handle(), wch, number)?;
+    fn hline_set(&self, wch: ComplexChar, length: i32) -> result!(()) {
+        assert!(length > 0, "hline_set() : length={} > 0", length);
+
+        ncursesw::whline_set(self._handle(), wch, length)?;
 
         Ok(())
     }
 
-    fn mvhline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
-        ncursesw::mvwhline(self._handle(), origin, ch, number)?;
+    fn mvhline(&self, origin: Origin, ch: ChtypeChar, length: i32) -> result!(()) {
+        assert!(length > 0, "mvhline() : length={} > 0", length);
+
+        // get the right most edge of the window.
+        let max_x = self.getmaxx()?;
+
+        assert!(origin.x + length <= max_x, "mvhline() : attempting to write over window edge, origin.x={} + length={} <= max_x={}", origin.x, length, max_x);
+
+        ncursesw::mvwhline(self._handle(), origin, ch, length)?;
 
         Ok(())
     }
 
-    fn mvhline_set(&self, origin: Origin, wch: ComplexChar, number: i32) -> result!(()) {
-        ncursesw::mvwhline_set(self._handle(), origin, wch, number)?;
+    fn mvhline_set(&self, origin: Origin, wch: ComplexChar, length: i32) -> result!(()) {
+        assert!(length > 0, "mvhline_set() : length={} > 0", length);
+
+        // get the right most edge of the window.
+        let max_x = self.getmaxx()?;
+
+        assert!(origin.x + length <= max_x, "mvhline_set() : attempting to write over window edge, origin.x={} + length={} <= max_x={}", origin.x, length, max_x);
+
+        ncursesw::mvwhline_set(self._handle(), origin, wch, length)?;
 
         Ok(())
     }
 
-    fn mvvline(&self, origin: Origin, ch: ChtypeChar, number: i32) -> result!(()) {
-        ncursesw::mvwvline(self._handle(), origin, ch, number)?;
+    fn mvvline(&self, origin: Origin, ch: ChtypeChar, length: i32) -> result!(()) {
+        assert!(length > 0, "mvvline() : length={} > 0", length);
+
+        // get the bottom edge of the window.
+        let max_y = self.getmaxy()?;
+
+        assert!(origin.y + length <= max_y, "mvvline() : attempting to write over window edge, origin.y={} + length={} <= max_y={}", origin.y, length, max_y);
+
+        ncursesw::mvwvline(self._handle(), origin, ch, length)?;
 
         Ok(())
     }
 
-    fn mvvline_set(&self, origin: Origin, wch: ComplexChar, number: i32) -> result!(()) {
-        ncursesw::mvwvline_set(self._handle(), origin, wch, number)?;
+    fn mvvline_set(&self, origin: Origin, wch: ComplexChar, length: i32) -> result!(()) {
+        assert!(length > 0, "mvvline_set() : length={} > 0", length);
+
+        // get the bottom edge of the window.
+        let max_y = self.getmaxy()?;
+
+        assert!(origin.y + length <= max_y, "mvvline_set() : attempting to write over window edge, origin.y={} + length={} <= max_y={}", origin.y, length, max_y);
+
+        ncursesw::mvwvline_set(self._handle(), origin, wch, length)?;
 
         Ok(())
     }
 
-    fn vline(&self, ch: ChtypeChar, number: i32) -> result!(()) {
-        ncursesw::wvline(self._handle(), ch, number)?;
+    fn vline(&self, ch: ChtypeChar, length: i32) -> result!(()) {
+        assert!(length > 0, "vline() : length={} > 0", length);
+
+        ncursesw::wvline(self._handle(), ch, length)?;
 
         Ok(())
     }
 
-    fn vline_set(&self, wch: ComplexChar, number: i32) -> result!(()) {
-        ncursesw::wvline_set(self._handle(), wch, number)?;
+    fn vline_set(&self, wch: ComplexChar, length: i32) -> result!(()) {
+        assert!(length > 0, "vline_set() : length={} > 0", length);
+
+        ncursesw::wvline_set(self._handle(), wch, length)?;
 
         Ok(())
     }
@@ -136,8 +172,6 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         graphic:          HorizontalGraphic,
         length:           i32
     ) -> result!(()) {
-        assert!(length > 0, "thline_set() : length={} > 0", length);
-
         self.mvthline_set(self.cursor()?, box_drawing_type, graphic, length)
     }
 
@@ -153,6 +187,11 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
     ) -> result!(()) {
         assert!(length > 0, "mvthline_set() : length={} > 0", length);
 
+        // get the right most edge of the window.
+        let max_x = self.getmaxx()?;
+
+        assert!(origin.x + length <= max_x, "mvthline_set() : attempting to write over window edge, origin.x={} + length={} <= max_x={}", origin.x, length, max_x);
+
         // build a vector of the complex characters we are going to overwrite
         let complex_chars: Vec<ComplexChar> = ComplexString::into(self.mvin_wchnstr(origin, length)?);
         let mut line_origin = origin;
@@ -166,6 +205,8 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
 
         // iterate over the vector of complex characters
         for &complex_char in &complex_chars {
+            // transform our default graphic character with the existing
+            // complex character in the cell of the virtual window.
             let graphic_char = self._transform_graphic(
                 complex_char,
                 box_drawing_type,
@@ -174,12 +215,14 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
                 Some(_Direction::Horizontal)
             )?;
 
+            // write the character to the virtual window.
             self._put_complex_char(line_origin, complex_char, graphic_char)?;
 
+            // increment our x-axis.
             line_origin.x += 1;
 
             // check if we've reached the right edge of the window
-            if line_origin.x >= self.getmaxx()? {
+            if line_origin.x >= max_x {
                 break;
             }
         }
@@ -196,8 +239,6 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         graphic:          VerticalGraphic,
         length:           i32
     ) -> result!(()) {
-        assert!(length > 0, "tvline_set() : length={} > 0", length);
-
         self.mvtvline_set(self.cursor()?, box_drawing_type, graphic, length)
     }
 
@@ -213,6 +254,11 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
     ) -> result!(()) {
         assert!(length > 0, "mvtvline_set() : length={} > 0", length);
 
+        // get the bottom edge of the window.
+        let max_y = self.getmaxy()?;
+
+        assert!(origin.y + length <= max_y, "mvtvline_set() : attempting to write over window edge, origin.y={} + length={} <= max_y={}", origin.y, length, max_y);
+
         let mut complex_chars = vec!();
         let mut line_origin = origin;
 
@@ -222,6 +268,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
             line_origin.y += 1;
         }
 
+        // reset the origin secified.
         line_origin = origin;
 
         // define our default graphic character to use
@@ -233,6 +280,8 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
 
         // iterate over the vector of complex characters
         for &complex_char in &complex_chars {
+            // transform our default graphic character with the existing
+            // complex character in the cell of the virtual window.
             let graphic_char = self._transform_graphic(
                 complex_char,
                 box_drawing_type,
@@ -241,12 +290,14 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
                 Some(_Direction::Vertical)
             )?;
 
+            // write the character to the virtual window.
             self._put_complex_char(line_origin, complex_char, graphic_char)?;
 
+            // increment our y-axis.
             line_origin.y += 1;
 
             // check if we've reached the bottom edge of the window
-            if line_origin.y >= self.getmaxy()? {
+            if line_origin.y >= max_y {
                 break;
             }
         }
@@ -274,7 +325,16 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         size:             Size,
         box_drawing_type: BoxDrawingType
     ) -> result!(()) {
+        // get the size of the window.
+        let window_size = self.size()?;
+
+        assert!(origin.y + size.lines <= window_size.lines, "mvtbox_set() : attempting to write over window edge, origin.y={} + size.lines={} <= window_size.lines={}", origin.y, size.lines, window_size.lines);
+        assert!(origin.x + size.columns <= window_size.columns, "mvtbox_set() : attempting to write over window edge, origin.x={} + size.columns={} <= window_size.columns={}", origin.y, size.columns, window_size.columns);
+
+        // write a corner graphic to the virtual window.
         let set_corner_char = |corner_origin: Origin, box_drawing_graphic: BoxDrawingGraphic| -> result!(()) {
+            // transform our default graphic character with the existing
+            // complex character in the cell of the virtual window.
             let graphic_char = self._transform_graphic(
                 self.mvin_wch(corner_origin)?,
                 box_drawing_type,
@@ -283,6 +343,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
                 None
             )?;
 
+            // write the character to the virtual window.
             self._put_complex_char(corner_origin, self.mvin_wch(corner_origin)?, graphic_char)
         };
 
