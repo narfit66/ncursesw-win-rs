@@ -167,6 +167,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
     ) -> result!(()) {
         assert_origin_hlength!("mvthline_set", self.size()?, origin, length);
 
+        // get number of columns in the virtual window.
         let max_x = self.getmaxx()?;
 
         // build a vector of the complex characters we are going to overwrite
@@ -231,6 +232,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
     ) -> result!(()) {
         assert_origin_vlength!("mvtvline_set", self.size()?, origin, length);
 
+        // get number of lines in the virtual window.
         let max_y = self.getmaxy()?;
 
         let mut complex_chars = vec!();
@@ -301,17 +303,15 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
     ) -> result!(()) {
         let _window_size = self.size()?; // get the size of the window.
 
-        assert!(
-            origin.y >= 0 && origin.y <= _window_size.lines && origin.x >= 0 && origin.x <= _window_size.columns,
-            "mvtbox_set() : origin is invalid, origin={}", origin
-        );
+        assert_origin!("mvtbox_set", _window_size, origin);
+        assert!(size.lines >= 2 && size.columns >= 2, "mvtbox_set() : size is invalid, size={}", size);
         assert!(
             origin.y + size.lines <= _window_size.lines,
             "mvtbox_set() : attempting to write over window edge, origin.y={} + size.lines={} <= window_size.lines={}", origin.y, size.lines, _window_size.lines
         );
         assert!(
             origin.x + size.columns <= _window_size.columns,
-            "mvtbox_set() : attempting to write over window edge, origin.x={} + size.columns={} <= window_size.columns={}", origin.y, size.columns, _window_size.columns
+            "mvtbox_set() : attempting to write over window edge, origin.x={} + size.columns={} <= window_size.columns={}", origin.x, size.columns, _window_size.columns
         );
 
         // write a corner graphic to the virtual window.
@@ -336,10 +336,17 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         set_corner_char(Origin { y: origin.y + (size.lines - 1), x: origin.x }, BoxDrawingGraphic::LowerLeftCorner)?;
         set_corner_char(Origin { y: origin.y + (size.lines - 1), x: origin.x + (size.columns - 1) }, BoxDrawingGraphic::LowerRightCorner)?;
 
-        // ...then do the top, bottom, left and right sides of the box
-        self.mvthline_set(Origin { y: origin.y, x: origin.x + 1}, box_drawing_type, HorizontalGraphic::Upper, size.columns - 2)?;
-        self.mvthline_set(Origin { y: origin.y + (size.lines - 1), x: origin.x + 1}, box_drawing_type, HorizontalGraphic::Lower, size.columns - 2)?;
-        self.mvtvline_set(Origin { y: origin.y + 1, x: origin.x }, box_drawing_type, VerticalGraphic::Left, size.lines - 2)?;
-        self.mvtvline_set(Origin { y: origin.y + 1, x: origin.x + (size.columns - 1)}, box_drawing_type, VerticalGraphic::Right, size.lines - 2)
+        // ...then do the top, bottom, left and right sides of the box if required.
+        if size.columns > 2 {
+            self.mvthline_set(Origin { y: origin.y, x: origin.x + 1}, box_drawing_type, HorizontalGraphic::Upper, size.columns - 2)?;
+            self.mvthline_set(Origin { y: origin.y + (size.lines - 1), x: origin.x + 1}, box_drawing_type, HorizontalGraphic::Lower, size.columns - 2)?;
+        }
+
+        if size.lines > 2 {
+            self.mvtvline_set(Origin { y: origin.y + 1, x: origin.x }, box_drawing_type, VerticalGraphic::Left, size.lines - 2)?;
+            self.mvtvline_set(Origin { y: origin.y + 1, x: origin.x + (size.columns - 1)}, box_drawing_type, VerticalGraphic::Right, size.lines - 2)?;
+        }
+
+        Ok(())
     }
 }

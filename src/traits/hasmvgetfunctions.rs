@@ -84,6 +84,6 @@ pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
         }
     }
 
-    nonblocking_get_with_origin!(mvgetch_nonblocking, mvgetch, "mvwgetch", char);
-    nonblocking_get_with_origin!(mvget_wch_nonblocking, mvget_wch, "mvwget_wch", WideChar);
+    nonblocking_get_with_origin!(mvgetch_nonblocking, "mvgetch_nonblocking", mvgetch, "mvwgetch", char);
+    nonblocking_get_with_origin!(mvget_wch_nonblocking, "mvget_wch_nonblocking", mvget_wch, "mvwget_wch", WideChar);
 }

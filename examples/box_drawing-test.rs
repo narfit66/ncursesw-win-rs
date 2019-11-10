@@ -138,8 +138,8 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         // generate 20 random sized box's and add them with a random origin.
         for _ in 0..20 {
             let box_size = Size {
-                lines:   rng.gen_range(10, window_size.lines - 10),
-                columns: rng.gen_range(10, window_size.columns - 10)
+                lines:   rng.gen_range(2, window_size.lines - 2),
+                columns: rng.gen_range(2, window_size.columns - 2)
             };
 
             let box_origin = Origin {

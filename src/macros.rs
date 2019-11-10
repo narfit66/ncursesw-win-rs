@@ -104,7 +104,7 @@ macro_rules! nonblocking_get {
             // if we didn't error above then set the timeout back to what it
             // originally was.
             if result.is_ok() {
-                self.set_timeout(orig_timeout)?
+                self.set_timeout(orig_timeout)?;
             }
 
             result
@@ -113,9 +113,9 @@ macro_rules! nonblocking_get {
 }
 
 macro_rules! nonblocking_get_with_origin {
-    ($fname: ident, $func: ident, $str: expr, $type: ident) => {
+    ($fname: ident, $fname_str: expr, $func: ident, $str: expr, $type: ident) => {
         fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(NonBlockingResult<$type>) {
-            assert_origin!($str, self.size()?, origin);
+            assert_origin!($fname_str, self.size()?, origin);
 
             // remember the original timeout
             let orig_timeout = self.get_timeout()?;
@@ -140,7 +140,7 @@ macro_rules! nonblocking_get_with_origin {
             // if we didn't error above then set the timeout back to what it
             // originally was.
             if result.is_ok() {
-                self.set_timeout(orig_timeout)?
+                self.set_timeout(orig_timeout)?;
             }
 
             result
