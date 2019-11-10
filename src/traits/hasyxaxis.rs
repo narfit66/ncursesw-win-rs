@@ -47,28 +47,38 @@ pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_cursor() instead")]
     /// set the cursor origin on the window.
     fn r#move(&self, origin: Origin) -> result!(()) {
+        assert_origin!("move", self.size()?, origin);
+
         self.set_cursor(origin)
     }
 
     fn redrawln(&self, region: Region) -> result!(()) {
+        assert_region!("redrawln", self.size()?, region);
+
         ncursesw::wredrawln(self._handle(), region.top, region.bottom - region.top)?;
 
         Ok(())
     }
 
     fn resize(&self, size: Size) -> result!(()) {
+        assert!(size.lines >= 0 && size.columns >= 0, "resize() : size is invalid, size={}", size);
+
         ncursesw::wresize(self._handle(), size)?;
 
         Ok(())
     }
 
     fn touchline(&self, region: Region) -> result!(()) {
+        assert_region!("touchline", self.size()?, region);
+
         ncursesw::touchline(self._handle(), region.top, region.bottom - region.top)?;
 
         Ok(())
     }
 
     fn touchln(&self, region: Region, changed: Changed) -> result!(()) {
+        assert_region!("touchln", self.size()?, region);
+
         ncursesw::wtouchln(self._handle(), region.top, region.bottom - region.top, changed)?;
 
         Ok(())
@@ -100,6 +110,8 @@ pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
 
     /// set the cursor origin on the window.
     fn set_cursor(&self, origin: Origin) -> result!(()) {
+        assert_origin!("set_cursor", self.size()?, origin);
+
         ncursesw::wmove(self._handle(), origin)?;
 
         Ok(())

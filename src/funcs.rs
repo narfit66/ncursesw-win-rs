@@ -22,7 +22,7 @@
 
 use std::sync::atomic::Ordering;
 
-use crate::{InputMode, NCurseswWinError};
+use crate::{InputMode, Origin, Size, NCurseswWinError};
 use crate::ncurses::{INITSCR_CALLED, COLOR_STARTED};
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes,
@@ -172,4 +172,14 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
 
         Ok(old_cursor)
     }
+}
+
+/// The terminal/screen `Size` i.e. lines and columns using 0,0 as top left.
+pub fn terminal_size() -> Size {
+    Size { lines: ncursesw::LINES() - 1, columns: ncursesw::COLS() - 1 }
+}
+
+// The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
+pub(in crate) fn terminal_bottom_right_origin() -> Origin {
+    Origin { y: ncursesw::LINES() - 1, x: ncursesw::COLS() - 1 }
 }

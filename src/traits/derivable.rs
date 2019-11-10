@@ -35,6 +35,8 @@ pub trait Derivable: HasHandle + NCurseswWindow + HasYXAxis + IsWindow {
     }
 
     fn mvderwin(&self, origin: Origin) -> result!(()) {
+        assert_origin!("mvderwin", self.size()?, origin);
+
         ncursesw::mvderwin(self._handle(), origin)?;
 
         Ok(())

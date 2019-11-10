@@ -24,6 +24,60 @@
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
+macro_rules! assert_length {
+    ($str: expr, $length: expr) => {
+        assert!($length > 0, "{}() : length={} > 0", $str, $length);
+    }
+}
+
+macro_rules! assert_origin {
+    ($str: expr, $window_size: expr, $origin: expr) => {
+        let _window_size = $window_size;
+
+        assert!(
+            $origin.y >= 0 && $origin.y <= _window_size.lines && $origin.x >= 0 && $origin.x <= _window_size.columns,
+            "{}() : origin is invalid, origin={}, window_size={}", $str, $origin, _window_size
+        );
+    }
+}
+
+macro_rules! assert_region {
+    ($str: expr, $window_size: expr, $region: expr) => {
+        let _window_size = $window_size;
+
+        assert!(
+            $region.top >= 0 && $region.bottom >= 0 && $region.top < $region.bottom && $region.bottom <= _window_size.lines,
+            "{}() : region is invalid, region={}, window_size={}", $str, $region, _window_size
+        );
+    }
+}
+
+macro_rules! assert_origin_hlength {
+    ($str: expr, $window_size: expr, $origin: expr, $length: expr) => {
+        let _window_size = $window_size;
+
+        assert_length!($str, $length);
+        assert_origin!($str, _window_size, $origin);
+        assert!(
+            $origin.x + $length <= _window_size.columns,
+            "{}() : attempting to write over window edge, origin.x={} + length={} <= window_size.columns={}", $str, $origin.x, $length, _window_size.columns
+        );
+    }
+}
+
+macro_rules! assert_origin_vlength {
+    ($str: expr, $window_size: expr, $origin: expr, $length: expr) => {
+        let _window_size = $window_size;
+
+        assert_length!($str, $length);
+        assert_origin!($str, _window_size, $origin);
+        assert!(
+            $origin.y + $length <= _window_size.lines,
+            "{}() : attempting to write over window edge, origin.y={} + length={} <= window_size.lines={}", $str, $origin.y, $length, _window_size.lines
+        );
+    }
+}
+
 macro_rules! nonblocking_get {
     ($fname: ident, $func: ident, $str: expr, $type: ty) => {
         fn $fname(&self, timeout: Timeout) -> result!(NonBlockingResult<$type>) {
@@ -61,6 +115,8 @@ macro_rules! nonblocking_get {
 macro_rules! nonblocking_get_with_origin {
     ($fname: ident, $func: ident, $str: expr, $type: ident) => {
         fn $fname(&self, origin: Origin, timeout: Timeout) -> result!(NonBlockingResult<$type>) {
+            assert_origin!($str, self.size()?, origin);
+
             // remember the original timeout
             let orig_timeout = self.get_timeout()?;
 

@@ -90,12 +90,14 @@ pub trait HasAttributes: HasHandle {
         Ok(())
     }
 
-    fn chgat<A, P, T>(&self, number: i32, attrs: A, color_pair: P) -> result!(())
+    fn chgat<A, P, T>(&self, length: i32, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        ncursesw::wchgat(self._handle(), number, attrs, color_pair)?;
+        assert_length!("chgat", length);
+
+        ncursesw::wchgat(self._handle(), length, attrs, color_pair)?;
 
         Ok(())
     }

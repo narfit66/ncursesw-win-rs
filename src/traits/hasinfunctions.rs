@@ -28,8 +28,10 @@ use crate::traits::*;
 
 /// Does the window canvas type have ncursesw in functions.
 pub trait HasInFunctions: HasHandle {
-    fn inchnstr(&self, number: i32) -> result!(ChtypeString) {
-        match ncursesw::winchnstr(self._handle(), number) {
+    fn inchnstr(&self, length: i32) -> result!(ChtypeString) {
+        assert_length!("inchnstr", length);
+
+        match ncursesw::winchnstr(self._handle(), length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(chstr)   => Ok(chstr)
         }
@@ -47,15 +49,19 @@ pub trait HasInFunctions: HasHandle {
         }
     }
 
-    fn innstr(&self, number: i32) -> result!(String) {
-        match ncursesw::winnstr(self._handle(), number) {
+    fn innstr(&self, length: i32) -> result!(String) {
+        assert_length!("innstr", length);
+
+        match ncursesw::winnstr(self._handle(), length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
         }
     }
 
-    fn innwstr(&self, number: i32) -> result!(WideString) {
-        match ncursesw::winnwstr(self._handle(), number) {
+    fn innwstr(&self, length: i32) -> result!(WideString) {
+        assert_length!("innwstr", length);
+
+        match ncursesw::winnwstr(self._handle(), length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
         }
@@ -69,8 +75,10 @@ pub trait HasInFunctions: HasHandle {
         }
     }
 
-    fn in_wchnstr(&self, number: i32) -> result!(ComplexString) {
-        match ncursesw::win_wchnstr(self._handle(), number) {
+    fn in_wchnstr(&self, length: i32) -> result!(ComplexString) {
+        assert_length!("in_wchnstr", length);
+
+        match ncursesw::win_wchnstr(self._handle(), length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(cstr)    => Ok(cstr)
         }

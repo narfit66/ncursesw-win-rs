@@ -32,14 +32,18 @@ pub trait HasInsFunctions: HasHandle {
         Ok(())
     }
 
-    fn insnstr(&self, str: &str, number: i32) -> result!(()) {
-        ncursesw::winsnstr(self._handle(), str, number)?;
+    fn insnstr(&self, str: &str, length: i32) -> result!(()) {
+        assert_length!("insnstr", length);
+
+        ncursesw::winsnstr(self._handle(), str, length)?;
 
         Ok(())
     }
 
-    fn ins_nwstr(&self, wstr: &WideString, number: i32) -> result!(()) {
-        ncursesw::wins_nwstr(self._handle(), wstr, number)?;
+    fn ins_nwstr(&self, wstr: &WideString, length: i32) -> result!(()) {
+        assert_length!("ins_nwstr", length);
+
+        ncursesw::wins_nwstr(self._handle(), wstr, length)?;
 
         Ok(())
     }

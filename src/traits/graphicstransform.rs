@@ -50,6 +50,8 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         origin:               Origin,
         direction:            Option<_Direction>
     ) -> result!(ComplexChar) {
+        assert_origin!("_transform_graphic", self.size()?, origin);
+
         let mut box_drawing_graphic = box_drawing_graphic;
 
         let char_attr_pair = getcchar(current_complex_char)?;
@@ -126,15 +128,14 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         current_complex_char:       ComplexChar,
         new_complex_char:           ComplexChar
     ) -> result!(()) {
+        assert_origin!("_put_complex_char", self.size()?, origin);
+
         // only update our virtual screen if required.
         if current_complex_char != new_complex_char {
-            // define the bottom right origin of the screen.
-            let screen_bottom_right_origin = Origin { y: ncursesw::LINES() - 1, x: ncursesw::COLS() - 1 };
-
             // if we are at the bottom right origin of the screen then
             // insert our new graphic otherwise add the character
             // (mvadd_wch() will error otherwise!).
-            if origin == screen_bottom_right_origin {
+            if origin == crate::terminal_bottom_right_origin() {
                 self.mvins_wch(origin, new_complex_char)?;
             } else {
                 self.mvadd_wch(origin, new_complex_char)?;

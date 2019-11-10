@@ -29,21 +29,27 @@ use crate::traits::*;
 /// Does the window canvas type have ncursesw get origin functions.
 pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
     fn mvgetch(&self, origin: Origin) -> result!(CharacterResult<char>) {
+        assert_origin!("mvgetch", self.size()?, origin);
+
         match ncursesw::mvwgetch(self._handle(), origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(result)  => Ok(result)
         }
     }
 
-    fn mvgetnstr(&self, origin: Origin, number: i32) -> result!(String) {
-        match ncursesw::mvwgetnstr(self._handle(), origin, number) {
+    fn mvgetnstr(&self, origin: Origin, length: i32) -> result!(String) {
+        assert_origin_hlength!("mvgetnstr", self.size()?, origin, length);
+
+        match ncursesw::mvwgetnstr(self._handle(), origin, length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
         }
     }
 
-    fn mvgetn_wstr(&self, origin: Origin, number: i32) -> result!(WideString) {
-        match ncursesw::mvwgetn_wstr(self._handle(), origin, number) {
+    fn mvgetn_wstr(&self, origin: Origin, length: i32) -> result!(WideString) {
+        assert_origin_hlength!("mvgetn_wstr", self.size()?, origin, length);
+
+        match ncursesw::mvwgetn_wstr(self._handle(), origin, length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
         }
@@ -51,6 +57,8 @@ pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetnstr() instead")]
     fn mvgetstr(&self, origin: Origin) -> result!(String) {
+        assert_origin!("mvgetstr", self.size()?, origin);
+
         match ncursesw::mvwgetstr(self._handle(), origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
@@ -58,6 +66,8 @@ pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
     }
 
     fn mvget_wch(&self, origin: Origin) -> result!(CharacterResult<WideChar>) {
+        assert_origin!("mvget_wch", self.size()?, origin);
+
         match ncursesw::mvwget_wch(self._handle(), origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(result)  => Ok(result)
@@ -66,6 +76,8 @@ pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetn_wstr() instead")]
     fn mvget_wstr(&self, origin: Origin) -> result!(WideString) {
+        assert_origin!("mvget_wstr", self.size()?, origin);
+
         match ncursesw::mvwget_wstr(self._handle(), origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)

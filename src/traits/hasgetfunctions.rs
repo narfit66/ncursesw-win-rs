@@ -35,15 +35,19 @@ pub trait HasGetFunctions: HasHandle + HasNonBlocking {
         }
     }
 
-    fn getnstr(&self, number: i32) -> result!(String) {
-        match ncursesw::wgetnstr(self._handle(), number) {
+    fn getnstr(&self, length: i32) -> result!(String) {
+        assert_length!("getnstr", length);
+
+        match ncursesw::wgetnstr(self._handle(), length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(str)     => Ok(str)
         }
     }
 
-    fn getn_wstr(&self, number: i32) -> result!(WideString) {
-        match ncursesw::wgetn_wstr(self._handle(), number) {
+    fn getn_wstr(&self, length: i32) -> result!(WideString) {
+        assert_length!("getn_wstr", length);
+
+        match ncursesw::wgetn_wstr(self._handle(), length) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(wstr)    => Ok(wstr)
         }

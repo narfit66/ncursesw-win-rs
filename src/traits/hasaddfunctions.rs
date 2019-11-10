@@ -26,8 +26,10 @@ use crate::traits::*;
 
 /// Does the window canvas type have ncursesw add functions.
 pub trait HasAddFunctions: HasHandle {
-    fn addchnstr(&self, chstr: &ChtypeString, number: i32) -> result!(()) {
-        ncursesw::waddchnstr(self._handle(), chstr, number)?;
+    fn addchnstr(&self, chstr: &ChtypeString, length: i32) -> result!(()) {
+        assert_length!("addchnstr", length);
+
+        ncursesw::waddchnstr(self._handle(), chstr, length)?;
 
         Ok(())
     }
@@ -44,14 +46,18 @@ pub trait HasAddFunctions: HasHandle {
         Ok(())
     }
 
-    fn addnstr(&self, str: &str, number: i32) -> result!(()) {
-        ncursesw::waddnstr(self._handle(), str, number)?;
+    fn addnstr(&self, str: &str, length: i32) -> result!(()) {
+        assert_length!("addnstr", length);
+
+        ncursesw::waddnstr(self._handle(), str, length)?;
 
         Ok(())
     }
 
-    fn addnwstr(&self, wstr: &WideString, number: i32) -> result!(()) {
-        ncursesw::waddnwstr(self._handle(), wstr, number)?;
+    fn addnwstr(&self, wstr: &WideString, length: i32) -> result!(()) {
+        assert_length!("addnwstr", length);
+
+        ncursesw::waddnwstr(self._handle(), wstr, length)?;
 
         Ok(())
     }
@@ -62,8 +68,10 @@ pub trait HasAddFunctions: HasHandle {
         Ok(())
     }
 
-    fn add_wchnstr(&self, wchstr: &ComplexString, number: i32) -> result!(()) {
-        ncursesw::wadd_wchnstr(self._handle(), wchstr, number)?;
+    fn add_wchnstr(&self, wchstr: &ComplexString, length: i32) -> result!(()) {
+        assert_length!("add_wchnstr", length);
+
+        ncursesw::wadd_wchnstr(self._handle(), wchstr, length)?;
 
         Ok(())
     }

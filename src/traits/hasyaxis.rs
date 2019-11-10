@@ -46,13 +46,17 @@ pub trait HasYAxis: HasHandle {
         }
     }
 
-    fn insdelln(&self, number: i32) -> result!(()) {
-        ncursesw::winsdelln(self._handle(), number)?;
+    fn insdelln(&self, length: i32) -> result!(()) {
+        assert_length!("insdelln", length);
+
+        ncursesw::winsdelln(self._handle(), length)?;
 
         Ok(())
     }
 
     fn is_linetouched(&self, line: i32) -> bool {
+        assert!(line > 0, "is_linetouched() : line={} > 0", line);
+
         ncursesw::is_linetouched(self._handle(), line)
     }
 }

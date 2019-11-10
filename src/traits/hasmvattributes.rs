@@ -26,12 +26,14 @@ use crate::traits::*;
 
 /// Does the window canvas type have ncursesw attribute origin functions.
 pub trait HasMvAttributes: HasHandle + HasYXAxis {
-    fn mvchgat<A, P, T>(&self, origin: Origin, number: i32, attrs: A, color_pair: P) -> result!(())
+    fn mvchgat<A, P, T>(&self, origin: Origin, length: i32, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        ncursesw::mvwchgat(self._handle(), origin, number, attrs, color_pair)?;
+        assert_origin_hlength!("mvchgat", self.size()?, origin, length);
+
+        ncursesw::mvwchgat(self._handle(), origin, length, attrs, color_pair)?;
 
         Ok(())
     }

@@ -173,12 +173,6 @@ pub trait BaseCanvas: HasHandle {
         Ok(())
     }
 
-    /*pub fn noutrefresh(&self) -> result!(()) {
-        ncursesw::wnoutrefresh(self.handle)?;
-
-        Ok(())
-    }*/
-
     fn putwin(&self, path: &path::Path) -> result!(()) {
         ncursesw::putwin(self._handle(), path)?;
 
@@ -190,18 +184,6 @@ pub trait BaseCanvas: HasHandle {
 
         Ok(())
     }
-
-    /*pub fn refresh(&self) -> result!(()) {
-        ncursesw::wrefresh(self.handle)?;
-
-        Ok(())
-    }
-
-    pub fn resize(&self, size: Size) -> result!(()) {
-        ncursesw::wresize(self.handle, size)?;
-
-        Ok(())
-    }*/
 
     fn syncdown(&self) {
         ncursesw::wsyncdown(self._handle());

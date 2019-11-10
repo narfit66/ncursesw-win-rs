@@ -27,36 +27,48 @@ use crate::traits::*;
 /// Does the window canvas type have ncursesw insert origin functions.
 pub trait HasMvInsFunctions: HasHandle + HasYXAxis {
     fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
+        assert_origin!("mvinsch", self.size()?, origin);
+
         ncursesw::mvwinsch(self._handle(), origin, ch)?;
 
         Ok(())
     }
 
-    fn mvinsnstr(&self, origin: Origin, str: &str, number: i32) -> result!(()) {
-        ncursesw::mvwinsnstr(self._handle(), origin, str, number)?;
+    fn mvinsnstr(&self, origin: Origin, str: &str, length: i32) -> result!(()) {
+        assert_origin_hlength!("mvinsnstr", self.size()?, origin, length);
+
+        ncursesw::mvwinsnstr(self._handle(), origin, str, length)?;
 
         Ok(())
     }
 
-    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, number: i32) -> result!(()) {
-        ncursesw::mvwins_nwstr(self._handle(), origin, wstr, number)?;
+    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, length: i32) -> result!(()) {
+        assert_origin_hlength!("mvins_nwstr", self.size()?, origin, length);
+
+        ncursesw::mvwins_nwstr(self._handle(), origin, wstr, length)?;
 
         Ok(())
     }
 
     fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
+        assert_origin!("mvinsstr", self.size()?, origin);
+
         ncursesw::mvwinsstr(self._handle(), origin, str)?;
 
         Ok(())
     }
 
     fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
+        assert_origin!("mvins_wch", self.size()?, origin);
+
         ncursesw::mvwins_wch(self._handle(), origin, wch)?;
 
         Ok(())
     }
 
     fn mvins_wstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
+        assert_origin!("mvins_wstr", self.size()?, origin);
+
         ncursesw::mvwins_wstr(self._handle(), origin, wstr)?;
 
         Ok(())
