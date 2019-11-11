@@ -165,10 +165,9 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         graphic:          HorizontalGraphic,
         length:           i32
     ) -> result!(()) {
-        assert_origin_hlength!("mvthline_set", self.size()?, origin, length);
+        let window_size = self.size()?;
 
-        // get number of columns in the virtual window.
-        let max_x = self.getmaxx()?;
+        assert_origin_hlength!("mvthline_set", window_size, origin, length);
 
         // build a vector of the complex characters we are going to overwrite
         let complex_chars: Vec<ComplexChar> = ComplexString::into(self.mvin_wchnstr(origin, length)?);
@@ -200,7 +199,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
             line_origin.x += 1;
 
             // check if we've reached the right edge of the window
-            if line_origin.x >= max_x {
+            if line_origin.x >= window_size.columns {
                 break;
             }
         }
@@ -230,10 +229,9 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         graphic:          VerticalGraphic,
         length:           i32
     ) -> result!(()) {
-        assert_origin_vlength!("mvtvline_set", self.size()?, origin, length);
+        let window_size = self.size()?;
 
-        // get number of lines in the virtual window.
-        let max_y = self.getmaxy()?;
+        assert_origin_vlength!("mvtvline_set", window_size, origin, length);
 
         let mut complex_chars = vec!();
         let mut line_origin = origin;
@@ -273,7 +271,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
             line_origin.y += 1;
 
             // check if we've reached the bottom edge of the window
-            if line_origin.y >= max_y {
+            if line_origin.y >= window_size.lines {
                 break;
             }
         }

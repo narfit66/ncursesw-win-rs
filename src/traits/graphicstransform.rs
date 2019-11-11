@@ -23,16 +23,16 @@
 #![allow(clippy::never_loop)]
 
 use ncursesw::{
-    AttributesColorPairType, AttributesColorPairSet, ComplexChar,
-    Origin, WideChar, getcchar
+    AttributesColorPairType, AttributesColorPairSet, ComplexChar, Origin, WideChar,
+    getcchar
 };
-use crate::graphics::{
-    WIDEBOXDRAWING, complex_box_graphic, BoxDrawingType, BoxDrawingGraphic
+use crate::graphics::WIDEBOXDRAWING;
+use crate::{
+    BoxDrawingType, BoxDrawingGraphic, NCurseswWinError,
+    complex_box_graphic
 };
-use crate::NCurseswWinError;
 use crate::traits::*;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum _Direction {
     Horizontal,
     Vertical
@@ -50,7 +50,9 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         origin:               Origin,
         direction:            Option<_Direction>
     ) -> result!(ComplexChar) {
-        assert_origin!("_transform_graphic", self.size()?, origin);
+        let window_size = self.size()?;
+
+        assert_origin!("_transform_graphic", window_size, origin);
 
         let mut box_drawing_graphic = box_drawing_graphic;
 
@@ -61,8 +63,23 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
             let graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP);
 
             box_drawing_graphic = match direction {
-                None            => graphic,
-                Some(direction) => self.__transform_by_position(graphic, origin, direction)?
+                // if we are doing a vertical or horizontal line then don't
+                // transform by position on the virtual window.
+                Some(_) => graphic,
+                // as we've just transformed our box drawing graphic then let's
+                // just make sure if the graphic we are dealing with should be
+                // changed dependent it's position on the virtual window.
+                None    => if origin.x == 0 && origin.y == 0 {
+                    BoxDrawingGraphic::UpperLeftCorner
+                } else if origin.x == 0 && origin.y == window_size.lines {
+                    BoxDrawingGraphic::LowerLeftCorner
+                } else if origin.x == window_size.columns && origin.y == 0 {
+                    BoxDrawingGraphic::UpperRightCorner
+                } else if origin.x == window_size.columns && origin.y == window_size.lines {
+                    BoxDrawingGraphic::LowerRightCorner
+                } else {
+                    graphic
+                }
             };
 
             break;
@@ -71,53 +88,6 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         match char_attr_pair.attributes_and_color_pair() {
             AttributesColorPairSet::Normal(set)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair()),
             AttributesColorPairSet::Extended(set) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair())
-        }
-    }
-
-    // if we are in the left or right edge of the window then change to the appropriate tee or corner character
-    fn __transform_by_position(
-        &self,
-        box_drawing_graphic: BoxDrawingGraphic,
-        origin:              Origin,
-        direction:           _Direction
-    ) -> result!(BoxDrawingGraphic) {
-        // can we transform our box_drawing_graphic
-        if if box_drawing_graphic == BoxDrawingGraphic::Plus {
-            true
-        } else {
-            match direction {
-                _Direction::Vertical   => box_drawing_graphic == BoxDrawingGraphic::LeftTee || box_drawing_graphic == BoxDrawingGraphic::RightTee,
-                _Direction::Horizontal => box_drawing_graphic == BoxDrawingGraphic::UpperTee || box_drawing_graphic == BoxDrawingGraphic::LowerTee
-            }
-        } {
-            // as we have already transformed our box drawing graphic before calling
-            // this routine let's just make sure that the graphic we are dealing with
-            // should be changed dependent it's position on the virtual window.
-
-            let max_y_axis = self.getmaxy()?;
-            let max_x_axis = self.getmaxx()?;
-
-            Ok(if origin.x == 0 {
-                if origin.y == 0 {
-                    BoxDrawingGraphic::UpperLeftCorner
-                } else if origin.y == max_y_axis {
-                    BoxDrawingGraphic::LowerLeftCorner
-                } else {
-                    box_drawing_graphic
-                }
-            } else if origin.y == max_y_axis {
-                if origin.x == 0 {
-                    BoxDrawingGraphic::UpperRightCorner
-                } else if origin.x == max_x_axis {
-                    BoxDrawingGraphic::LowerRightCorner
-                } else {
-                    box_drawing_graphic
-                }
-            } else {
-                box_drawing_graphic
-            })
-        } else {
-            Ok(box_drawing_graphic)
         }
     }
 
