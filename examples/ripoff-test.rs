@@ -64,13 +64,17 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
     // create a border on the inital window (stdscr).
     initial_window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
-    let mut origin = Origin { y: 1, x: 2};
+    let initial_window_size = initial_window.size()?;
 
-    initial_window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
+    let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
+    let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
+
+    let mut origin = Origin { y: (initial_window_size.lines / 2) - 1, x: (initial_window_size.columns / 2) - (line1.len() as i32 / 2) + 1};
+
+    initial_window.mvaddstr(origin, line1)?;
     origin.y += 1;
-    initial_window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
-
-    initial_window.refresh()?;
+    origin.x = (initial_window_size.columns / 2) - (line2.len() as i32 / 2) + 1;
+    initial_window.mvaddstr(origin, line2)?;
 
     //  update the top ripoff line.
     top_ripoff.update(|ripoff_window, columns| -> result!(()) {
@@ -90,14 +94,22 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
 }
 
 fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) {
-    ripoff_window.addstr(&format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns))?;
+    let ripoff_message = &format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns);
+
+    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as i32 / 2))?;
+
+    ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()?;
 
     Ok(())
 }
 
 fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) {
-    ripoff_window.addstr(&format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns))?;
+    let ripoff_message = &format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns);
+
+    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as i32 / 2))?;
+
+    ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()?;
 
     Ok(())
