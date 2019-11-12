@@ -1,0 +1,76 @@
+/*
+    src/gen/hasmvinsfunctions.rs
+
+    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom
+    the Software is furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+    IN THE SOFTWARE.
+*/
+
+use ncursesw::{ChtypeChar, ComplexChar, Origin, WideString};
+use crate::NCurseswWinError;
+use crate::gen::*;
+
+/// Does the window canvas type have ncursesw insert origin functions.
+pub trait HasMvInsFunctions: HasHandle + HasYXAxis {
+    fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
+        assert_origin!("mvinsch", self.size()?, origin);
+
+        ncursesw::mvwinsch(self._handle(), origin, ch)?;
+
+        Ok(())
+    }
+
+    fn mvinsnstr(&self, origin: Origin, str: &str, length: i32) -> result!(()) {
+        assert_origin_hlength!("mvinsnstr", self.size()?, origin, length);
+
+        ncursesw::mvwinsnstr(self._handle(), origin, str, length)?;
+
+        Ok(())
+    }
+
+    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, length: i32) -> result!(()) {
+        assert_origin_hlength!("mvins_nwstr", self.size()?, origin, length);
+
+        ncursesw::mvwins_nwstr(self._handle(), origin, wstr, length)?;
+
+        Ok(())
+    }
+
+    fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
+        assert_origin!("mvinsstr", self.size()?, origin);
+
+        ncursesw::mvwinsstr(self._handle(), origin, str)?;
+
+        Ok(())
+    }
+
+    fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
+        assert_origin!("mvins_wch", self.size()?, origin);
+
+        ncursesw::mvwins_wch(self._handle(), origin, wch)?;
+
+        Ok(())
+    }
+
+    fn mvins_wstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
+        assert_origin!("mvins_wstr", self.size()?, origin);
+
+        ncursesw::mvwins_wstr(self._handle(), origin, wstr)?;
+
+        Ok(())
+    }
+}

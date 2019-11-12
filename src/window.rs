@@ -21,7 +21,7 @@
 */
 
 use ncursesw::WINDOW;
-use crate::traits::*;
+use crate::gen::*;
 
 /// A moveable window canvas.
 ///

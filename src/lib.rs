@@ -40,7 +40,7 @@ mod pad;
 mod panel;
 mod ripoff;
 mod timeout;
-mod traits;
+mod gen;
 mod window;
 
 pub use funcs::*;
@@ -54,7 +54,7 @@ pub use pad::*;
 pub use panel::*;
 pub use ripoff::*;
 pub use timeout::*;
-pub use traits::*;
+pub use gen::*;
 pub use window::*;
 
 pub use ncursesw::{normal, extend};
