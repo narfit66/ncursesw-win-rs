@@ -23,8 +23,8 @@
 #![allow(clippy::never_loop)]
 
 use ncursesw::{
-    AttributesColorPairType, AttributesColorPairSet, ComplexChar, Origin, WideChar,
-    getcchar
+    AttributesColorPairType, AttributesColorPairSet, ComplexChar,
+    Origin, Size, WideChar, getcchar
 };
 use crate::graphics::WIDEBOXDRAWING;
 use crate::{
@@ -57,32 +57,64 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         let mut box_drawing_graphic = box_drawing_graphic;
 
         let char_attr_pair = getcchar(current_complex_char)?;
-        let wchar: u32 = WideChar::into(char_attr_pair.character());
 
-        for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
-            let graphic = box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP);
+        if let BoxDrawingType::Custom(box_drawing) = box_drawing_type {
+            let wide_char = char_attr_pair.character();
 
-            box_drawing_graphic = match direction {
-                // if we are doing a vertical or horizontal line then don't
-                // transform by position on the virtual window.
-                Some(_) => graphic,
-                // as we've just transformed our box drawing graphic then let's
-                // just make sure if the graphic we are dealing with should be
-                // changed dependent it's position on the virtual window.
-                None    => if origin.x == 0 && origin.y == 0 {
-                    BoxDrawingGraphic::UpperLeftCorner
-                } else if origin.x == 0 && origin.y == window_size.lines {
-                    BoxDrawingGraphic::LowerLeftCorner
-                } else if origin.x == window_size.columns && origin.y == 0 {
-                    BoxDrawingGraphic::UpperRightCorner
-                } else if origin.x == window_size.columns && origin.y == window_size.lines {
-                    BoxDrawingGraphic::LowerRightCorner
-                } else {
-                    graphic
-                }
-            };
+            box_drawing_graphic = match if wide_char == box_drawing.upper_left_corner {
+                Some(BoxDrawingGraphic::UpperLeftCorner)
+            } else if wide_char == box_drawing.lower_left_corner {
+                Some(BoxDrawingGraphic::LowerLeftCorner)
+            } else if wide_char == box_drawing.upper_right_corner {
+                Some(BoxDrawingGraphic::UpperRightCorner)
+            } else if wide_char == box_drawing.lower_right_corner {
+                Some(BoxDrawingGraphic::LowerRightCorner)
+            } else if wide_char == box_drawing.right_tee {
+                Some(BoxDrawingGraphic::RightTee)
+            } else if wide_char == box_drawing.left_tee {
+                Some(BoxDrawingGraphic::LeftTee)
+            } else if wide_char == box_drawing.lower_tee {
+                Some(BoxDrawingGraphic::LowerTee)
+            } else if wide_char == box_drawing.upper_tee {
+                Some(BoxDrawingGraphic::UpperTee)
+            } else if wide_char == box_drawing.horizontal_line {
+                Some(BoxDrawingGraphic::HorizontalLine)
+            } else if wide_char == box_drawing.upper_horizontal_line {
+                Some(BoxDrawingGraphic::UpperHorizontalLine)
+            } else if wide_char == box_drawing.lower_horizontal_line {
+                Some(BoxDrawingGraphic::LowerHorizontalLine)
+            } else if wide_char == box_drawing.vertical_line {
+                Some(BoxDrawingGraphic::VerticalLine)
+            } else if wide_char == box_drawing.left_vertical_line {
+                Some(BoxDrawingGraphic::LeftVerticalLine)
+            } else if wide_char == box_drawing.right_vertical_line {
+                Some(BoxDrawingGraphic::RightVerticalLine)
+            } else if wide_char == box_drawing.plus {
+                Some(BoxDrawingGraphic::Plus)
+            } else {
+                None
+            } {
+                Some(graphic) => _transform_by_position(
+                    origin,
+                    window_size,
+                    box_drawing_graphic.transform(graphic, BOX_DRAWING_GRAPHIC_REMAP),
+                    direction
+                ),
+                None          => box_drawing_graphic
+            }
+        } else {
+            let wchar: u32 = WideChar::into(char_attr_pair.character());
 
-            break;
+            for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
+                box_drawing_graphic = _transform_by_position(
+                    origin,
+                    window_size,
+                    box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP),
+                    direction
+                );
+
+                break;
+            }
         }
 
         match char_attr_pair.attributes_and_color_pair() {
@@ -113,5 +145,32 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
         }
 
         Ok(())
+    }
+}
+
+fn _transform_by_position(
+    origin:              Origin,
+    window_size:         Size,
+    box_drawing_graphic: BoxDrawingGraphic,
+    direction:           Option<_Direction>
+) -> BoxDrawingGraphic {
+    match direction {
+        // if we are doing a vertical or horizontal line then don't
+        // transform by position on the virtual window.
+        Some(_) => box_drawing_graphic,
+        // as we've just transformed our box drawing graphic then let's
+        // just make sure if the graphic we are dealing with should be
+        // changed dependent it's position on the virtual window.
+        None    => if origin.x == 0 && origin.y == 0 {
+            BoxDrawingGraphic::UpperLeftCorner
+        } else if origin.x == 0 && origin.y == window_size.lines {
+            BoxDrawingGraphic::LowerLeftCorner
+        } else if origin.x == window_size.columns && origin.y == 0 {
+            BoxDrawingGraphic::UpperRightCorner
+        } else if origin.x == window_size.columns && origin.y == window_size.lines {
+            BoxDrawingGraphic::LowerRightCorner
+        } else {
+            box_drawing_graphic
+        }
     }
 }

@@ -78,8 +78,26 @@ fn box_drawing_test(window: &Window) -> result!(()) {
     let attrs = Attributes::default();
 
     let window_size = window.size()?;
-    let display_origin = Origin { y: 3, x: 40 };
+    let display_origin = Origin { y: 1, x: 1 };
     let corner_box_size = Size { lines: 10, columns: 10 };
+
+    let custom_box_drawing = BoxDrawing::new(
+        WideChar::from(0x25e4),
+        WideChar::from(0x25e3),
+        WideChar::from(0x25e5),
+        WideChar::from(0x25e2),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::RightTee),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::LeftTee),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::LowerTee),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::UpperTee),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::HorizontalLine),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::UpperHorizontalLine),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::LowerHorizontalLine),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::VerticalLine),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::LeftVerticalLine),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::RightVerticalLine),
+        wide_box_graphic(BoxDrawingType::default(), BoxDrawingGraphic::Plus)
+    );
 
     // define our corner box origins.
     let corner_origins = {
@@ -94,7 +112,7 @@ fn box_drawing_test(window: &Window) -> result!(()) {
     };
 
     // define all the default box drawing types.
-    let box_drawing_types: [BoxDrawingType; 14] = [BoxDrawingType::Ascii,
+    let box_drawing_types: [BoxDrawingType; 15] = [BoxDrawingType::Ascii,
                                                    BoxDrawingType::Light(BoxDrawingTypeDetail::Normal),
                                                    BoxDrawingType::Light(BoxDrawingTypeDetail::LeftDash),
                                                    BoxDrawingType::Light(BoxDrawingTypeDetail::RightDash),
@@ -107,7 +125,8 @@ fn box_drawing_test(window: &Window) -> result!(()) {
                                                    BoxDrawingType::Heavy(BoxDrawingTypeDetail::DoubleDash),
                                                    BoxDrawingType::Heavy(BoxDrawingTypeDetail::TripleDash),
                                                    BoxDrawingType::Heavy(BoxDrawingTypeDetail::QuadrupleDash),
-                                                   BoxDrawingType::Double];
+                                                   BoxDrawingType::Double,
+                                                   BoxDrawingType::Custom(custom_box_drawing)];
 
     // make a handle to the thread-local generator.
     let mut rng = thread_rng();
@@ -151,8 +170,13 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         }
 
         // add the type of box drawing type on the window.
-        let display_str = &format!("box drawing type {:?}", box_drawing_type);
-        window.mvadd_wchstr(display_origin, &ComplexString::from_str(display_str, &attrs, &display_color_pair)?)?;
+        let display_str = if let BoxDrawingType::Custom(_) = box_drawing_type {
+            format!("box drawing type Custom()")
+        } else {
+            format!("box drawing type {:?}", box_drawing_type)
+        };
+
+        window.mvadd_wchstr(display_origin, &ComplexString::from_str(&display_str, &attrs, &display_color_pair)?)?;
 
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
         // if a resize event happens then error this back up the call chain.

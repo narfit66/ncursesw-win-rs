@@ -20,20 +20,21 @@
     IN THE SOFTWARE.
 */
 
-use crate::BoxDrawingTypeDetail;
+use crate::{BoxDrawingTypeDetail, BoxDrawing};
 
 /// Box drawing type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[repr(u8)]
 pub enum BoxDrawingType {
-    /// Ascii.
+    /// Ascii style.
     Ascii,
-    /// Light BoxDrawingTypeDetail.
+    /// Light style `BoxDrawingTypeDetail`.
     Light(BoxDrawingTypeDetail),
-    /// Heavy BoxDrawingTypeDetail.
+    /// Heavy style `BoxDrawingTypeDetail`.
     Heavy(BoxDrawingTypeDetail),
-    /// Double lines.
-    Double
+    /// Double lines style.
+    Double,
+    /// Custom box drawing `BoxDrawing`.
+    Custom(BoxDrawing)
 }
 
 impl Default for BoxDrawingType {

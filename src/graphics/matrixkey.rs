@@ -1,5 +1,5 @@
 /*
-    src/graphics/mod.rs
+    src/graphics/matrixkey.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,18 +20,24 @@
     IN THE SOFTWARE.
 */
 
-mod boxdrawing;
-mod boxdrawinggraphic;
-mod boxdrawingtypedetail;
-mod boxdrawingtype;
-mod horizontalgraphic;
-mod matrixkey;
-mod verticalgraphic;
+use crate::{BoxDrawingType, BoxDrawingGraphic};
 
-pub use crate::graphics::boxdrawing::*;
-pub use crate::graphics::boxdrawinggraphic::*;
-pub use crate::graphics::boxdrawingtypedetail::*;
-pub use crate::graphics::boxdrawingtype::*;
-pub use crate::graphics::horizontalgraphic::*;
-pub(in crate) use crate::graphics::matrixkey::*;
-pub use crate::graphics::verticalgraphic::*;
+#[derive(PartialEq, Eq, Hash)]
+pub(crate) struct MatrixKey {
+    box_drawing_type:    BoxDrawingType,
+    box_drawing_graphic: BoxDrawingGraphic
+}
+
+impl MatrixKey {
+    pub fn new(box_drawing_type: BoxDrawingType, box_drawing_graphic: BoxDrawingGraphic) -> Self {
+        Self { box_drawing_type, box_drawing_graphic }
+    }
+
+    pub fn box_drawing_type(&self) -> BoxDrawingType {
+        self.box_drawing_type
+    }
+
+    pub fn box_drawing_graphic(&self) -> BoxDrawingGraphic {
+        self.box_drawing_graphic
+    }
+}
