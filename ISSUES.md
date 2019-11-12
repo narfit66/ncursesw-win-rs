@@ -10,3 +10,4 @@ tarvis CI is reporting the like of
 
           collect2: error: ld returned 1 exit status
 ```
+Tried to do a [sudo ldconfig](https://travis-ci.com/narfit66/ncursesw-win-rs/builds/136228092) after compile and install of ncurses, this did nor solve the issue.
