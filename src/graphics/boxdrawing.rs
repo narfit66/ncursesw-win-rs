@@ -306,6 +306,7 @@ pub struct BoxDrawing {
 }
 
 impl BoxDrawing {
+    /// Create a new instance of `BoxDrawing`.
     pub fn new(
         upper_left_corner:     WideChar,
         lower_left_corner:     WideChar,
@@ -344,20 +345,28 @@ impl BoxDrawing {
 }
 
 /// Obtain the box drawing graphic of ChtypeChar type.
-pub fn chtype_box_graphic(graphic: BoxDrawingGraphic) -> ChtypeChar {
+pub fn chtype_box_graphic(box_drawing_graphic: BoxDrawingGraphic) -> ChtypeChar {
+    // extract the chtype character value represnted by the box drawing
+    // graphic from the crate defined values.
     ChtypeChar::from(
         NCURSES_ACS(
             *CHTYPEBOXDRAWING
-            .get(&graphic)
-            .unwrap_or_else(|| panic!("chtype_box_graphic() : unable to retrive {:?}", graphic))
+            .get(&box_drawing_graphic)
+            .unwrap_or_else(|| panic!("chtype_box_graphic() : unable to retrive {:?}", box_drawing_graphic))
         )
     )
 }
 
 /// Obtain the box drawing graphic of WideChar type.
-pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGraphic) -> WideChar {
+pub fn wide_box_graphic(
+    box_drawing_type:    BoxDrawingType,
+    box_drawing_graphic: BoxDrawingGraphic
+) -> WideChar {
+    // if we have a custom box drawing type then extract the wide character
+    // value from the contained `BoxDrawing` struct otherwise extract the
+    // wide character value from the crate defined values.
     if let BoxDrawingType::Custom(box_drawing) = box_drawing_type {
-        match graphic {
+        match box_drawing_graphic {
             BoxDrawingGraphic::UpperLeftCorner     => box_drawing.upper_left_corner,
             BoxDrawingGraphic::LowerLeftCorner     => box_drawing.lower_left_corner,
             BoxDrawingGraphic::UpperRightCorner    => box_drawing.upper_right_corner,
@@ -377,24 +386,24 @@ pub fn wide_box_graphic(box_drawing_type: BoxDrawingType, graphic: BoxDrawingGra
     } else {
         WideChar::from(
             *WIDEBOXDRAWING
-            .get(&MatrixKey::new(box_drawing_type, graphic))
-            .unwrap_or_else(|| panic!("wide_box_graphic() : unable to retrive {:?}, {:?}", box_drawing_type, graphic)) as wchar_t
+            .get(&MatrixKey::new(box_drawing_type, box_drawing_graphic))
+            .unwrap_or_else(|| panic!("wide_box_graphic() : unable to retrive {:?}, {:?}", box_drawing_type, box_drawing_graphic)) as wchar_t
         )
     }
 }
 
 /// Obtain the box drawing graphic of ComplexChar type.
 pub fn complex_box_graphic<A, P, T>(
-    box_drawing_type: BoxDrawingType,
-    graphic: BoxDrawingGraphic,
-    attrs: &A,
-    color_pair: &P
+    box_drawing_type:    BoxDrawingType,
+    box_drawing_graphic: BoxDrawingGraphic,
+    attrs:               &A,
+    color_pair:          &P
 ) -> result!(ComplexChar)
     where A: AttributesType<T>,
           P: ColorPairType<T>,
           T: ColorAttributeTypes
 {
-    match ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, graphic), attrs, color_pair) {
+    match ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, box_drawing_graphic), attrs, color_pair) {
         Err(source) => Err(NCurseswWinError::NCurseswError { source }),
         Ok(cc)      => Ok(cc)
     }

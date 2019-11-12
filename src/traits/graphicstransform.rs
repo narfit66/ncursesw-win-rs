@@ -33,13 +33,16 @@ use crate::{
 };
 use crate::traits::*;
 
+// Direction of travel that graphics drawing maybe going
+// i.e. `_Direction::Horizontal` when drawing a horizontal line
+//      on the virtual window.
 pub enum _Direction {
     Horizontal,
     Vertical
 }
 
 // constant to control remaping during BoxDrawingGraphic.transform()
-const BOX_DRAWING_GRAPHIC_REMAP: bool = true;
+const REMAP_BOX_DRAWING_GRAPHIC: bool = true;
 
 pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + HasMvInsFunctions {
     fn _transform_graphic(
@@ -56,8 +59,12 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
 
         let mut box_drawing_graphic = box_drawing_graphic;
 
+        // extract our complex character into it's character, attributes and color pair.
         let char_attr_pair = getcchar(current_complex_char)?;
 
+        // if we have a custom box drawing type then extract the `BoxDrawingGraphic`
+        // from the contained `BoxDrawing` struct otherwise extract the
+        // `BoxDrawingType` from the crate defined values.
         if let BoxDrawingType::Custom(box_drawing) = box_drawing_type {
             let wide_char = char_attr_pair.character();
 
@@ -94,10 +101,10 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
             } else {
                 None
             } {
-                Some(graphic) => _transform_by_position(
+                Some(custom_graphic) => transform_by_position(
                     origin,
                     window_size,
-                    box_drawing_graphic.transform(graphic, BOX_DRAWING_GRAPHIC_REMAP),
+                    box_drawing_graphic.transform(custom_graphic, REMAP_BOX_DRAWING_GRAPHIC),
                     direction
                 ),
                 None          => box_drawing_graphic
@@ -106,10 +113,10 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
             let wchar: u32 = WideChar::into(char_attr_pair.character());
 
             for (key, _) in WIDEBOXDRAWING.iter().filter(|(k, v)| k.box_drawing_type() == box_drawing_type && **v == wchar) {
-                box_drawing_graphic = _transform_by_position(
+                box_drawing_graphic = transform_by_position(
                     origin,
                     window_size,
-                    box_drawing_graphic.transform(key.box_drawing_graphic(), BOX_DRAWING_GRAPHIC_REMAP),
+                    box_drawing_graphic.transform(key.box_drawing_graphic(), REMAP_BOX_DRAWING_GRAPHIC),
                     direction
                 );
 
@@ -117,6 +124,7 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
             }
         }
 
+        // return the transformed (or not!) complex character.
         match char_attr_pair.attributes_and_color_pair() {
             AttributesColorPairSet::Normal(set)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair()),
             AttributesColorPairSet::Extended(set) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair())
@@ -148,7 +156,7 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
     }
 }
 
-fn _transform_by_position(
+fn transform_by_position(
     origin:              Origin,
     window_size:         Size,
     box_drawing_graphic: BoxDrawingGraphic,
@@ -173,4 +181,87 @@ fn _transform_by_position(
             box_drawing_graphic
         }
     }
+}
+
+#[test]
+fn transform_by_position_test() {
+    let max_lines = 24;
+    let max_columns = 80;
+    let window_size = Size { lines: max_lines, columns: max_columns };
+
+    let upper_left_corner = Origin { y: 0, x: 0 };
+    let lower_left_corner = Origin { y: max_lines, x: 0 };
+    let upper_right_corner = Origin { y: 0, x: max_columns };
+    let lower_right_corner = Origin { y: max_lines, x: max_columns };
+
+    let center_origin = Origin { y: max_lines / 2, x: max_columns / 2};
+
+    // simulate Window.mvtbox_set()
+    assert_eq!(
+        transform_by_position(upper_left_corner, window_size, BoxDrawingGraphic::Plus, None),
+        BoxDrawingGraphic::UpperLeftCorner
+    );
+    assert_eq!(
+        transform_by_position(lower_left_corner, window_size, BoxDrawingGraphic::Plus, None),
+        BoxDrawingGraphic::LowerLeftCorner
+    );
+    assert_eq!(
+        transform_by_position(upper_right_corner, window_size, BoxDrawingGraphic::Plus, None),
+        BoxDrawingGraphic::UpperRightCorner
+    );
+    assert_eq!(
+        transform_by_position(lower_right_corner, window_size, BoxDrawingGraphic::Plus, None),
+        BoxDrawingGraphic::LowerRightCorner
+    );
+
+    assert_eq!(
+        transform_by_position(center_origin, window_size, BoxDrawingGraphic::Plus, None),
+        BoxDrawingGraphic::Plus
+    );
+
+    // simulate Window.mvhline_set()
+    assert_eq!(
+        transform_by_position(upper_left_corner, window_size, BoxDrawingGraphic::HorizontalLine, Some(_Direction::Horizontal)),
+        BoxDrawingGraphic::HorizontalLine
+    );
+    assert_eq!(
+        transform_by_position(lower_left_corner, window_size, BoxDrawingGraphic::HorizontalLine, Some(_Direction::Horizontal)),
+        BoxDrawingGraphic::HorizontalLine
+    );
+    assert_eq!(
+        transform_by_position(upper_right_corner, window_size, BoxDrawingGraphic::HorizontalLine, Some(_Direction::Horizontal)),
+        BoxDrawingGraphic::HorizontalLine
+    );
+    assert_eq!(
+        transform_by_position(lower_right_corner, window_size, BoxDrawingGraphic::HorizontalLine, Some(_Direction::Horizontal)),
+        BoxDrawingGraphic::HorizontalLine
+    );
+
+    assert_eq!(
+        transform_by_position(center_origin, window_size, BoxDrawingGraphic::Plus, Some(_Direction::Horizontal)),
+        BoxDrawingGraphic::Plus
+    );
+
+    // simulate Window.mvvline_set()
+    assert_eq!(
+        transform_by_position(upper_left_corner, window_size, BoxDrawingGraphic::VerticalLine, Some(_Direction::Vertical)),
+        BoxDrawingGraphic::VerticalLine
+    );
+    assert_eq!(
+        transform_by_position(lower_left_corner, window_size, BoxDrawingGraphic::VerticalLine, Some(_Direction::Vertical)),
+        BoxDrawingGraphic::VerticalLine
+    );
+    assert_eq!(
+        transform_by_position(upper_right_corner, window_size, BoxDrawingGraphic::VerticalLine, Some(_Direction::Vertical)),
+        BoxDrawingGraphic::VerticalLine
+    );
+    assert_eq!(
+        transform_by_position(lower_right_corner, window_size, BoxDrawingGraphic::VerticalLine, Some(_Direction::Vertical)),
+        BoxDrawingGraphic::VerticalLine
+    );
+
+    assert_eq!(
+        transform_by_position(center_origin, window_size, BoxDrawingGraphic::Plus, Some(_Direction::Vertical)),
+        BoxDrawingGraphic::Plus
+    );
 }
