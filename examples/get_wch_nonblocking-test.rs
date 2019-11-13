@@ -57,6 +57,9 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
 
     window.mvaddstr(display_origin, display_str)?;
 
+    let lower_q = WideChar::new('q');
+    let upper_q = WideChar::new('Q');
+
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
         let getch_result = match window.mvget_wch_nonblocking(getch_origin, Some(time::Duration::new(5, 0))) {
@@ -64,7 +67,7 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
             Ok(value)   => match value {
                 Some(char_result) => match char_result {
                     CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
-                    CharacterResult::Character(character) => if character == WideChar::new('q') || character == WideChar::new('Q') {
+                    CharacterResult::Character(character) => if character == lower_q || character == upper_q {
                         break;
                     } else {
                         format!("character: '{:?}'", character)

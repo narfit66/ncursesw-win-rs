@@ -30,6 +30,7 @@ extern crate strum_macros;
 mod macros;
 
 mod funcs;
+mod gen;
 mod graphics;
 mod inputmode;
 mod mouse;
@@ -40,10 +41,10 @@ mod pad;
 mod panel;
 mod ripoff;
 mod timeout;
-mod gen;
 mod window;
 
 pub use funcs::*;
+pub use gen::*;
 pub use graphics::*;
 pub use inputmode::*;
 pub use mouse::*;
@@ -54,7 +55,6 @@ pub use pad::*;
 pub use panel::*;
 pub use ripoff::*;
 pub use timeout::*;
-pub use gen::*;
 pub use window::*;
 
 pub use ncursesw::{normal, extend};
@@ -82,6 +82,7 @@ pub use ncursesw::{
     reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
     resize_term, resizeterm, setcchar, use_legacy_coding
 };
+pub use ncursesw::panels::PanelUserPtr;
 pub use ncursesw::mouse::OriginResult;
 pub use ncursesw::mouse::{
     has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,

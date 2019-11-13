@@ -171,7 +171,7 @@ fn box_drawing_test(window: &Window) -> result!(()) {
 
         // add the type of box drawing type on the window.
         let display_str = if let BoxDrawingType::Custom(_) = box_drawing_type {
-            format!("box drawing type Custom()")
+            "box drawing type Custom()".to_string()
         } else {
             format!("box drawing type {:?}", box_drawing_type)
         };

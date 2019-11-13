@@ -12,7 +12,7 @@ license = "MIT"
 [workspace]
 
 [dependencies]
-ncursesw = "0.3.0"
+ncursesw = "0.3.3"
 custom_error = "1.7.0"
 lazy_static = "1.4.0"
 strum = "0.16.0"
@@ -23,8 +23,8 @@ ascii = "0.9.1"
 rand = "0.7"
 
 [patch.crates-io]
-ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
-#ncursesw = { path = "../ncursesw-rs" }
+#ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
+ncursesw = { path = "../ncursesw-rs" }
 
 [features]
 key_resize_as_error = ["ncursesw/key_resize_as_error"]

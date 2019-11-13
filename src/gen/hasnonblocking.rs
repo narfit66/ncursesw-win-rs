@@ -46,7 +46,7 @@ pub trait HasNonBlocking: HasHandle {
 
     /// get the non-blocking read timeout in milliseconds.
     fn get_timeout(&self) -> result!(Timeout) {
-        match ncursesw::shims::ncurses::wgetdelay(self._handle()) {
+        match unsafe { ncursesw::shims::ncurses::wgetdelay(self._handle()) } {
             -1 => Ok(None),
             rc => {
                 if rc < 0 {
@@ -63,7 +63,7 @@ pub trait HasNonBlocking: HasHandle {
     /// set the non-blocking read timeout in milliseconds, use `ms: None` to set blocking read mode.
     fn set_timeout(&self, ms: Timeout) -> result!(()) {
         match ms {
-            None     => ncursesw::shims::ncurses::wtimeout(self._handle(), -1),
+            None     => unsafe { ncursesw::shims::ncurses::wtimeout(self._handle(), -1) },
             Some(ms) => ncursesw::wtimeout(self._handle(), ms)?
         }
 

@@ -1,5 +1,5 @@
 /*
-    src/panel/panel.rs
+    src/panel.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -22,7 +22,6 @@
 
 use ncursesw::{panels, panels::PANEL, Origin};
 use crate::{Window, NCurseswWinError};
-use crate::panel::PanelUserPtr;
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
@@ -131,14 +130,14 @@ impl Panel {
     }
 
     /// Sets the panel's user pointer.
-    pub fn set_panel_userptr(&self, ptr: PanelUserPtr) -> result!(()) {
+    pub fn set_panel_userptr(&self, ptr: panels::PanelUserPtr) -> result!(()) {
         panels::set_panel_userptr(self.handle, ptr)?;
 
         Ok(())
     }
 
     /// Returns the user pointer for the given panel.
-    pub fn panel_userptr(&self) -> PanelUserPtr {
+    pub fn panel_userptr(&self) -> panels::PanelUserPtr {
         panels::panel_userptr(self.handle)
     }
 }
