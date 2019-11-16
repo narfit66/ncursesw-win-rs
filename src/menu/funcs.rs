@@ -1,5 +1,5 @@
 /*
-    src/menu/mod.rs
+    src/menu/funcs.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,10 +20,13 @@
     IN THE SOFTWARE.
 */
 
-mod funcs;
-mod menu;
-mod menuitem;
+use ncursesw::menu;
+use ncursesw::menu::MenuSize;
 
-pub use crate::menu::funcs::*;
-pub use crate::menu::menu::*;
-pub use crate::menu::menuitem::*;
+use crate::NCurseswWinError;
+
+pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
+    menu::set_menu_format(None, menu_size)?;
+
+    Ok(())
+}
