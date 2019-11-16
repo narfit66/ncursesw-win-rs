@@ -22,6 +22,7 @@
 
 use ncursesw::shims::constants::ERR;
 use ncursesw::NCurseswError;
+use ncursesw::menu::NCurseswMenuError;
 
 custom_error::custom_error! {
 /// NCurseswWin Errors.
@@ -35,7 +36,8 @@ pub NCurseswWinError
     InternalError = "an internal error has occured",
     Panic { message: String } = "{message}",
     IntError { source: std::num::TryFromIntError } = "{source}",
-    NCurseswError { source: ncursesw::NCurseswError } = "{source}"
+    NCurseswError { source: NCurseswError } = "{source}",
+    MenuError { source: NCurseswMenuError } = "{source}"
 }
 
 impl PartialEq for NCurseswWinError {

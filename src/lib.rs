@@ -33,6 +33,8 @@ mod funcs;
 mod gen;
 mod graphics;
 mod inputmode;
+/// Menu module.
+pub mod menu;
 mod mouse;
 mod ncurses;
 mod ncurseswwinerror;
