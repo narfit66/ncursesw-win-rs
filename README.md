@@ -39,6 +39,11 @@ use ncurseswwin::normal::*; // for 'ansi' color pairs and attributes...
 use ncurseswwin::extend::*; // or for 'extended' color pairs and attributes.
 ```
 
+To use menus
+```
+use ncurseswwin::menu::*;
+```
+
 ## Examples
 
 Examples are built by `cargo build --examples`. To run them, use `cargo run --example <EXAMPLE>`.
