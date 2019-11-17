@@ -26,7 +26,7 @@ use ncursesw;
 use ncursesw::menu;
 use ncursesw::menu::ITEM;
 
-pub use ncursesw::menu::{ItemOptions, MENU_USERPTR};
+pub use ncursesw::menu::ItemOptions;
 
 /// Menu item.
 pub struct MenuItem {
@@ -88,8 +88,11 @@ impl MenuItem {
         Ok(())
     }
 
-    pub fn item_userptr(&self) -> MENU_USERPTR {
-        menu::item_userptr(self.handle)
+    pub fn item_userptr<T>(&self) -> Option<Box<T>> {
+        match menu::item_userptr(self.handle) {
+            Some(ptr) => Some(unsafe { Box::from_raw(ptr as *mut T) }),
+            None      => None
+        }
     }
 
     pub fn item_value(&self) -> bool {
@@ -106,8 +109,11 @@ impl MenuItem {
         Ok(())
     }
 
-    pub fn set_item_userptr(&self, userptr: MENU_USERPTR) {
-        menu::set_item_userptr(self.handle, userptr)
+    pub fn set_item_userptr<T>(&self, ptr: Option<Box<&T>>) {
+        menu::set_item_userptr(self.handle, match ptr {
+            Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
+            None      => None
+        })
     }
 
     pub fn set_item_value(&self, value: bool) -> result!(()) {

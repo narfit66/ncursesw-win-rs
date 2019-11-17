@@ -20,9 +20,11 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{panels, panels::PANEL, panels::PanelUserPtr, Origin};
+use ncursesw::{panels, panels::PANEL, Origin};
 use crate::{Window, NCurseswWinError};
 use crate::gen::HasHandle;
+
+pub use ncursesw::panels::update_panels;
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
@@ -137,15 +139,21 @@ impl Panel {
     }
 
     /// Sets the panel's user pointer to the passed `Panel`.
-    pub fn set_panel_userptr(&self, ptr: PanelUserPtr) -> result!(()) {
-        panels::set_panel_userptr(self.handle, ptr)?;
+    pub fn set_panel_userptr<T>(&self, ptr: Option<Box<&T>>) -> result!(()) {
+        panels::set_panel_userptr(self.handle, match ptr {
+            Some(ptr) => Some(Box::into_raw(ptr) as *const libc::c_void),
+            None      => None
+        })?;
 
         Ok(())
     }
 
     /// Returns the user pointers `Panel` for the given panel.
-    pub fn panel_userptr(&self) -> PanelUserPtr {
-        panels::panel_userptr(self.handle)
+    pub fn panel_userptr<T>(&self) -> Option<Box<T>> {
+        match panels::panel_userptr(self.handle) {
+            Some(ptr) => Some(unsafe { Box::from_raw(ptr as *mut T) }),
+            None      => None
+        }
     }
 }
 

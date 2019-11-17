@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::WINDOW;
+use ncursesw::{stdscr, WINDOW};
 use crate::gen::*;
 
 /// A moveable window canvas.
@@ -79,6 +79,13 @@ impl Drop for Window {
                 panic!(e.to_string())
             }
         }
+    }
+}
+
+/// The default window which is the stdscr created by `ncursesw_entry()`
+impl Default for Window {
+    fn default() -> Self {
+        Self::_from(stdscr(), false)
     }
 }
 

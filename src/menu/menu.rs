@@ -28,8 +28,7 @@ use crate::{Window, NCurseswWinError, menu::MenuItem};
 use crate::gen::HasHandle;
 
 pub use ncursesw::menu::{
-    MenuHook, MenuOptions, MenuRequest, MenuSpacing, MenuSize,
-    MENU_USERPTR
+    MenuHook, MenuOptions, MenuRequest, MenuSpacing, MenuSize
 };
 
 /// Menu.
@@ -180,8 +179,11 @@ impl Menu {
         Ok(func)
     }
 
-    pub fn menu_userptr(&self) -> MENU_USERPTR {
-        menu::menu_userptr(self.handle)
+    pub fn menu_userptr<T>(&self) -> Option<Box<T>> {
+        match menu::menu_userptr(self.handle) {
+            Some(ptr) => Some(unsafe { Box::from_raw(ptr as *mut T) }),
+            None      => None
+        }
     }
 
     pub fn pos_menu_cursor(&self) -> result!(()) {
@@ -304,8 +306,11 @@ impl Menu {
         Ok(())
     }
 
-    pub fn set_menu_userptr(&self, userptr: MENU_USERPTR) {
-        menu::set_menu_userptr(self.handle, userptr)
+    pub fn set_menu_userptr<T>(&self, ptr: Option<Box<&T>>) {
+        menu::set_menu_userptr(self.handle, match ptr {
+            Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
+            None      => None
+        })
     }
 
     pub fn set_menu_win(&self, win: &Window) -> result!(()) {
