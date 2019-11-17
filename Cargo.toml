@@ -12,7 +12,6 @@ license = "MIT"
 [workspace]
 
 [dependencies]
-libc = "0.2"
 ncursesw = "0.3.3"
 custom_error = "1.7.0"
 lazy_static = "1.4.0"

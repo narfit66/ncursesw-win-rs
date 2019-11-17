@@ -20,7 +20,6 @@
     IN THE SOFTWARE.
 */
 
-extern crate libc;
 extern crate ncursesw;
 extern crate custom_error;
 #[macro_use]
