@@ -22,6 +22,7 @@
 
 use ncursesw::{panels, panels::PANEL, Origin};
 use crate::{Window, NCurseswWinError};
+use crate::gen::HasHandle;
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
@@ -32,7 +33,7 @@ pub struct Panel {
 impl Panel {
     /// Create a new Panel instance with it's associated Window.
     pub fn new(window: &Window) -> result!(Self) {
-        match panels::new_panel(window.handle()) {
+        match panels::new_panel(window._handle()) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(handle)  => Ok(Self::from(handle, true))
         }
@@ -50,8 +51,12 @@ impl Panel {
     // free_on_drop is false in call's such as panel_above(&self) where we are
     // 'peeking' the Panel but it would be invalid to free the handle when
     // our instance goes out of scope.
-    pub(crate) fn from(handle: PANEL, free_on_drop: bool) -> Self {
+    pub(in crate::panel) fn from(handle: PANEL, free_on_drop: bool) -> Self {
         Self { handle, free_on_drop }
+    }
+
+    pub(in crate::panel) fn handle(&self) -> PANEL {
+        self.handle
     }
 
     /// Puts panel at the bottom of all panels.
@@ -88,7 +93,7 @@ impl Panel {
     pub fn panel_window(&self) -> result!(Window) {
         match panels::panel_window(self.handle) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, false))
+            Ok(handle)  => Ok(Window::_from(handle, false))
         }
     }
 
@@ -97,7 +102,7 @@ impl Panel {
     /// Useful, for example if you want to resize a panel; if you're using ncurses, you can
     /// call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
     pub fn replace_panel(&self, window: &Window) -> result!(()) {
-        panels::replace_panel(self.handle, window.handle())?;
+        panels::replace_panel(self.handle, window._handle())?;
 
         Ok(())
     }
@@ -129,16 +134,22 @@ impl Panel {
         panel_below(Some(self))
     }
 
-    /// Sets the panel's user pointer.
-    pub fn set_panel_userptr(&self, ptr: panels::PanelUserPtr) -> result!(()) {
-        panels::set_panel_userptr(self.handle, ptr)?;
+    /// Sets the panel's user pointer to the passed `Panel`.
+    pub fn set_panel_userptr(&self, panel: Option<&Panel>) -> result!(()) {
+        panels::set_panel_userptr(self.handle, match panel {
+            Some(panel) => Some(panel.handle() as *const libc::c_void),
+            None        => None
+        })?;
 
         Ok(())
     }
 
-    /// Returns the user pointer for the given panel.
-    pub fn panel_userptr(&self) -> panels::PanelUserPtr {
-        panels::panel_userptr(self.handle)
+    /// Returns the user pointers `Panel` for the given panel.
+    pub fn panel_userptr(&self) -> Option<Panel> {
+        match panels::panel_userptr(self.handle) {
+            Some(handle) => Some(Self::from(handle as PANEL, false)),
+            None         => None
+        }
     }
 }
 

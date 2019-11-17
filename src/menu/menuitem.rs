@@ -36,12 +36,12 @@ pub struct MenuItem {
 
 impl MenuItem {
     // make a new instance from the passed ncurses menu item pointer.
-    pub(in crate) fn from(handle: ITEM, free_on_drop: bool) -> Self {
+    pub(in crate::menu) fn from(handle: ITEM, free_on_drop: bool) -> Self {
         Self { handle, free_on_drop }
     }
 
     // get the ncurses menu item pointer for this Window structure.
-    pub(in crate) fn handle(&self) -> ITEM {
+    pub(in crate::menu) fn handle(&self) -> ITEM {
         self.handle
     }
 }

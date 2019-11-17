@@ -34,8 +34,12 @@ pub struct Window {
 }
 
 impl HasHandle for Window {
+    fn _from(handle: WINDOW, free_on_drop: bool) -> Self {
+        Self { handle, free_on_drop }
+    }
+
     fn _handle(&self) -> WINDOW {
-        self.handle()
+        self.handle
     }
 }
 
@@ -67,23 +71,6 @@ impl HasMvInsFunctions for Window { }
 impl HasNonBlocking for Window { }
 impl HasGetFunctions for Window { }
 impl HasMvGetFunctions for Window { }
-
-impl Window {
-    // make a new instance from the passed ncurses _win_st pointer and specify
-    // if the handle is to be free'd when the structure is dropped.
-    //
-    // free_on_drop is false in call's such as getparent(&self) where we are
-    // 'peeking' the Window but it would be invalid to free the handle when
-    // our instance goes out of scope.
-    pub(crate) fn from(handle: WINDOW, free_on_drop: bool) -> Self {
-        Self { handle, free_on_drop }
-    }
-
-    // get the ncurses _win_st pointer for this Window structure.
-    pub(crate) fn handle(&self) -> WINDOW {
-        self.handle
-    }
-}
 
 impl Drop for Window {
     fn drop(&mut self) {

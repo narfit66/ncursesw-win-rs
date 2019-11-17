@@ -30,7 +30,7 @@ pub trait Derivable: HasHandle + NCurseswWindow + HasYXAxis + IsWindow {
     fn derwin(&self, size: Size, origin: Origin) -> result!(Window) {
         match ncursesw::derwin(self._handle(), size, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Window::_from(handle, true))
         }
     }
 

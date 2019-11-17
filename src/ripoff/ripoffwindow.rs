@@ -34,8 +34,12 @@ pub struct RipoffWindow {
 }
 
 impl HasHandle for RipoffWindow {
+    fn _from(handle: WINDOW, _: bool) -> Self {
+        Self { handle }
+    }
+
     fn _handle(&self) -> WINDOW {
-        self.handle()
+        self.handle
     }
 }
 
@@ -54,16 +58,6 @@ impl HasNonBlocking for RipoffWindow { }
 impl HasGetFunctions for RipoffWindow { }
 
 impl RipoffWindow {
-    // make a new instance from the passed ncurses _win_st pointer.
-    pub(in crate::ripoff) fn from(handle: WINDOW) -> Self {
-        Self { handle }
-    }
-
-    // get the ncurses _win_st pointer for this Window structure.
-    pub(in crate::ripoff) fn handle(&self) -> WINDOW {
-        self.handle
-    }
-
     /// get the cursor column on the ripoff window.
     pub fn column(&self) -> result!(i32) {
         match ncursesw::getcurx(self._handle()) {

@@ -32,7 +32,7 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     fn new(size: Size) -> result!(Pad) {
         match ncursesw::newpad(size) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Pad::from(handle, true))
+            Ok(handle)  => Ok(Pad::_from(handle, true))
         }
     }
 
@@ -45,7 +45,7 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     fn subpad(&self, size: Size, origin: Origin) -> result!(Pad) {
         match ncursesw::subpad(self._handle(), size, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Pad::from(handle, true))
+            Ok(handle)  => Ok(Pad::_from(handle, true))
         }
     }
 
@@ -53,7 +53,7 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     fn getparent(&self) -> Option<Pad> {
         match ncursesw::wgetparent(self._handle()) {
             None         => None,
-            Some(handle) => Some(Pad::from(handle, false))
+            Some(handle) => Some(Pad::_from(handle, false))
         }
     }
 
@@ -63,7 +63,7 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     fn getwin(path: &path::Path) -> result!(Pad) {
         match ncursesw::getwin(path) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Pad::from(handle, true))
+            Ok(handle)  => Ok(Pad::_from(handle, true))
         }
     }
 

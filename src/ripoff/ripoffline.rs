@@ -26,6 +26,7 @@ use std::sync::Mutex;
 use ncursesw;
 use ncursesw::{WINDOW, Orientation};
 use crate::{RipoffWindow, NCurseswWinError};
+use crate::gen::*;
 use crate::ncurses::INITSCR_CALLED;
 
 pub(crate) const MAX_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
@@ -43,7 +44,7 @@ macro_rules! ripoff_init_fn {
             RIPOFFLINES
                 .lock()
                 .unwrap_or_else(|_| panic!("ripoff_init{}() : RIPOFFLINES.lock() failed!", $n))
-                .insert($n, (RipoffWindow::from(win), cols));
+                .insert($n, (RipoffWindow::_from(win, false), cols));
 
             ncursesw::shims::constants::OK
         }
@@ -106,7 +107,7 @@ impl RipoffLine {
                 .lock()
                 .unwrap_or_else(|_| panic!("RipoffLine.update() : RIPOFFLINES.lock() failed!"))[self.number];
 
-            if ripoff_window.handle().is_null() {
+            if ripoff_window._handle().is_null() {
                 Err(NCurseswWinError::RipoffNotInitialized { number: self.number })
             } else {
                 // call the passed closure to process against the ripoff.

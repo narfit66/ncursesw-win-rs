@@ -25,6 +25,7 @@ use ncursesw::normal;
 use ncursesw::menu::MENU;
 
 use crate::{Window, NCurseswWinError, menu::MenuItem};
+use crate::gen::HasHandle;
 
 pub use ncursesw::menu::{
     MenuHook, MenuOptions, MenuRequest, MenuSpacing, MenuSize,
@@ -39,7 +40,7 @@ pub struct Menu {
 
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
-    pub(in crate) fn from(handle: MENU, free_on_drop: bool) -> Self {
+    pub(in crate::menu) fn from(handle: MENU, free_on_drop: bool) -> Self {
         Self { handle, free_on_drop }
     }
 }
@@ -166,7 +167,7 @@ impl Menu {
     pub fn menu_sub(&self) -> result!(Window) {
         let handle = menu::menu_sub(self.handle)?;
 
-        Ok(Window::from(handle, false))
+        Ok(Window::_from(handle, false))
     }
 
     pub fn menu_term(&self) -> result!(MenuHook) {
@@ -288,7 +289,7 @@ impl Menu {
     }
 
     pub fn set_menu_sub(&self, win: &Window) -> result!(()) {
-        menu::set_menu_sub(self.handle, Some(win.handle()))?;
+        menu::set_menu_sub(self.handle, Some(win._handle()))?;
 
         Ok(())
     }
@@ -304,7 +305,7 @@ impl Menu {
     }
 
     pub fn set_menu_win(&self, win: &Window) -> result!(()) {
-        menu::set_menu_win(self.handle, Some(win.handle()))?;
+        menu::set_menu_win(self.handle, Some(win._handle()))?;
 
         Ok(())
     }

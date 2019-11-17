@@ -31,7 +31,7 @@ pub trait IsWindow: HasHandle + Drop {
     fn dupwin(&self) -> result!(Window) {
         match ncursesw::dupwin(self._handle()) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Window::_from(handle, true))
         }
     }
 
@@ -41,7 +41,7 @@ pub trait IsWindow: HasHandle + Drop {
     fn getwin(path: &path::Path) -> result!(Window) {
         match ncursesw::getwin(path) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Window::_from(handle, true))
         }
     }
 

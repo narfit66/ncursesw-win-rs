@@ -28,6 +28,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use ncursesw;
 use ncursesw::WINDOW;
 use crate::{Window, NCurseswWinError};
+use crate::gen::*;
 
 lazy_static! {
     pub(crate) static ref INITSCR_CALLED: AtomicBool = AtomicBool::new(false);
@@ -44,7 +45,6 @@ impl NCurses {
     // Initialise ncurses.
     fn initscr() -> result!(Self) {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
-
             let handle = ncursesw::initscr()?;
 
             COLOR_STARTED.store(false, Ordering::SeqCst);
@@ -58,7 +58,7 @@ impl NCurses {
 
     // Returns the initial window(stdscr) after initialisation.
     fn initial_window(&self) -> Window {
-        Window::from(self.handle, true)
+        Window::_from(self.handle, true)
     }
 }
 

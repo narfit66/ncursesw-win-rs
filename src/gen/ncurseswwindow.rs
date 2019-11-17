@@ -30,7 +30,7 @@ pub trait NCurseswWindow: HasHandle + IsWindow {
     fn new(size: Size, origin: Origin) -> result!(Window) {
         match ncursesw::newwin(size, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Window::_from(handle, true))
         }
     }
 

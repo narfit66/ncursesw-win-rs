@@ -30,7 +30,7 @@ pub trait CanSubWindow: HasHandle + HasYXAxis + NCurseswWindow + IsWindow {
     fn subwin(&self, size: Size, origin: Origin) -> result!(Window) {
         match ncursesw::subwin(self._handle(), size, origin) {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::from(handle, true))
+            Ok(handle)  => Ok(Window::_from(handle, true))
         }
     }
 
@@ -38,7 +38,7 @@ pub trait CanSubWindow: HasHandle + HasYXAxis + NCurseswWindow + IsWindow {
     fn getparent(&self) -> Option<Window> {
         match ncursesw::wgetparent(self._handle()) {
             None         => None,
-            Some(handle) => Some(Window::from(handle, false))
+            Some(handle) => Some(Window::_from(handle, false))
         }
     }
 
