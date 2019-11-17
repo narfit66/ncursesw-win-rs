@@ -40,8 +40,12 @@ pub struct Menu {
 
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
-    pub(in crate::menu) fn from(handle: MENU, free_on_drop: bool) -> Self {
+    fn _from(handle: MENU, free_on_drop: bool) -> Self {
         Self { handle, free_on_drop }
+    }
+
+    fn _handle(&self) -> MENU {
+        self.handle
     }
 }
 
@@ -50,12 +54,12 @@ impl Menu {
         let mut item_handles = vec!();
 
         for item in items {
-            item_handles.push(item.handle())
+            item_handles.push(item._handle())
         }
 
         let handle = menu::new_menu(item_handles)?;
 
-        Ok(Self::from(handle, true))
+        Ok(Self::_from(handle, true))
     }
 
     #[deprecated(since = "0.3.2", note = "Use MenuItem::new() instead")]
@@ -66,7 +70,7 @@ impl Menu {
     pub fn current_item(&self) -> result!(MenuItem) {
         let handle = menu::current_item(self.handle)?;
 
-        Ok(MenuItem::from(handle, false))
+        Ok(MenuItem::_from(handle, false))
     }
 
     pub fn item_count(&self) -> result!(i32) {
@@ -121,7 +125,7 @@ impl Menu {
                 let mut menu_items = vec!();
 
                 for handle in handles {
-                    menu_items.push(MenuItem::from(handle, false))
+                    menu_items.push(MenuItem::_from(handle, false))
                 }
 
                 Some(menu_items)
@@ -199,7 +203,7 @@ impl Menu {
     }
 
     pub fn set_current_item(&self, item: &MenuItem) -> result!(()) {
-        menu::set_current_item(self.handle, item.handle())?;
+        menu::set_current_item(self.handle, item._handle())?;
 
         Ok(())
     }
@@ -250,7 +254,7 @@ impl Menu {
         let mut handles = vec!();
 
         for item in items {
-            handles.push(item.handle())
+            handles.push(item._handle())
         }
 
         menu::set_menu_items(self.handle, handles)?;
