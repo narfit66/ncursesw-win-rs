@@ -21,10 +21,7 @@
 */
 
 use crate::NCurseswWinError;
-
-use ncursesw;
-use ncursesw::menu;
-use ncursesw::menu::ITEM;
+use ncursesw::{menu, menu::ITEM};
 
 pub use ncursesw::menu::ItemOptions;
 
@@ -125,11 +122,15 @@ impl MenuItem {
 
 impl Drop for MenuItem {
     fn drop(&mut self) {
+        // TODO: remove comments once we've sorted out why Menu::post_menu()
+        //       is failing with no menu items connected.
+        /*
         if self.free_on_drop {
-            if let Err(e) = menu::free_item(self.handle) {
-                panic!(e.to_string())
+            if let Err(source) = menu::free_item(self.handle) {
+                panic!(source.to_string())
             }
         }
+        */
     }
 }
 

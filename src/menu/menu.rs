@@ -20,12 +20,8 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::menu;
-use ncursesw::normal;
-use ncursesw::menu::MENU;
-
-use crate::{Window, NCurseswWinError, menu::MenuItem};
-use crate::gen::HasHandle;
+use ncursesw::{menu, menu::MENU, normal};
+use crate::{Window, NCurseswWinError, menu::MenuItem, gen::HasHandle};
 
 pub use ncursesw::menu::{
     MenuHook, MenuOptions, MenuRequest, MenuSpacing, MenuSize
@@ -50,19 +46,15 @@ impl Menu {
 
 impl Menu {
     pub fn new(items: Vec<&MenuItem>) -> result!(Self) {
-        let mut item_handles = vec!();
-
-        for item in items {
-            item_handles.push(item._handle())
-        }
+        let item_handles = items.iter().map(|item| item._handle()).collect();
 
         let handle = menu::new_menu(item_handles)?;
 
         Ok(Self::_from(handle, true))
     }
 
-    #[deprecated(since = "0.3.2", note = "Use MenuItem::new() instead")]
-    pub fn new_item(items: Vec<&MenuItem>) -> result!(Self) {
+    #[deprecated(since = "0.3.2", note = "Use Menu::new() instead")]
+    pub fn new_menu(items: Vec<&MenuItem>) -> result!(Self) {
         Self::new(items)
     }
 
@@ -120,15 +112,7 @@ impl Menu {
 
     pub fn menu_items(&self) -> Option<Vec<MenuItem>> {
         match menu::menu_items(self.handle) {
-            Some(handles) => {
-                let mut menu_items = vec!();
-
-                for handle in handles {
-                    menu_items.push(MenuItem::_from(handle, false))
-                }
-
-                Some(menu_items)
-            },
+            Some(handles) => Some(handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect()),
             None          => None
         }
     }
@@ -252,14 +236,10 @@ impl Menu {
         Ok(())
     }
 
-    pub fn set_menu_items(&self, items: Vec<&MenuItem>) -> result!(()) {
-        let mut handles = vec!();
+    pub fn set_menu_items(&self, items: &[&MenuItem]) -> result!(()) {
+        let item_handles = items.iter().map(|item| item._handle()).collect();
 
-        for item in items {
-            handles.push(item._handle())
-        }
-
-        menu::set_menu_items(self.handle, handles)?;
+        menu::set_menu_items(self.handle, item_handles)?;
 
         Ok(())
     }
@@ -339,8 +319,8 @@ impl Menu {
 impl Drop for Menu {
     fn drop(&mut self) {
         if self.free_on_drop {
-            if let Err(e) = menu::free_menu(self.handle) {
-                panic!(e.to_string())
+            if let Err(source) = menu::free_menu(self.handle) {
+                panic!(source.to_string())
             }
         }
     }

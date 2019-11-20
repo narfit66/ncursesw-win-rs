@@ -85,7 +85,6 @@ pub use ncursesw::{
     reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
     resize_term, resizeterm, setcchar, use_legacy_coding
 };
-pub use ncursesw::panels::PanelUserPtr;
 pub use ncursesw::mouse::OriginResult;
 pub use ncursesw::mouse::{
     has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,

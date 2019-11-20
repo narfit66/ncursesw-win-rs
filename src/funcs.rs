@@ -34,7 +34,7 @@ pub fn setlocale(lc: LcCategory, locale: &str) -> result!(String) {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrAlreadyCalled)
     } else {
-        Ok(ncursesw::setlocale(lc, locale))
+        Ok(ncursesw::setlocale(lc, locale)?)
     }
 }
 
