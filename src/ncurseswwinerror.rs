@@ -20,9 +20,13 @@
     IN THE SOFTWARE.
 */
 
+use std::num;
+
 use ncursesw::shims::constants::ERR;
-use ncursesw::NCurseswError;
-use ncursesw::menu::NCurseswMenuError;
+use ncursesw::{
+    NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError, menu::NCurseswMenuError
+};
+use crate::ripoff::MAX_LINES;
 
 custom_error::custom_error! {
 /// NCurseswWin Errors.
@@ -31,12 +35,14 @@ pub NCurseswWinError
     InitscrNotCalled = "ncurses has not been initialised",
     StartColorAlreadyCalled = "ncurseswwin::start_color() already called",
     StartColorNotCalled = "ncurseswwin::start_color() not called",
-    MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, crate::ripoff::MAX_LINES) },
+    MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, MAX_LINES) },
     RipoffNotInitialized { number: usize } = "ripoff line {number} has not been initialised",
     InternalError = "an internal error has occured",
     Panic { message: String } = "{message}",
-    IntError { source: std::num::TryFromIntError } = "{source}",
+    IntError { source: num::TryFromIntError } = "{source}",
     NCurseswError { source: NCurseswError } = "{source}",
+    PanelsError { source: NCurseswPanelsError } = "{source}",
+    MouseError { source: NCurseswMouseError } = "{source}",
     MenuError { source: NCurseswMenuError } = "{source}"
 }
 
@@ -50,5 +56,5 @@ impl PartialEq for NCurseswWinError {
 impl Eq for NCurseswWinError { }
 
 pub(crate) fn timeout_error(func: &str) -> NCurseswWinError {
-    NCurseswWinError::from(NCurseswError::NCursesFunction { func: func.to_string(), rc: ERR })
+    NCurseswWinError::from(NCurseswError::LibraryError { func: func.to_string(), rc: ERR })
 }

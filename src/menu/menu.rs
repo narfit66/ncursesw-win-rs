@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::ptr;
+
 use ncursesw::{menu, menu::MENU, normal};
 use crate::{Window, NCurseswWinError, menu::MenuItem, gen::HasHandle};
 
@@ -110,15 +112,16 @@ impl Menu {
         Ok(func)
     }
 
-    pub fn menu_items(&self) -> Option<Vec<MenuItem>> {
-        match menu::menu_items(self.handle) {
-            Some(handles) => Some(handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect()),
-            None          => None
-        }
+    pub fn menu_items(&self) -> result!(Vec<MenuItem>) {
+        let handles = menu::menu_items(self.handle)?;
+
+        Ok(handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect())
     }
 
-    pub fn menu_mark(&self) -> Option<String> {
-        menu::menu_mark(self.handle)
+    pub fn menu_mark(&self) -> result!(String) {
+        let mark = menu::menu_mark(self.handle)?;
+
+        Ok(mark)
     }
 
     pub fn menu_opts(&self) -> MenuOptions {
@@ -141,8 +144,10 @@ impl Menu {
         menu::menu_pad(self.handle)
     }
 
-    pub fn menu_pattern(&self) -> Option<String> {
-        menu::menu_pattern(self.handle)
+    pub fn menu_pattern(&self) -> result!(String) {
+        let pattern = menu::menu_pattern(self.handle)?;
+
+        Ok(pattern)
     }
 
     pub fn menu_spacing(&self) -> result!(MenuSpacing) {
@@ -328,3 +333,11 @@ impl Drop for Menu {
 
 unsafe impl Send for Menu { } // too make thread safe
 unsafe impl Sync for Menu { } // too make thread safe
+
+impl PartialEq for Menu {
+    fn eq(&self, rhs: &Self) -> bool {
+        ptr::eq(self.handle, rhs.handle)
+    }
+}
+
+impl Eq for Menu { }

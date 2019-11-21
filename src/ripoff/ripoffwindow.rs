@@ -21,8 +21,7 @@
 */
 
 use ncursesw::{Origin, WINDOW};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::*};
 
 /// A ripoff line window canvas.
 ///
@@ -60,10 +59,9 @@ impl HasGetFunctions for RipoffWindow { }
 impl RipoffWindow {
     /// get the cursor column on the ripoff window.
     pub fn column(&self) -> result!(i32) {
-        match ncursesw::getcurx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(x)       => Ok(x)
-        }
+        let column = ncursesw::getcurx(self._handle())?;
+
+        Ok(column)
     }
 
     /// set the cursor column on the ripoff window.
@@ -76,8 +74,8 @@ impl RipoffWindow {
 
 impl Drop for RipoffWindow {
     fn drop(&mut self) {
-        if let Err(e) = ncursesw::delwin(self.handle) {
-            panic!(e.to_string())
+        if let Err(source) = ncursesw::delwin(self.handle) {
+            panic!(source.to_string())
         }
     }
 }

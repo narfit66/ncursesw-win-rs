@@ -13,14 +13,14 @@ license = "MIT"
 
 [dependencies]
 libc = "0.2"
-ncursesw = "0.3.3"
-custom_error = "1.7.0"
-lazy_static = "1.4.0"
-strum = "0.16.0"
-strum_macros = "0.16.0"
+ncursesw = "0.4"
+custom_error = "1.7"
+lazy_static = "1.4"
+strum = "0.16"
+strum_macros = "0.16"
 
 [dev-dependencies]
-ascii = "0.9.1"
+ascii = "1.0"
 rand = "0.7"
 
 [patch.crates-io]

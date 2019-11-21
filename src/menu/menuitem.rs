@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::ptr;
+
 use crate::NCurseswWinError;
 use ncursesw::{menu, menu::ITEM};
 
@@ -55,8 +57,10 @@ impl MenuItem {
         Self::new(name, description)
     }
 
-    pub fn item_description(&self) -> Option<String> {
-        menu::item_description(self.handle)
+    pub fn item_description(&self) -> result!(String) {
+        let description = menu::item_description(self.handle)?;
+
+        Ok(description)
     }
 
     pub fn item_index(&self) -> result!(i32) {
@@ -65,8 +69,10 @@ impl MenuItem {
         Ok(index)
     }
 
-    pub fn item_name(&self) -> Option<String> {
-        menu::item_name(self.handle)
+    pub fn item_name(&self) -> result!(String) {
+        let name = menu::item_name(self.handle)?;
+
+        Ok(name)
     }
 
     pub fn item_opts(&self) -> ItemOptions {
@@ -122,17 +128,21 @@ impl MenuItem {
 
 impl Drop for MenuItem {
     fn drop(&mut self) {
-        // TODO: remove comments once we've sorted out why Menu::post_menu()
-        //       is failing with no menu items connected.
-        /*
         if self.free_on_drop {
             if let Err(source) = menu::free_item(self.handle) {
                 panic!(source.to_string())
             }
         }
-        */
     }
 }
 
 unsafe impl Send for MenuItem { } // too make thread safe
 unsafe impl Sync for MenuItem { } // too make thread safe
+
+impl PartialEq for MenuItem {
+    fn eq(&self, rhs: &Self) -> bool {
+        ptr::eq(self.handle, rhs.handle)
+    }
+}
+
+impl Eq for MenuItem { }

@@ -50,7 +50,7 @@ pub trait HasNonBlocking: HasHandle {
             -1 => Ok(None),
             rc => {
                 if rc < 0 {
-                    Err(NCurseswWinError::from(NCurseswError::NCursesFunction { func: "wgetdelay".to_string(), rc }))
+                    Err(NCurseswWinError::from(NCurseswError::LibraryError { func: "wgetdelay".to_string(), rc }))
                 } else {
                     let delay = time::Duration::from_millis(u64::try_from(rc)?);
 

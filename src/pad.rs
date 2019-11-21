@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::ptr;
+
 use ncursesw::WINDOW;
 use crate::gen::*;
 
@@ -80,3 +82,11 @@ impl Drop for Pad {
 
 unsafe impl Send for Pad { } // too make thread safe
 unsafe impl Sync for Pad { } // too make thread safe
+
+impl PartialEq for Pad {
+    fn eq(&self, rhs: &Self) -> bool {
+        ptr::eq(self.handle, rhs.handle)
+    }
+}
+
+impl Eq for Pad { }

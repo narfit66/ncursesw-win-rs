@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::ptr;
+
 use ncursesw::{stdscr, WINDOW};
 use crate::gen::*;
 
@@ -91,3 +93,11 @@ impl Default for Window {
 
 unsafe impl Send for Window { } // too make thread safe
 unsafe impl Sync for Window { } // too make thread safe
+
+impl PartialEq for Window {
+    fn eq(&self, rhs: &Self) -> bool {
+        ptr::eq(self.handle, rhs.handle)
+    }
+}
+
+impl Eq for Window { }

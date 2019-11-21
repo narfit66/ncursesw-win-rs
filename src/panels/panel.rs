@@ -1,5 +1,5 @@
 /*
-    src/panel.rs
+    src/panels/panel.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,11 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{panels, panels::PANEL, Origin};
-use crate::{Window, NCurseswWinError};
-use crate::gen::HasHandle;
+use std::ptr;
 
-pub use ncursesw::panels::update_panels;
+use ncursesw::{panels, panels::PANEL, Origin};
+use crate::{Window, NCurseswWinError, gen::HasHandle, panels::funcs};
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
@@ -39,11 +38,11 @@ impl Panel {
     // free_on_drop is false in call's such as panel_above(&self) where we are
     // 'peeking' the Panel but it would be invalid to free the handle when
     // our instance goes out of scope.
-    fn _from(handle: PANEL, free_on_drop: bool) -> Self {
+    pub(in crate::panels) fn _from(handle: PANEL, free_on_drop: bool) -> Self {
         Self { handle, free_on_drop }
     }
 
-    fn _handle(&self) -> PANEL {
+    pub(in crate::panels) fn _handle(&self) -> PANEL {
         self.handle
     }
 }
@@ -52,7 +51,7 @@ impl Panel {
     /// Create a new Panel instance with it's associated Window.
     pub fn new(window: &Window) -> result!(Self) {
         match panels::new_panel(window._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Err(source) => Err(NCurseswWinError::PanelsError { source }),
             Ok(handle)  => Ok(Self::_from(handle, true))
         }
     }
@@ -96,7 +95,7 @@ impl Panel {
     /// Returns the window of the given panel.
     pub fn panel_window(&self) -> result!(Window) {
         match panels::panel_window(self.handle) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Err(source) => Err(NCurseswWinError::PanelsError { source }),
             Ok(handle)  => Ok(Window::_from(handle, false))
         }
     }
@@ -123,19 +122,19 @@ impl Panel {
     /// Returns true if the panel is in the panel stack, false if it is not.
     pub fn panel_hidden(&self) -> result!(bool) {
         match panels::panel_hidden(self.handle) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Err(source) => Err(NCurseswWinError::PanelsError { source }),
             Ok(hidden)  => Ok(hidden)
         }
     }
 
     /// Returns the panel above panel.
     pub fn panel_above(&self) -> result!(Self) {
-        panel_above(Some(self))
+        funcs::panel_above(Some(self))
     }
 
     /// Returns the panel just below panel.
     pub fn panel_below(&self) -> result!(Self) {
-        panel_below(Some(self))
+        funcs::panel_below(Some(self))
     }
 
     /// Sets the panel's user pointer to the passed `Panel`.
@@ -170,28 +169,10 @@ impl Drop for Panel {
 unsafe impl Send for Panel { } // too make thread safe
 unsafe impl Sync for Panel { } // too make thread safe
 
-/// Returns the panel above the specified panel.
-///
-/// If the specified panel argument is None, it returns the bottom panel in the stack.
-pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
-    match panels::panel_above(match panel {
-        None        => None,
-        Some(panel) => Some(panel.handle)
-    }) {
-        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-        Ok(handle)  => Ok(Panel::_from(handle, false))
+impl PartialEq for Panel {
+    fn eq(&self, rhs: &Self) -> bool {
+        ptr::eq(self.handle, rhs.handle)
     }
 }
 
-/// Returns the panel just below the specified panel.
-///
-/// If the specified panel argument is None, it returns the top panel in the stack.
-pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
-    match panels::panel_below(match panel {
-        None        => None,
-        Some(panel) => Some(panel.handle)
-    }) {
-        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-        Ok(handle)  => Ok(Panel::_from(handle, false))
-    }
-}
+impl Eq for Panel { }
