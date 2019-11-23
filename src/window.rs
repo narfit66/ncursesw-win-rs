@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::ptr;
+use std::{ptr, fmt};
 
 use ncursesw::{stdscr, WINDOW};
 use crate::gen::*;
@@ -77,8 +77,8 @@ impl HasMvGetFunctions for Window { }
 impl Drop for Window {
     fn drop(&mut self) {
         if self.free_on_drop {
-            if let Err(e) = ncursesw::delwin(self.handle) {
-                panic!(e.to_string())
+            if let Err(source) = ncursesw::delwin(self.handle) {
+                panic!(source.to_string())
             }
         }
     }
@@ -101,3 +101,9 @@ impl PartialEq for Window {
 }
 
 impl Eq for Window { }
+
+impl fmt::Debug for Window {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Window {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+    }
+}

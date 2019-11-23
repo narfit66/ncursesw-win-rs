@@ -21,16 +21,13 @@
 */
 
 use ncursesw::Origin;
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw delete origin functions.
 pub trait HasMvDelFunctions: HasHandle + HasYXAxis {
     fn mvdelch(&self, origin: Origin) -> result!(()) {
         assert_origin!("mvdelch", self.size()?, origin);
 
-        ncursesw::mvwdelch(self._handle(), origin)?;
-
-        Ok(())
+        Ok(ncursesw::mvwdelch(self._handle(), origin)?)
     }
 }

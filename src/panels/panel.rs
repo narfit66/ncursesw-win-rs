@@ -50,10 +50,7 @@ impl Panel {
 impl Panel {
     /// Create a new Panel instance with it's associated Window.
     pub fn new(window: &Window) -> result!(Self) {
-        match panels::new_panel(window._handle()) {
-            Err(source) => Err(NCurseswWinError::PanelsError { source }),
-            Ok(handle)  => Ok(Self::_from(handle, true))
-        }
+        Ok(Self::_from(panels::new_panel(window._handle())?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Panel::new() instead")]
@@ -64,40 +61,29 @@ impl Panel {
 
     /// Puts panel at the bottom of all panels.
     pub fn bottom_panel(&self) -> result!(()) {
-        panels::bottom_panel(self.handle)?;
-
-        Ok(())
+        Ok(panels::bottom_panel(self.handle)?)
     }
 
     /// Puts the given visible panel on top of all panels in the stack.
     pub fn top_panel(&self) -> result!(()) {
-        panels::top_panel(self.handle)?;
-
-        Ok(())
+        Ok(panels::top_panel(self.handle)?)
     }
 
     /// Makes a hidden panel visible by placing it on top of the panels in the panel stack.
     pub fn show_panel(&self) -> result!(()) {
-        panels::show_panel(self.handle)?;
-
-        Ok(())
+        Ok(panels::show_panel(self.handle)?)
     }
 
     /// Removes the given panel from the panel stack and thus hides it from view.
     ///
     /// The Panel is not lost, merely removed from the stack.
     pub fn hide_panel(&self) -> result!(()) {
-        panels::hide_panel(self.handle)?;
-
-        Ok(())
+        Ok(panels::hide_panel(self.handle)?)
     }
 
     /// Returns the window of the given panel.
     pub fn panel_window(&self) -> result!(Window) {
-        match panels::panel_window(self.handle) {
-            Err(source) => Err(NCurseswWinError::PanelsError { source }),
-            Ok(handle)  => Ok(Window::_from(handle, false))
-        }
+        Ok(Window::_from(panels::panel_window(self.handle)?, false))
     }
 
     /// Replaces the current window of panel with window.
@@ -105,26 +91,19 @@ impl Panel {
     /// Useful, for example if you want to resize a panel; if you're using ncurses, you can
     /// call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
     pub fn replace_panel(&self, window: &Window) -> result!(()) {
-        panels::replace_panel(self.handle, window._handle())?;
-
-        Ok(())
+        Ok(panels::replace_panel(self.handle, window._handle())?)
     }
 
     /// Moves the given panel window so that its upper-left corner is at origin.y, origin.x.
     ///
     /// It does not change the position of the panel in the stack. Be sure to use this function, not mvwin(), to move a panel window.
     pub fn move_panel(&self, origin: Origin) -> result!(()) {
-        panels::move_panel(self.handle, origin)?;
-
-        Ok(())
+        Ok(panels::move_panel(self.handle, origin)?)
     }
 
     /// Returns true if the panel is in the panel stack, false if it is not.
     pub fn panel_hidden(&self) -> result!(bool) {
-        match panels::panel_hidden(self.handle) {
-            Err(source) => Err(NCurseswWinError::PanelsError { source }),
-            Ok(hidden)  => Ok(hidden)
-        }
+        Ok(panels::panel_hidden(self.handle)?)
     }
 
     /// Returns the panel above panel.
@@ -139,12 +118,10 @@ impl Panel {
 
     /// Sets the panel's user pointer to the passed `Panel`.
     pub fn set_panel_userptr<T>(&self, ptr: Option<Box<&T>>) -> result!(()) {
-        panels::set_panel_userptr(self.handle, match ptr {
+        Ok(panels::set_panel_userptr(self.handle, match ptr {
             Some(ptr) => Some(Box::into_raw(ptr) as *const libc::c_void),
             None      => None
-        })?;
-
-        Ok(())
+        })?)
     }
 
     /// Returns the user pointers `Panel` for the given panel.

@@ -23,5 +23,5 @@
 mod ripoffline;
 mod ripoffwindow;
 
-pub use crate::ripoff::ripoffline::*;
-pub use crate::ripoff::ripoffwindow::*;
+pub use ripoffline::*;
+pub use ripoffwindow::*;

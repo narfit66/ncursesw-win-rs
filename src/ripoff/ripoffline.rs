@@ -20,14 +20,13 @@
     IN THE SOFTWARE.
 */
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
+use std::sync::{Mutex, atomic::{AtomicUsize, Ordering}};
 
 use ncursesw;
 use ncursesw::{WINDOW, Orientation};
 use crate::{RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
 
-pub(crate) const MAX_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
+pub(in crate) const MAX_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
 
 lazy_static! {
     static ref RIPOFFCOUNT: AtomicUsize = AtomicUsize::new(0);

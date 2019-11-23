@@ -20,7 +20,9 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::CharacterResult;
+#![allow(type_alias_bounds)]
+
+use ncursesw::{GetCharacterType, CharacterResult};
 
 /// Non-Blocking get function return type, None is a timeout.
-pub type NonBlockingResult<T> = Option<CharacterResult<T>>;
+pub type NonBlockingResult<T: GetCharacterType> = Option<CharacterResult<T>>;

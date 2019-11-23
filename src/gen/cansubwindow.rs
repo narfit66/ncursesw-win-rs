@@ -21,17 +21,14 @@
 */
 
 use ncursesw::{Origin, Size};
-use crate::NCurseswWinError;
-use crate::window::*;
-use crate::gen::*;
+use crate::{
+    NCurseswWinError, window::Window, gen::{HasHandle, HasYXAxis, NCurseswWindow, IsWindow}
+};
 
 /// Is the window canvas type capable of creating a sub-window.
 pub trait CanSubWindow: HasHandle + HasYXAxis + NCurseswWindow + IsWindow {
     fn subwin(&self, size: Size, origin: Origin) -> result!(Window) {
-        match ncursesw::subwin(self._handle(), size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::_from(handle, true))
-        }
+        Ok(Window::_from(ncursesw::subwin(self._handle(), size, origin)?, true))
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
@@ -43,23 +40,14 @@ pub trait CanSubWindow: HasHandle + HasYXAxis + NCurseswWindow + IsWindow {
     }
 
     fn getparx(&self) -> result!(i32) {
-        match ncursesw::getparx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(x)       => Ok(x)
-        }
+        Ok(ncursesw::getparx(self._handle())?)
     }
 
     fn getpary(&self) -> result!(i32) {
-        match ncursesw::getpary(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(y)       => Ok(y)
-        }
+        Ok(ncursesw::getpary(self._handle())?)
     }
 
     fn getparyx(&self) -> result!(Origin) {
-        match ncursesw::getparyx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(origin)  => Ok(origin)
-        }
+        Ok(ncursesw::getparyx(self._handle())?)
     }
 }

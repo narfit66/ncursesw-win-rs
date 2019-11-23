@@ -28,10 +28,10 @@ mod horizontalgraphic;
 mod matrixkey;
 mod verticalgraphic;
 
-pub use crate::graphics::boxdrawing::*;
-pub use crate::graphics::boxdrawinggraphic::*;
-pub use crate::graphics::boxdrawingtypedetail::*;
-pub use crate::graphics::boxdrawingtype::*;
-pub use crate::graphics::horizontalgraphic::*;
-pub(in crate) use crate::graphics::matrixkey::*;
-pub use crate::graphics::verticalgraphic::*;
+pub use boxdrawing::*;
+pub use boxdrawinggraphic::*;
+pub use boxdrawingtypedetail::*;
+pub use boxdrawingtype::*;
+pub use horizontalgraphic::*;
+pub(in crate) use matrixkey::*;
+pub use verticalgraphic::*;

@@ -22,7 +22,6 @@
 
 /// Box drawing type detail.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[repr(u8)]
 pub enum BoxDrawingTypeDetail {
     /// Normal.
     Normal,

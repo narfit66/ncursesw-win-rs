@@ -21,8 +21,7 @@
 */
 
 use ncursesw::{Changed, Origin, Region, Size};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::{HasHandle, HasYAxis, HasXAxis}};
 
 /// Does the window canvas have an x and y axis.
 pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
@@ -55,65 +54,46 @@ pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
     fn redrawln(&self, region: Region) -> result!(()) {
         assert_region!("redrawln", self.size()?, region);
 
-        ncursesw::wredrawln(self._handle(), region.top, region.bottom - region.top)?;
-
-        Ok(())
+        Ok(ncursesw::wredrawln(self._handle(), region.top, region.bottom - region.top)?)
     }
 
     fn resize(&self, size: Size) -> result!(()) {
         assert!(size.lines >= 0 && size.columns >= 0, "resize() : size is invalid, size={}", size);
 
-        ncursesw::wresize(self._handle(), size)?;
-
-        Ok(())
+        Ok(ncursesw::wresize(self._handle(), size)?)
     }
 
     fn touchline(&self, region: Region) -> result!(()) {
         assert_region!("touchline", self.size()?, region);
 
-        ncursesw::touchline(self._handle(), region.top, region.bottom - region.top)?;
-
-        Ok(())
+        Ok(ncursesw::touchline(self._handle(), region.top, region.bottom - region.top)?)
     }
 
     fn touchln(&self, region: Region, changed: Changed) -> result!(()) {
         assert_region!("touchln", self.size()?, region);
 
-        ncursesw::wtouchln(self._handle(), region.top, region.bottom - region.top, changed)?;
-
-        Ok(())
+        Ok(ncursesw::wtouchln(self._handle(), region.top, region.bottom - region.top, changed)?)
     }
 
     /// get the origin of the window.
     fn origin(&self) -> result!(Origin) {
-        match ncursesw::getbegyx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(origin)  => Ok(origin)
-        }
+        Ok(ncursesw::getbegyx(self._handle())?)
     }
 
     /// get the size of the window.
     fn size(&self) -> result!(Size) {
-        match ncursesw::getmaxyx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(size)    => Ok(size)
-        }
+        Ok(ncursesw::getmaxyx(self._handle())?)
     }
 
     /// get the cursor origin on the window.
     fn cursor(&self) -> result!(Origin) {
-        match ncursesw::getcuryx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(origin)  => Ok(origin)
-        }
+        Ok(ncursesw::getcuryx(self._handle())?)
     }
 
     /// set the cursor origin on the window.
     fn set_cursor(&self, origin: Origin) -> result!(()) {
         assert_origin!("set_cursor", self.size()?, origin);
 
-        ncursesw::wmove(self._handle(), origin)?;
-
-        Ok(())
+        Ok(ncursesw::wmove(self._handle(), origin)?)
     }
 }

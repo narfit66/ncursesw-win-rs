@@ -20,14 +20,11 @@
     IN THE SOFTWARE.
 */
 
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw delete functions.
 pub trait HasDelFunctions: HasHandle {
     fn delch(&self) -> result!(()) {
-        ncursesw::wdelch(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wdelch(self._handle())?)
     }
 }

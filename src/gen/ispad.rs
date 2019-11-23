@@ -23,17 +23,13 @@
 use std::path;
 
 use ncursesw::{ChtypeChar, ComplexChar, Origin, Size};
-use crate::{Pad, NCurseswWinError};
-use crate::gen::*;
+use crate::{Pad, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a pad.
 pub trait IsPad: HasHandle + Drop + Sync + Send {
     /// Create a new instance of a Window that will act as a pad.
     fn new(size: Size) -> result!(Pad) {
-        match ncursesw::newpad(size) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Pad::_from(handle, true))
-        }
+        Ok(Pad::_from(ncursesw::newpad(size)?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Pad::new() instead")]
@@ -43,10 +39,7 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     }
 
     fn subpad(&self, size: Size, origin: Origin) -> result!(Pad) {
-        match ncursesw::subpad(self._handle(), size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Pad::_from(handle, true))
-        }
+        Ok(Pad::_from(ncursesw::subpad(self._handle(), size, origin)?, true))
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
@@ -61,51 +54,34 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
     fn getwin(path: &path::Path) -> result!(Pad) {
-        match ncursesw::getwin(path) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Pad::_from(handle, true))
-        }
+        Ok(Pad::_from(ncursesw::getwin(path)?, true))
     }
 
     fn putwin(&self, path: &path::Path) -> result!(()) {
-        ncursesw::putwin(self._handle(), path)?;
-
-        Ok(())
+        Ok(ncursesw::putwin(self._handle(), path)?)
     }
 
     fn overlay(&self, srcwin: &Pad) -> result!(()) {
-        ncursesw::overlay(srcwin._handle(), self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::overlay(srcwin._handle(), self._handle())?)
     }
 
     fn overwrite(&self, srcwin: &Pad) -> result!(()) {
-        ncursesw::overwrite(srcwin._handle(), self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::overwrite(srcwin._handle(), self._handle())?)
     }
 
     fn pechochar(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::pechochar(self._handle(), ch)?;
-
-        Ok(())
+        Ok(ncursesw::pechochar(self._handle(), ch)?)
     }
 
     fn pecho_wchar(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::pecho_wchar(self._handle(), wch)?;
-
-        Ok(())
+        Ok(ncursesw::pecho_wchar(self._handle(), wch)?)
     }
 
     fn pnoutrefresh(&self, pmin: Origin, smin: Origin, smax: Origin) -> result!(()) {
-        ncursesw::pnoutrefresh(self._handle(), pmin, smin, smax)?;
-
-        Ok(())
+        Ok(ncursesw::pnoutrefresh(self._handle(), pmin, smin, smax)?)
     }
 
     fn prefresh(&self, pmin: Origin, smin: Origin, smax: Origin) -> result!(()) {
-        ncursesw::prefresh(self._handle(), pmin, smin, smax)?;
-
-        Ok(())
+        Ok(ncursesw::prefresh(self._handle(), pmin, smin, smax)?)
     }
 }

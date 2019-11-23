@@ -22,8 +22,7 @@
 
 #![allow(unused_imports)] // supress warning about un-used HashMap (this is used in the test transform_test()).
 
-use std::convert::{TryFrom, Into};
-use std::collections::HashMap;
+use std::{convert::{TryFrom, Into}, collections::HashMap};
 
 use crate::NCurseswWinError;
 

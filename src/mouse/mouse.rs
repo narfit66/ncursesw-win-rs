@@ -22,9 +22,8 @@
 
 use std::hash::{Hash, Hasher};
 
-use crate::mouse::mouseevents::MouseEvents;
-use crate::{MouseMask, MouseOrigin, NCurseswWinError};
 use ncursesw::mouse::{MEVENT, mousemask, getmouse, ungetmouse};
+use crate::{MouseMask, MouseOrigin, NCurseswWinError, mouse::MouseEvents};
 
 /// A mouse pointer device.
 pub struct Mouse {
@@ -54,22 +53,20 @@ impl Mouse {
 
         // check if the event is for this mouse, if not then
         // push the event back onto the mouse fifo-queue.
-        if self.handle.id == handle[0].id {
+        Ok(if self.handle.id == handle[0].id {
             self.handle = handle[0];
 
-            Ok(true)
+            true
         } else {
             ungetmouse(handle.as_mut_ptr())?;
 
-            Ok(false)
-        }
+            false
+        })
     }
 
     /// Push the current mouse event back onto the mouse-fifo queue.
     pub fn push(&mut self) -> result!(()) {
-        ungetmouse(&mut self.handle)?;
-
-        Ok(())
+        Ok(ungetmouse(&mut self.handle)?)
     }
 
     /// The id of the mouse.

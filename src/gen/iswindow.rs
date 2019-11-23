@@ -23,49 +23,34 @@
 use std::path;
 
 use ncursesw::{ChtypeChar, ComplexChar};
-use crate::{Window, NCurseswWinError};
-use crate::gen::*;
+use crate::{Window, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a window.
 pub trait IsWindow: HasHandle + Drop {
     fn dupwin(&self) -> result!(Window) {
-        match ncursesw::dupwin(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::_from(handle, true))
-        }
+        Ok(Window::_from(ncursesw::dupwin(self._handle())?, true))
     }
 
     /// Create a Window instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
     fn getwin(path: &path::Path) -> result!(Window) {
-        match ncursesw::getwin(path) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::_from(handle, true))
-        }
+        Ok(Window::_from(ncursesw::getwin(path)?, true))
     }
 
     fn putwin(&self, path: &path::Path) -> result!(()) {
-        ncursesw::putwin(self._handle(), path)?;
-
-        Ok(())
+        Ok(ncursesw::putwin(self._handle(), path)?)
     }
 
     fn echochar(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::wechochar(self._handle(), ch)?;
-
-        Ok(())
+        Ok(ncursesw::wechochar(self._handle(), ch)?)
     }
 
     fn echo_wchar(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::wecho_wchar(self._handle(), wch)?;
-
-        Ok(())
+        Ok(ncursesw::wecho_wchar(self._handle(), wch)?)
     }
 
     fn noutrefresh(&self) -> result!(()) {
-        ncursesw::wnoutrefresh(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wnoutrefresh(self._handle())?)
     }
 }

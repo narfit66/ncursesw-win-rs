@@ -21,15 +21,12 @@
 */
 
 use ncursesw::{ChtypeChar, ComplexChar};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw background functions.
 pub trait HasBackground: HasHandle {
     fn bkgd(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::wbkgd(self._handle(), ch)?;
-
-        Ok(())
+        Ok(ncursesw::wbkgd(self._handle(), ch)?)
     }
 
     fn bkgdset(&self, ch: ChtypeChar) {
@@ -37,9 +34,7 @@ pub trait HasBackground: HasHandle {
     }
 
     fn bkgrnd(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::wbkgrnd(self._handle(), wch)?;
-
-        Ok(())
+        Ok(ncursesw::wbkgrnd(self._handle(), wch)?)
     }
 
     fn bkgrndset(&self, wch: ComplexChar) {
@@ -51,9 +46,6 @@ pub trait HasBackground: HasHandle {
     }
 
     fn getbkgrnd(&self) -> result!(ComplexChar) {
-        match ncursesw::wgetbkgrnd(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(ch)      => Ok(ch)
-        }
+        Ok(ncursesw::wgetbkgrnd(self._handle())?)
     }
 }

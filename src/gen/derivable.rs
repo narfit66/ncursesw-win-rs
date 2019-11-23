@@ -21,24 +21,19 @@
 */
 
 use ncursesw::{Origin, Size};
-use crate::NCurseswWinError;
-use crate::gen::*;
-use crate::window::*;
+use crate::{
+    NCurseswWinError, window::Window, gen::{HasHandle, NCurseswWindow, HasYXAxis, IsWindow}
+};
 
 /// Is the window canvas type capable of creating a derived window.
 pub trait Derivable: HasHandle + NCurseswWindow + HasYXAxis + IsWindow {
     fn derwin(&self, size: Size, origin: Origin) -> result!(Window) {
-        match ncursesw::derwin(self._handle(), size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::_from(handle, true))
-        }
+        Ok(Window::_from(ncursesw::derwin(self._handle(), size, origin)?, true))
     }
 
     fn mvderwin(&self, origin: Origin) -> result!(()) {
         assert_origin!("mvderwin", self.size()?, origin);
 
-        ncursesw::mvderwin(self._handle(), origin)?;
-
-        Ok(())
+        Ok(ncursesw::mvderwin(self._handle(), origin)?)
     }
 }

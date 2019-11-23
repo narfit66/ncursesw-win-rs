@@ -39,11 +39,9 @@ pub enum MouseMask {
 
 impl MouseMask {
     pub(in crate::mouse) fn mask(self) -> result!(mmask_t) {
-        let mask = match self {
+        Ok(match self {
             MouseMask::ReportMousePosition => REPORT_MOUSE_POSITION,
             MouseMask::AllMouseEvents      => ALL_MOUSE_EVENTS
-        }.try_into()?;
-
-        Ok(mask)
+        }.try_into()?)
     }
 }

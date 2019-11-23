@@ -66,8 +66,8 @@ impl Drop for NCurses {
     // Unallocate the initialised ncurses instance.
     fn drop(&mut self) {
         match ncursesw::endwin() {
-            Err(e) => panic!(e.to_string()),
-            _      => {
+            Err(source) => panic!(source.to_string()),
+            _           => {
                 COLOR_STARTED.store(false, Ordering::SeqCst);
                 INITSCR_CALLED.store(false, Ordering::SeqCst);
             }

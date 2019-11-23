@@ -22,8 +22,9 @@
 
 use strum::IntoEnumIterator;
 
-use crate::{MouseButtonEvent, MouseButtonState, MouseButton};
-use crate::mouse::mouseevent::MouseEvent;
+use crate::{
+    MouseButtonEvent, MouseButtonState, MouseButton, mouse::mouseevent::MouseEvent
+};
 use ncursesw::mouse::mmask_t;
 
 macro_rules! pub_getter {

@@ -23,7 +23,7 @@
 use crate::{BoxDrawingType, BoxDrawingGraphic};
 
 #[derive(PartialEq, Eq, Hash)]
-pub(crate) struct MatrixKey {
+pub(in crate) struct MatrixKey {
     box_drawing_type:    BoxDrawingType,
     box_drawing_graphic: BoxDrawingGraphic
 }

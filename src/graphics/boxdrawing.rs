@@ -22,13 +22,15 @@
 
 use std::collections::HashMap;
 
-use crate::{BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic, NCurseswWinError};
-use crate::graphics::MatrixKey;
+use crate::{
+    BoxDrawingType, BoxDrawingTypeDetail, BoxDrawingGraphic, NCurseswWinError,
+    graphics::MatrixKey
+};
 use ncursesw::{
     ChtypeChar, WideChar, ComplexChar,
-    AttributesType, ColorPairType, ColorAttributeTypes
+    AttributesType, ColorPairType, ColorAttributeTypes,
+    shims::ncurses::{wchar_t, NCURSES_ACS}
 };
-use ncursesw::shims::ncurses::{wchar_t, NCURSES_ACS};
 
 lazy_static! {
     static ref CHTYPEBOXDRAWING: HashMap<BoxDrawingGraphic, char> = {
@@ -403,8 +405,5 @@ pub fn complex_box_graphic<A, P, T>(
           P: ColorPairType<T>,
           T: ColorAttributeTypes
 {
-    match ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, box_drawing_graphic), attrs, color_pair) {
-        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-        Ok(cc)      => Ok(cc)
-    }
+    Ok(ComplexChar::from_wide_char(wide_box_graphic(box_drawing_type, box_drawing_graphic), attrs, color_pair)?)
 }

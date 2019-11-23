@@ -23,5 +23,5 @@
 mod funcs;
 mod panel;
 
-pub use crate::panels::funcs::*;
-pub use crate::panels::panel::*;
+pub use funcs::*;
+pub use panel::*;

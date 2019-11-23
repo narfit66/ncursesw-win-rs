@@ -26,12 +26,11 @@ use ncursesw::{
     AttributesColorPairType, AttributesColorPairSet, ComplexChar,
     Origin, Size, WideChar, getcchar
 };
-use crate::graphics::WIDEBOXDRAWING;
 use crate::{
+    graphics::WIDEBOXDRAWING,
     BoxDrawingType, BoxDrawingGraphic, NCurseswWinError,
-    complex_box_graphic
+    complex_box_graphic, gen::*
 };
-use crate::gen::*;
 
 // Direction of travel that graphics drawing maybe going
 // i.e. `_Direction::Horizontal` when drawing a horizontal line

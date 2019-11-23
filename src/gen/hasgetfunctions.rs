@@ -23,57 +23,38 @@
 #![allow(deprecated)]
 
 use ncursesw::{CharacterResult, WideChar, WideString};
-use crate::{NonBlockingResult, Timeout, NCurseswWinError};
-use crate::gen::*;
+use crate::{NonBlockingResult, Timeout, NCurseswWinError, gen::{HasHandle, HasNonBlocking}};
 
 /// Does the window canvas type have ncursesw get functions.
 pub trait HasGetFunctions: HasHandle + HasNonBlocking {
     fn getch(&self) -> result!(CharacterResult<char>) {
-        match ncursesw::wgetch(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(result)  => Ok(result)
-        }
+        Ok(ncursesw::wgetch(self._handle())?)
     }
 
     fn getnstr(&self, length: i32) -> result!(String) {
         assert_length!("getnstr", length);
 
-        match ncursesw::wgetnstr(self._handle(), length) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(str)     => Ok(str)
-        }
+        Ok(ncursesw::wgetnstr(self._handle(), length)?)
     }
 
     fn getn_wstr(&self, length: i32) -> result!(WideString) {
         assert_length!("getn_wstr", length);
 
-        match ncursesw::wgetn_wstr(self._handle(), length) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(wstr)    => Ok(wstr)
-        }
+        Ok(ncursesw::wgetn_wstr(self._handle(), length)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getnstr() instead")]
     fn getstr(&self) -> result!(String) {
-        match ncursesw::wgetstr(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(str)     => Ok(str)
-        }
+        Ok(ncursesw::wgetstr(self._handle())?)
     }
 
     fn get_wch(&self) -> result!(CharacterResult<WideChar>) {
-        match ncursesw::wget_wch(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(result)  => Ok(result)
-        }
+        Ok(ncursesw::wget_wch(self._handle())?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getn_wstr() instead")]
     fn get_wstr(&self) -> result!(WideString) {
-        match ncursesw::wget_wstr(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(wstr)    => Ok(wstr)
-        }
+        Ok(ncursesw::wget_wstr(self._handle())?)
     }
 
     nonblocking_get!(getch_nonblocking, getch, "wgetch", char);

@@ -23,18 +23,14 @@
 #![allow(deprecated)]
 
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw in functions.
 pub trait HasInFunctions: HasHandle {
     fn inchnstr(&self, length: i32) -> result!(ChtypeString) {
         assert_length!("inchnstr", length);
 
-        match ncursesw::winchnstr(self._handle(), length) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(chstr)   => Ok(chstr)
-        }
+        Ok(ncursesw::winchnstr(self._handle(), length)?)
     }
 
     fn inch(&self) -> ChtypeChar {
@@ -43,67 +39,43 @@ pub trait HasInFunctions: HasHandle {
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use inchnstr() instead")]
     fn inchstr(&self) -> result!(ChtypeString) {
-        match ncursesw::winchstr(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(chstr)   => Ok(chstr)
-        }
+        Ok(ncursesw::winchstr(self._handle())?)
     }
 
     fn innstr(&self, length: i32) -> result!(String) {
         assert_length!("innstr", length);
 
-        match ncursesw::winnstr(self._handle(), length) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(str)     => Ok(str)
-        }
+        Ok(ncursesw::winnstr(self._handle(), length)?)
     }
 
     fn innwstr(&self, length: i32) -> result!(WideString) {
         assert_length!("innwstr", length);
 
-        match ncursesw::winnwstr(self._handle(), length) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(wstr)    => Ok(wstr)
-        }
+        Ok(ncursesw::winnwstr(self._handle(), length)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use innstr() instead")]
     fn instr(&self) -> result!(String) {
-        match ncursesw::winstr(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(str)     => Ok(str)
-        }
+        Ok(ncursesw::winstr(self._handle())?)
     }
 
     fn in_wchnstr(&self, length: i32) -> result!(ComplexString) {
         assert_length!("in_wchnstr", length);
 
-        match ncursesw::win_wchnstr(self._handle(), length) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(cstr)    => Ok(cstr)
-        }
+        Ok(ncursesw::win_wchnstr(self._handle(), length)?)
     }
 
     fn in_wch(&self) -> result!(ComplexChar) {
-        match ncursesw::win_wch(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(cc)      => Ok(cc)
-        }
+        Ok(ncursesw::win_wch(self._handle())?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use in_wchnstr() instead")]
     fn in_wchstr(&self) -> result!(ComplexString) {
-        match ncursesw::win_wchstr(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(cstr)    => Ok(cstr)
-        }
+        Ok(ncursesw::win_wchstr(self._handle())?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use innwstr() instead")]
     fn inwstr(&self) -> result!(WideString) {
-        match ncursesw::winwstr(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(wstr)    => Ok(wstr)
-        }
+        Ok(ncursesw::winwstr(self._handle())?)
     }
 }

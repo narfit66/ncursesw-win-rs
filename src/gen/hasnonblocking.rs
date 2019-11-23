@@ -20,41 +20,33 @@
     IN THE SOFTWARE.
 */
 
-use std::time;
+use std::time::Duration;
 use std::convert::TryFrom;
 
-use ncursesw::NCurseswError;
-use crate::{Timeout, NCurseswWinError};
-use crate::gen::*;
+use ncursesw::{NCurseswError, shims::ncurses};
+use crate::{Timeout, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type support non-blocking functions.
 pub trait HasNonBlocking: HasHandle {
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_timeout() instead")]
-    fn getdelay(&self) -> result!(time::Duration) {
-        match ncursesw::wgetdelay(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(delay)   => Ok(delay)
-        }
+    fn getdelay(&self) -> result!(Duration) {
+        Ok(ncursesw::wgetdelay(self._handle())?)
     }
 
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use set_timeout() instead")]
-    fn timeout(&self, ms: time::Duration) -> result!(()) {
-        ncursesw::wtimeout(self._handle(), ms)?;
-
-        Ok(())
+    fn timeout(&self, ms: Duration) -> result!(()) {
+        Ok(ncursesw::wtimeout(self._handle(), ms)?)
     }
 
     /// get the non-blocking read timeout in milliseconds.
     fn get_timeout(&self) -> result!(Timeout) {
-        match unsafe { ncursesw::shims::ncurses::wgetdelay(self._handle()) } {
+        match unsafe { ncurses::wgetdelay(self._handle()) } {
             -1 => Ok(None),
             rc => {
                 if rc < 0 {
                     Err(NCurseswWinError::from(NCurseswError::LibraryError { func: "wgetdelay".to_string(), rc }))
                 } else {
-                    let delay = time::Duration::from_millis(u64::try_from(rc)?);
-
-                    Ok(Some(delay))
+                    Ok(Some(Duration::from_millis(u64::try_from(rc)?)))
                 }
             }
         }
@@ -62,11 +54,9 @@ pub trait HasNonBlocking: HasHandle {
 
     /// set the non-blocking read timeout in milliseconds, use `ms: None` to set blocking read mode.
     fn set_timeout(&self, ms: Timeout) -> result!(()) {
-        match ms {
-            None     => unsafe { ncursesw::shims::ncurses::wtimeout(self._handle(), -1) },
+        Ok(match ms {
+            None     => unsafe { ncurses::wtimeout(self._handle(), -1) },
             Some(ms) => ncursesw::wtimeout(self._handle(), ms)?
-        }
-
-        Ok(())
+        })
     }
 }

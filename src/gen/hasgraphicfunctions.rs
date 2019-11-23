@@ -27,9 +27,8 @@ use ncursesw::{
 };
 use crate::{
     BoxDrawingType, BoxDrawingGraphic, HorizontalGraphic, VerticalGraphic,
-    NCurseswWinError
+    NCurseswWinError, gen::{HasYXAxis, HasMvAddFunctions, HasMvInFunctions, HasMvInsFunctions, GraphicsTransform, _Direction}
 };
-use crate::gen::*;
 
 /// Does the window canvas type have ncursesw graphics functions.
 pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + HasMvInsFunctions + GraphicsTransform {
@@ -44,9 +43,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         bl: ChtypeChar,
         br: ChtypeChar) -> result!(())
     {
-        ncursesw::wborder(self._handle(), ls, rs, ts, bs, tl, tr, bl, br)?;
-
-        Ok(())
+        Ok(ncursesw::wborder(self._handle(), ls, rs, ts, bs, tl, tr, bl, br)?)
     }
 
     fn border_set(
@@ -60,85 +57,63 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         bl: ComplexChar,
         br: ComplexChar) -> result!(())
     {
-        ncursesw::wborder_set(self._handle(), ls, rs, ts, bs, tl, tr, bl, br)?;
-
-        Ok(())
+        Ok(ncursesw::wborder_set(self._handle(), ls, rs, ts, bs, tl, tr, bl, br)?)
     }
 
     fn r#box(&self, verch: ChtypeChar, horch: ChtypeChar) -> result!(()) {
-        ncursesw::r#box(self._handle(), verch, horch)?;
-
-        Ok(())
+        Ok(ncursesw::r#box(self._handle(), verch, horch)?)
     }
 
     fn box_set(&self, verch: ComplexChar, horch: ComplexChar) -> result!(()) {
-        ncursesw::box_set(self._handle(), verch, horch)?;
-
-        Ok(())
+        Ok(ncursesw::box_set(self._handle(), verch, horch)?)
     }
 
     fn hline(&self, ch: ChtypeChar, length: i32) -> result!(()) {
         assert_length!("hline", length);
 
-        ncursesw::whline(self._handle(), ch, length)?;
-
-        Ok(())
+        Ok(ncursesw::whline(self._handle(), ch, length)?)
     }
 
     fn hline_set(&self, wch: ComplexChar, length: i32) -> result!(()) {
         assert_length!("hline_set", length);
 
-        ncursesw::whline_set(self._handle(), wch, length)?;
-
-        Ok(())
+        Ok(ncursesw::whline_set(self._handle(), wch, length)?)
     }
 
     fn mvhline(&self, origin: Origin, ch: ChtypeChar, length: i32) -> result!(()) {
         assert_origin_hlength!("mvhline", self.size()?, origin, length);
 
-        ncursesw::mvwhline(self._handle(), origin, ch, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwhline(self._handle(), origin, ch, length)?)
     }
 
     fn mvhline_set(&self, origin: Origin, wch: ComplexChar, length: i32) -> result!(()) {
         assert_origin_hlength!("mvhline_set", self.size()?, origin, length);
 
-        ncursesw::mvwhline_set(self._handle(), origin, wch, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwhline_set(self._handle(), origin, wch, length)?)
     }
 
     fn mvvline(&self, origin: Origin, ch: ChtypeChar, length: i32) -> result!(()) {
         assert_origin_vlength!("mvvline", self.size()?, origin, length);
 
-        ncursesw::mvwvline(self._handle(), origin, ch, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwvline(self._handle(), origin, ch, length)?)
     }
 
     fn mvvline_set(&self, origin: Origin, wch: ComplexChar, length: i32) -> result!(()) {
         assert_origin_vlength!("mvvline_set", self.size()?, origin, length);
 
-        ncursesw::mvwvline_set(self._handle(), origin, wch, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwvline_set(self._handle(), origin, wch, length)?)
     }
 
     fn vline(&self, ch: ChtypeChar, length: i32) -> result!(()) {
         assert_length!("vline", length);
 
-        ncursesw::wvline(self._handle(), ch, length)?;
-
-        Ok(())
+        Ok(ncursesw::wvline(self._handle(), ch, length)?)
     }
 
     fn vline_set(&self, wch: ComplexChar, length: i32) -> result!(()) {
         assert_length!("vline_set", length);
 
-        ncursesw::wvline_set(self._handle(), wch, length)?;
-
-        Ok(())
+        Ok(ncursesw::wvline_set(self._handle(), wch, length)?)
     }
 
     // Transformative box drawing.

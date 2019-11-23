@@ -56,38 +56,38 @@ mod cansubwindow;
 mod ispad;
 mod iswindow;
 
-pub use crate::gen::hasaddfunctions::*;
-pub use crate::gen::hasmvaddfunctions::*;
-pub use crate::gen::hasdelfunctions::*;
-pub use crate::gen::hasmvdelfunctions::*;
-pub(in crate) use crate::gen::graphicstransform::*;
-pub use crate::gen::hasgraphicfunctions::*;
-pub(in crate) use crate::gen::hashandle::*;
-pub use crate::gen::hasinfunctions::*;
-pub use crate::gen::hasmvinfunctions::*;
-pub use crate::gen::hasinsfunctions::*;
-pub use crate::gen::hasmvinsfunctions::*;
-pub use crate::gen::hasyaxis::*;
-pub use crate::gen::hasyxaxis::*;
-pub use crate::gen::hasxaxis::*;
-pub use crate::gen::moveable::*;
-pub use crate::gen::derivable::*;
-pub use crate::gen::scrollable::*;
+pub use hasaddfunctions::*;
+pub use hasmvaddfunctions::*;
+pub use hasdelfunctions::*;
+pub use hasmvdelfunctions::*;
+pub(in crate) use graphicstransform::*;
+pub use hasgraphicfunctions::*;
+pub(in crate) use hashandle::*;
+pub use hasinfunctions::*;
+pub use hasmvinfunctions::*;
+pub use hasinsfunctions::*;
+pub use hasmvinsfunctions::*;
+pub use hasyaxis::*;
+pub use hasyxaxis::*;
+pub use hasxaxis::*;
+pub use moveable::*;
+pub use derivable::*;
+pub use scrollable::*;
 
-pub use crate::gen::hasbackground::*;
+pub use hasbackground::*;
 
-pub use crate::gen::hasattributes::*;
-pub use crate::gen::hasmvattributes::*;
+pub use hasattributes::*;
+pub use hasmvattributes::*;
 
-pub use crate::gen::hasnonblocking::*;
-pub use crate::gen::hasgetfunctions::*;
-pub use crate::gen::hasmvgetfunctions::*;
+pub use hasnonblocking::*;
+pub use hasgetfunctions::*;
+pub use hasmvgetfunctions::*;
 
-pub use crate::gen::mouseable::*;
+pub use mouseable::*;
 
-pub use crate::gen::basecanvas::*;
-pub use crate::gen::ncurseswwindow::*;
-pub use crate::gen::cansubwindow::*;
+pub use basecanvas::*;
+pub use ncurseswwindow::*;
+pub use cansubwindow::*;
 
-pub use crate::gen::ispad::*;
-pub use crate::gen::iswindow::*;
+pub use ispad::*;
+pub use iswindow::*;

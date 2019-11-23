@@ -21,76 +21,55 @@
 */
 
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw add functions.
 pub trait HasAddFunctions: HasHandle {
     fn addchnstr(&self, chstr: &ChtypeString, length: i32) -> result!(()) {
         assert_length!("addchnstr", length);
 
-        ncursesw::waddchnstr(self._handle(), chstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::waddchnstr(self._handle(), chstr, length)?)
     }
 
     fn addch(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::waddch(self._handle(), ch)?;
-
-        Ok(())
+        Ok(ncursesw::waddch(self._handle(), ch)?)
     }
 
     fn addchstr(&self, chstr: &ChtypeString) -> result!(()) {
-        ncursesw::waddchstr(self._handle(), chstr)?;
-
-        Ok(())
+        Ok(ncursesw::waddchstr(self._handle(), chstr)?)
     }
 
     fn addnstr(&self, str: &str, length: i32) -> result!(()) {
         assert_length!("addnstr", length);
 
-        ncursesw::waddnstr(self._handle(), str, length)?;
-
-        Ok(())
+        Ok(ncursesw::waddnstr(self._handle(), str, length)?)
     }
 
     fn addnwstr(&self, wstr: &WideString, length: i32) -> result!(()) {
         assert_length!("addnwstr", length);
 
-        ncursesw::waddnwstr(self._handle(), wstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::waddnwstr(self._handle(), wstr, length)?)
     }
 
     fn addstr(&self, str: &str) -> result!(()) {
-        ncursesw::waddstr(self._handle(), str)?;
-
-        Ok(())
+        Ok(ncursesw::waddstr(self._handle(), str)?)
     }
 
     fn add_wchnstr(&self, wchstr: &ComplexString, length: i32) -> result!(()) {
         assert_length!("add_wchnstr", length);
 
-        ncursesw::wadd_wchnstr(self._handle(), wchstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::wadd_wchnstr(self._handle(), wchstr, length)?)
     }
 
     fn add_wch(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::wadd_wch(self._handle(), wch)?;
-
-        Ok(())
+        Ok(ncursesw::wadd_wch(self._handle(), wch)?)
     }
 
     fn add_wchstr(&self, wchstr: &ComplexString) -> result!(()) {
-        ncursesw::wadd_wchstr(self._handle(), wchstr)?;
-
-        Ok(())
+        Ok(ncursesw::wadd_wchstr(self._handle(), wchstr)?)
     }
 
     fn addwstr(&self, wstr: &WideString) -> result!(()) {
-        ncursesw::waddwstr(self._handle(), wstr)?;
-
-        Ok(())
+        Ok(ncursesw::waddwstr(self._handle(), wstr)?)
     }
 }

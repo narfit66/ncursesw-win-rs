@@ -20,29 +20,19 @@
     IN THE SOFTWARE.
 */
 
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas have an x-axis.
 pub trait HasXAxis: HasHandle {
     fn getbegx(&self) -> result!(i32) {
-        match ncursesw::getbegx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(x)       => Ok(x)
-        }
+        Ok(ncursesw::getbegx(self._handle())?)
     }
 
     fn getmaxx(&self) -> result!(i32) {
-        match ncursesw::getmaxx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(x)       => Ok(x)
-        }
+        Ok(ncursesw::getmaxx(self._handle())?)
     }
 
     fn getcurx(&self) -> result!(i32) {
-        match ncursesw::getcurx(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(x)       => Ok(x)
-        }
+        Ok(ncursesw::getcurx(self._handle())?)
     }
 }

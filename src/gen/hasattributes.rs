@@ -23,34 +23,26 @@
 use ncursesw::{
     AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType, normal
 };
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw attribute type functions.
 pub trait HasAttributes: HasHandle {
     fn attr_get(&self) -> result!(AttributesColorPairSet) {
-        match ncursesw::wattr_get(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(set)     => Ok(set)
-        }
+        Ok(ncursesw::wattr_get(self._handle())?)
     }
 
     fn attr_off<A, T>(&self, attrs: A) -> result!(())
         where A: AttributesType<T>,
               T: ColorAttributeTypes
     {
-        ncursesw::wattr_off(self._handle(), attrs)?;
-
-        Ok(())
+        Ok(ncursesw::wattr_off(self._handle(), attrs)?)
     }
 
     fn attr_on<A, T>(&self, attrs: A) -> result!(())
         where A: AttributesType<T>,
               T: ColorAttributeTypes
     {
-        ncursesw::wattr_on(self._handle(), attrs)?;
-
-        Ok(())
+        Ok(ncursesw::wattr_on(self._handle(), attrs)?)
     }
 
     fn attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(())
@@ -58,36 +50,26 @@ pub trait HasAttributes: HasHandle {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        ncursesw::wattr_set(self._handle(), attrs, color_pair)?;
-
-        Ok(())
+        Ok(ncursesw::wattr_set(self._handle(), attrs, color_pair)?)
     }
 
     fn attroff(&self, attrs: normal::Attributes) -> result!(()) {
-        ncursesw::wattroff(self._handle(), attrs)?;
-
-        Ok(())
+        Ok(ncursesw::wattroff(self._handle(), attrs)?)
     }
 
     fn attron(&self, attrs: normal::Attributes) -> result!(()) {
-        ncursesw::wattron(self._handle(), attrs)?;
-
-        Ok(())
+        Ok(ncursesw::wattron(self._handle(), attrs)?)
     }
 
     fn attrset(&self, attrs: normal::Attributes) -> result!(()) {
-        ncursesw::wattrset(self._handle(), attrs)?;
-
-        Ok(())
+        Ok(ncursesw::wattrset(self._handle(), attrs)?)
     }
 
     fn color_set<P, T>(&self, color_pair: P) -> result!(())
         where P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        ncursesw::wcolor_set(self._handle(), color_pair)?;
-
-        Ok(())
+        Ok(ncursesw::wcolor_set(self._handle(), color_pair)?)
     }
 
     fn chgat<A, P, T>(&self, length: i32, attrs: A, color_pair: P) -> result!(())
@@ -97,9 +79,7 @@ pub trait HasAttributes: HasHandle {
     {
         assert_length!("chgat", length);
 
-        ncursesw::wchgat(self._handle(), length, attrs, color_pair)?;
-
-        Ok(())
+        Ok(ncursesw::wchgat(self._handle(), length, attrs, color_pair)?)
     }
 
     fn getattrs(&self) -> normal::Attributes {
@@ -107,14 +87,10 @@ pub trait HasAttributes: HasHandle {
     }
 
     fn standend(&self) -> result!(()) {
-        ncursesw::wstandend(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wstandend(self._handle())?)
     }
 
     fn standout(&self) -> result!(()) {
-        ncursesw::wstandout(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wstandout(self._handle())?)
     }
 }

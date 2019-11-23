@@ -21,17 +21,13 @@
 */
 
 use ncursesw::{Origin, Size};
-use crate::{Window, NCurseswWinError};
-use crate::gen::*;
+use crate::{Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 
 /// Is the window canvas a ncursesw window type.
 pub trait NCurseswWindow: HasHandle + IsWindow {
     /// Create a new instance of a Window
     fn new(size: Size, origin: Origin) -> result!(Window) {
-        match ncursesw::newwin(size, origin) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(handle)  => Ok(Window::_from(handle, true))
-        }
+        Ok(Window::_from(ncursesw::newwin(size, origin)?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Window::new() instead")]
@@ -48,26 +44,18 @@ pub trait NCurseswWindow: HasHandle + IsWindow {
         dmax: Origin,
         overlay: bool) -> result!(())
     {
-        ncursesw::copywin(self._handle(), dstwin._handle(), smin, dmin, dmax, overlay)?;
-
-        Ok(())
+        Ok(ncursesw::copywin(self._handle(), dstwin._handle(), smin, dmin, dmax, overlay)?)
     }
 
     fn overlay(&self, srcwin: &Window) -> result!(()) {
-        ncursesw::overlay(srcwin._handle(), self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::overlay(srcwin._handle(), self._handle())?)
     }
 
     fn overwrite(&self, srcwin: &Window) -> result!(()) {
-        ncursesw::overwrite(srcwin._handle(), self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::overwrite(srcwin._handle(), self._handle())?)
     }
 
     fn refresh(&self) -> result!(()) {
-        ncursesw::wrefresh(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wrefresh(self._handle())?)
     }
 }

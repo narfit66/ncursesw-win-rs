@@ -21,14 +21,11 @@
 */
 
 use ncursesw::Origin;
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Is the window canvas type moveable.
 pub trait Moveable: HasHandle {
     fn mvwin(&self, origin: Origin) -> result!(()) {
-        ncursesw::mvwin(self._handle(), origin)?;
-
-        Ok(())
+        Ok(ncursesw::mvwin(self._handle(), origin)?)
     }
 }

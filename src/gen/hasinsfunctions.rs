@@ -21,48 +21,35 @@
 */
 
 use ncursesw::{ChtypeChar, ComplexChar, WideString};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw insert functions.
 pub trait HasInsFunctions: HasHandle {
     fn insch(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::winsch(self._handle(), ch)?;
-
-        Ok(())
+        Ok(ncursesw::winsch(self._handle(), ch)?)
     }
 
     fn insnstr(&self, str: &str, length: i32) -> result!(()) {
         assert_length!("insnstr", length);
 
-        ncursesw::winsnstr(self._handle(), str, length)?;
-
-        Ok(())
+        Ok(ncursesw::winsnstr(self._handle(), str, length)?)
     }
 
     fn ins_nwstr(&self, wstr: &WideString, length: i32) -> result!(()) {
         assert_length!("ins_nwstr", length);
 
-        ncursesw::wins_nwstr(self._handle(), wstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::wins_nwstr(self._handle(), wstr, length)?)
     }
 
     fn insstr(&self, str: &str) -> result!(()) {
-        ncursesw::winsstr(self._handle(), str)?;
-
-        Ok(())
+        Ok(ncursesw::winsstr(self._handle(), str)?)
     }
 
     fn ins_wch(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::wins_wch(self._handle(), wch)?;
-
-        Ok(())
+        Ok(ncursesw::wins_wch(self._handle(), wch)?)
     }
 
     fn ins_wstr(&self, wstr: &WideString) -> result!(()) {
-        ncursesw::wins_wstr(self._handle(), wstr)?;
-
-        Ok(())
+        Ok(ncursesw::wins_wstr(self._handle(), wstr)?)
     }
 }

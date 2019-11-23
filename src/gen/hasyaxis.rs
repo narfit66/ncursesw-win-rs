@@ -20,38 +20,26 @@
     IN THE SOFTWARE.
 */
 
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas have an y-axis.
 pub trait HasYAxis: HasHandle {
     fn getbegy(&self) -> result!(i32) {
-        match ncursesw::getbegy(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(y)       => Ok(y)
-        }
+        Ok(ncursesw::getbegy(self._handle())?)
     }
 
     fn getmaxy(&self) -> result!(i32) {
-        match ncursesw::getmaxy(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(y)       => Ok(y)
-        }
+        Ok(ncursesw::getmaxy(self._handle())?)
     }
 
     fn getcury(&self) -> result!(i32) {
-        match ncursesw::getcury(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(y)       => Ok(y)
-        }
+        Ok(ncursesw::getcury(self._handle())?)
     }
 
     fn insdelln(&self, length: i32) -> result!(()) {
         assert_length!("insdelln", length);
 
-        ncursesw::winsdelln(self._handle(), length)?;
-
-        Ok(())
+        Ok(ncursesw::winsdelln(self._handle(), length)?)
     }
 
     fn is_linetouched(&self, line: i32) -> bool {

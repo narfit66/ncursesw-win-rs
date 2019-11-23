@@ -21,88 +21,67 @@
 */
 
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin, WideString};
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw origin add functions.
 pub trait HasMvAddFunctions: HasHandle + HasYXAxis {
     fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, length: i32) -> result!(()) {
         assert_origin_hlength!("mvaddchnstr", self.size()?, origin, length);
 
-        ncursesw::mvwaddchnstr(self._handle(), origin, chstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddchnstr(self._handle(), origin, chstr, length)?)
     }
 
     fn mvaddch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
         assert_origin!("mvaddch", self.size()?, origin);
 
-        ncursesw::mvwaddch(self._handle(), origin, ch)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddch(self._handle(), origin, ch)?)
     }
 
     fn mvaddchstr(&self, origin: Origin, chstr: &ChtypeString) -> result!(()) {
         assert_origin!("mvaddchstr", self.size()?, origin);
 
-        ncursesw::mvwaddchstr(self._handle(), origin, chstr)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddchstr(self._handle(), origin, chstr)?)
     }
 
     fn mvaddnstr(&self, origin: Origin, str: &str, length: i32) -> result!(()) {
         assert_origin_hlength!("mvaddnstr", self.size()?, origin, length);
 
-        ncursesw::mvwaddnstr(self._handle(), origin, str, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddnstr(self._handle(), origin, str, length)?)
     }
 
     fn mvaddnwstr(&self, origin: Origin, wstr: &WideString, length: i32) -> result!(()) {
         assert_origin_hlength!("mvaddnwstr", self.size()?, origin, length);
 
-        ncursesw::mvwaddnwstr(self._handle(), origin, wstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddnwstr(self._handle(), origin, wstr, length)?)
     }
 
     fn mvaddstr(&self, origin: Origin, str: &str) -> result!(()) {
         assert_origin!("mvaddstr", self.size()?, origin);
 
-        ncursesw::mvwaddstr(self._handle(), origin, str)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddstr(self._handle(), origin, str)?)
     }
 
     fn mvadd_wchnstr(&self, origin: Origin, wchstr: &ComplexString, length: i32) -> result!(()) {
         assert_origin_hlength!("mvadd_wchnstr", self.size()?, origin, length);
 
-        ncursesw::mvwadd_wchnstr(self._handle(), origin, wchstr, length)?;
-
-        Ok(())
+        Ok(ncursesw::mvwadd_wchnstr(self._handle(), origin, wchstr, length)?)
     }
 
     fn mvadd_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
         assert_origin!("mvadd_wch", self.size()?, origin);
 
-        ncursesw::mvwadd_wch(self._handle(), origin, wch)?;
-
-        Ok(())
+        Ok(ncursesw::mvwadd_wch(self._handle(), origin, wch)?)
     }
 
     fn mvadd_wchstr(&self, origin: Origin, wchstr: &ComplexString) -> result!(()) {
         assert_origin!("mvadd_wchstr", self.size()?, origin);
 
-        ncursesw::mvwadd_wchstr(self._handle(), origin, wchstr)?;
-
-        Ok(())
+        Ok(ncursesw::mvwadd_wchstr(self._handle(), origin, wchstr)?)
     }
 
     fn mvaddwstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
         assert_origin!("mvaddwstr", self.size()?, origin);
 
-        ncursesw::mvwaddwstr(self._handle(), origin, wstr)?;
-
-        Ok(())
+        Ok(ncursesw::mvwaddwstr(self._handle(), origin, wstr)?)
     }
 }

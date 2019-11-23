@@ -21,27 +21,20 @@
 */
 
 use ncursesw::Region;
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Is the window canvas type scrollable.
 pub trait Scrollable: HasHandle + HasYXAxis {
     fn scroll(&self) -> result!(()) {
-        ncursesw::scroll(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::scroll(self._handle())?)
     }
 
     fn scrl(&self, n: i32) -> result!(()) {
-        ncursesw::wscrl(self._handle(), n)?;
-
-        Ok(())
+        Ok(ncursesw::wscrl(self._handle(), n)?)
     }
 
     fn scrollok(&self, bf: bool) -> result!(()) {
-        ncursesw::scrollok(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::scrollok(self._handle(), bf)?)
     }
 
     fn is_scrollok(&self) -> bool {
@@ -49,15 +42,10 @@ pub trait Scrollable: HasHandle + HasYXAxis {
     }
 
     fn setscrreg(&self, region: Region) -> result!(()) {
-        ncursesw::wsetscrreg(self._handle(), region)?;
-
-        Ok(())
+        Ok(ncursesw::wsetscrreg(self._handle(), region)?)
     }
 
     fn getscrreg(&self) -> result!(Region) {
-        match ncursesw::wgetscrreg(self._handle()) {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(region)  => Ok(region)
-        }
+        Ok(ncursesw::wgetscrreg(self._handle())?)
     }
 }

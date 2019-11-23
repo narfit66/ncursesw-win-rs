@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::fmt;
+
 use ncursesw::{Origin, WINDOW};
 use crate::{NCurseswWinError, gen::*};
 
@@ -59,16 +61,12 @@ impl HasGetFunctions for RipoffWindow { }
 impl RipoffWindow {
     /// get the cursor column on the ripoff window.
     pub fn column(&self) -> result!(i32) {
-        let column = ncursesw::getcurx(self._handle())?;
-
-        Ok(column)
+        Ok(ncursesw::getcurx(self._handle())?)
     }
 
     /// set the cursor column on the ripoff window.
     pub fn set_column(&self, column: i32) -> result!(()) {
-        ncursesw::wmove(self._handle(), Origin { y: 0, x: column })?;
-
-        Ok(())
+        Ok(ncursesw::wmove(self._handle(), Origin { y: 0, x: column })?)
     }
 }
 
@@ -82,3 +80,9 @@ impl Drop for RipoffWindow {
 
 unsafe impl Send for RipoffWindow { } // too make thread safe
 unsafe impl Sync for RipoffWindow { } // too make thread safe
+
+impl fmt::Debug for RipoffWindow {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "RipoffWindow {{ handle: {:p} }}", self.handle)
+    }
+}

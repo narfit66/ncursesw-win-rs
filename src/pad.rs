@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::ptr;
+use std::{ptr, fmt};
 
 use ncursesw::WINDOW;
 use crate::gen::*;
@@ -73,8 +73,8 @@ impl HasMvGetFunctions for Pad { }
 impl Drop for Pad {
     fn drop(&mut self) {
         if self.free_on_drop {
-            if let Err(e) = ncursesw::delwin(self.handle) {
-                panic!(e.to_string())
+            if let Err(source) = ncursesw::delwin(self.handle) {
+                panic!(source.to_string())
             }
         }
     }
@@ -90,3 +90,9 @@ impl PartialEq for Pad {
 }
 
 impl Eq for Pad { }
+
+impl fmt::Debug for Pad {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Pad {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+    }
+}

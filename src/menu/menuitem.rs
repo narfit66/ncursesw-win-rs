@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::ptr;
+use std::{ptr, fmt, convert::TryFrom};
 
 use crate::NCurseswWinError;
 use ncursesw::{menu, menu::ITEM};
@@ -47,9 +47,7 @@ impl MenuItem {
 
 impl MenuItem {
     pub fn new(name: &str, description: &str) -> result!(Self) {
-        let handle = menu::new_item(name, description)?;
-
-        Ok(Self::_from(handle, true))
+        Ok(Self::_from(menu::new_item(name, description)?, true))
     }
 
     #[deprecated(since = "0.3.2", note = "Use MenuItem::new() instead")]
@@ -58,21 +56,15 @@ impl MenuItem {
     }
 
     pub fn item_description(&self) -> result!(String) {
-        let description = menu::item_description(self.handle)?;
-
-        Ok(description)
+        Ok(menu::item_description(self.handle)?)
     }
 
-    pub fn item_index(&self) -> result!(i32) {
-        let index = menu::item_index(self.handle)?;
-
-        Ok(index)
+    pub fn item_index(&self) -> result!(usize) {
+        Ok(usize::try_from(menu::item_index(self.handle)?)?)
     }
 
     pub fn item_name(&self) -> result!(String) {
-        let name = menu::item_name(self.handle)?;
-
-        Ok(name)
+        Ok(menu::item_name(self.handle)?)
     }
 
     pub fn item_opts(&self) -> ItemOptions {
@@ -80,15 +72,11 @@ impl MenuItem {
     }
 
     pub fn item_opts_off(&self, opts: ItemOptions) -> result!(()) {
-        menu::item_opts_off(self.handle, opts)?;
-
-        Ok(())
+        Ok(menu::item_opts_off(self.handle, opts)?)
     }
 
     pub fn item_opts_on(&self, opts: ItemOptions) -> result!(()) {
-        menu::item_opts_on(self.handle, opts)?;
-
-        Ok(())
+        Ok(menu::item_opts_on(self.handle, opts)?)
     }
 
     pub fn item_userptr<T>(&self) -> Option<Box<T>> {
@@ -107,9 +95,7 @@ impl MenuItem {
     }
 
     pub fn set_item_opts(&self, opts: ItemOptions) -> result!(()) {
-        menu::set_item_opts(self.handle, opts)?;
-
-        Ok(())
+        Ok(menu::set_item_opts(self.handle, opts)?)
     }
 
     pub fn set_item_userptr<T>(&self, ptr: Option<Box<&T>>) {
@@ -120,9 +106,7 @@ impl MenuItem {
     }
 
     pub fn set_item_value(&self, value: bool) -> result!(()) {
-        menu::set_item_value(self.handle, value)?;
-
-        Ok(())
+        Ok(menu::set_item_value(self.handle, value)?)
     }
 }
 
@@ -146,3 +130,9 @@ impl PartialEq for MenuItem {
 }
 
 impl Eq for MenuItem { }
+
+impl fmt::Debug for MenuItem {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "MenuItem {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+    }
+}

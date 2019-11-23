@@ -24,6 +24,6 @@ mod funcs;
 mod menu;
 mod menuitem;
 
-pub use crate::menu::funcs::*;
-pub use crate::menu::menu::*;
-pub use crate::menu::menuitem::*;
+pub use funcs::*;
+pub use menu::*;
+pub use menuitem::*;

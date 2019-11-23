@@ -141,9 +141,7 @@ pub fn use_default_colors() -> result!(()) {
     } else if !COLOR_STARTED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::StartColorNotCalled)
     } else {
-        ncursesw::use_default_colors()?;
-
-        Ok(())
+        Ok(ncursesw::use_default_colors()?)
     }
 }
 
@@ -158,9 +156,7 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
     } else if !COLOR_STARTED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::StartColorNotCalled)
     } else {
-        ncursesw::assume_default_colors(colors)?;
-
-        Ok(())
+        Ok(ncursesw::assume_default_colors(colors)?)
     }
 }
 
@@ -169,9 +165,7 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        let old_cursor = ncursesw::curs_set(cursor)?;
-
-        Ok(old_cursor)
+        Ok(ncursesw::curs_set(cursor)?)
     }
 }
 

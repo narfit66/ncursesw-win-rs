@@ -31,10 +31,10 @@ mod mouseevents;
 mod mousemask;
 mod mouseorigin;
 
-pub use crate::mouse::mouse::*;
-pub use crate::mouse::mousebutton::*;
-pub use crate::mouse::mousebuttonevent::*;
-pub use crate::mouse::mousebuttonstate::*;
-pub use crate::mouse::mouseevents::*;
-pub use crate::mouse::mousemask::*;
-pub use crate::mouse::mouseorigin::*;
+pub use mouse::*;
+pub use mousebutton::*;
+pub use mousebuttonevent::*;
+pub use mousebuttonstate::*;
+pub use mouseevents::*;
+pub use mousemask::*;
+pub use mouseorigin::*;

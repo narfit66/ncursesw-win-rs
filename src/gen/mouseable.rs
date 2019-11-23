@@ -20,9 +20,8 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::Origin;
-use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
-use crate::gen::*;
+use ncursesw::{Origin, mouse::{wenclose, wmouse_trafo, OriginResult}};
+use crate::gen::HasHandle;
 
 /// Does the window canvas type have ncursesw mouse functions.
 pub trait Mouseable: HasHandle {

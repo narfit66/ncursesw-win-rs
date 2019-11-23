@@ -22,9 +22,9 @@
 
 use std::num;
 
-use ncursesw::shims::constants::ERR;
 use ncursesw::{
-    NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError, menu::NCurseswMenuError
+    NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
+    menu::NCurseswMenuError, shims::constants::ERR
 };
 use crate::ripoff::MAX_LINES;
 
@@ -39,7 +39,7 @@ pub NCurseswWinError
     RipoffNotInitialized { number: usize } = "ripoff line {number} has not been initialised",
     InternalError = "an internal error has occured",
     Panic { message: String } = "{message}",
-    IntError { source: num::TryFromIntError } = "{source}",
+    TryFromIntError { source: num::TryFromIntError } = "{source}",
     NCurseswError { source: NCurseswError } = "{source}",
     PanelsError { source: NCurseswPanelsError } = "{source}",
     MouseError { source: NCurseswMouseError } = "{source}",

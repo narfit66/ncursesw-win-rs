@@ -22,55 +22,32 @@
 
 use std::path;
 
-use crate::NCurseswWinError;
-use crate::gen::*;
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw add functions.
 pub trait BaseCanvas: HasHandle {
     fn clearok(&self, bf: bool) -> result!(()) {
-        ncursesw::clearok(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::clearok(self._handle(), bf)?)
     }
 
     fn clear(&self) -> result!(()) {
-        ncursesw::wclear(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wclear(self._handle())?)
     }
 
     fn clrtobot(&self) -> result!(()) {
-        ncursesw::wclrtobot(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wclrtobot(self._handle())?)
     }
 
     fn clrtoeol(&self) -> result!(()) {
-        ncursesw::wclrtoeol(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::wclrtoeol(self._handle())?)
     }
 
     fn cursyncup(&self) {
         ncursesw::wcursyncup(self._handle());
     }
 
-    /*pub fn echochar(&self, ch: ChtypeChar) -> result!(()) {
-        ncursesw::wechochar(self.handle, ch)?;
-
-        Ok(())
-    }
-
-    pub fn echo_wchar(&self, wch: ComplexChar) -> result!(()) {
-        ncursesw::wecho_wchar(self.handle, wch)?;
-
-        Ok(())
-    }*/
-
     fn erase(&self) -> result!(()) {
-        ncursesw::werase(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::werase(self._handle())?)
     }
 
     fn idcok(&self, bf: bool) {
@@ -78,9 +55,7 @@ pub trait BaseCanvas: HasHandle {
     }
 
     fn idlok(&self, bf: bool) -> result!(()) {
-        ncursesw::idlok(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::idlok(self._handle(), bf)?)
     }
 
     fn immedok(&self, bf: bool) {
@@ -88,15 +63,11 @@ pub trait BaseCanvas: HasHandle {
     }
 
     fn insertln(&self) -> result!(()) {
-        ncursesw::winsertln(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::winsertln(self._handle())?)
     }
 
     fn intrflush(&self, bf: bool) -> result!(()) {
-        ncursesw::intrflush(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::intrflush(self._handle(), bf)?)
     }
 
     fn is_cleared(&self) -> bool {
@@ -144,45 +115,31 @@ pub trait BaseCanvas: HasHandle {
     }
 
     fn keypad(&self, bf: bool) -> result!(()) {
-        ncursesw::keypad(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::keypad(self._handle(), bf)?)
     }
 
     fn leaveok(&self, bf: bool) -> result!(()) {
-        ncursesw::leaveok(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::leaveok(self._handle(), bf)?)
     }
 
     fn meta(&self, bf: bool) -> result!(()) {
-        ncursesw::meta(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::meta(self._handle(), bf)?)
     }
 
     fn nodelay(&self, bf: bool) -> result!(()) {
-        ncursesw::nodelay(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::nodelay(self._handle(), bf)?)
     }
 
     fn notimeout(&self, bf: bool) -> result!(()) {
-        ncursesw::notimeout(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::notimeout(self._handle(), bf)?)
     }
 
     fn putwin(&self, path: &path::Path) -> result!(()) {
-        ncursesw::putwin(self._handle(), path)?;
-
-        Ok(())
+        Ok(ncursesw::putwin(self._handle(), path)?)
     }
 
     fn redrawwin(&self) -> result!(()) {
-        ncursesw::redrawwin(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::redrawwin(self._handle())?)
     }
 
     fn syncdown(&self) {
@@ -190,9 +147,7 @@ pub trait BaseCanvas: HasHandle {
     }
 
     fn syncok(&self, bf: bool) -> result!(()) {
-        ncursesw::syncok(self._handle(), bf)?;
-
-        Ok(())
+        Ok(ncursesw::syncok(self._handle(), bf)?)
     }
 
     fn syncup(&self) {
@@ -200,14 +155,10 @@ pub trait BaseCanvas: HasHandle {
     }
 
     fn touchwin(&self) -> result!(()) {
-        ncursesw::touchwin(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::touchwin(self._handle())?)
     }
 
     fn untouchwin(&self) -> result!(()) {
-        ncursesw::untouchwin(self._handle())?;
-
-        Ok(())
+        Ok(ncursesw::untouchwin(self._handle())?)
     }
 }

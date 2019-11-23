@@ -20,13 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::menu;
-use ncursesw::menu::MenuSize;
+use ncursesw::{menu, menu::MenuSize};
 
 use crate::NCurseswWinError;
 
 pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
-    menu::set_menu_format(None, menu_size)?;
-
-    Ok(())
+    Ok(menu::set_menu_format(None, menu_size)?)
 }
