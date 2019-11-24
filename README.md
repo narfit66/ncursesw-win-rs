@@ -39,7 +39,7 @@ use ncurseswwin::normal::*; // for 'ansi' color pairs and attributes...
 use ncurseswwin::extend::*; // or for 'extended' color pairs and attributes.
 ```
 
-To use menus
+To use menus (this is still under active development)
 ```
 use ncurseswwin::menu::*;
 ```
