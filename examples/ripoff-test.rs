@@ -69,11 +69,11 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
     let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
     let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
 
-    let mut origin = Origin { y: (initial_window_size.lines / 2) - 1, x: (initial_window_size.columns / 2) - (line1.len() as i32 / 2) + 1};
+    let mut origin = Origin { y: (initial_window_size.lines / 2) - 1, x: (initial_window_size.columns / 2) - (line1.len() as u16 / 2) + 1};
 
     initial_window.mvaddstr(origin, line1)?;
     origin.y += 1;
-    origin.x = (initial_window_size.columns / 2) - (line2.len() as i32 / 2) + 1;
+    origin.x = (initial_window_size.columns / 2) - (line2.len() as u16 / 2) + 1;
     initial_window.mvaddstr(origin, line2)?;
 
     //  update the top ripoff line.
@@ -93,10 +93,10 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
     Ok(())
 }
 
-fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) {
+fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
     let ripoff_message = &format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns);
 
-    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as i32 / 2))?;
+    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
 
     ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()?;
@@ -104,10 +104,10 @@ fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) 
     Ok(())
 }
 
-fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: i32) -> result!(()) {
+fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
     let ripoff_message = &format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns);
 
-    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as i32 / 2))?;
+    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
 
     ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()?;

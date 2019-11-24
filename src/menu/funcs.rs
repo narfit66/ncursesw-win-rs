@@ -20,10 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{menu, menu::MenuSize};
+use std::convert::TryInto;
 
-use crate::NCurseswWinError;
+use crate::{NCurseswWinError, menu::MenuSize};
 
 pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
-    Ok(menu::set_menu_format(None, menu_size)?)
+    Ok(ncursesw::menu::set_menu_format(None, menu_size.try_into()?)?)
 }

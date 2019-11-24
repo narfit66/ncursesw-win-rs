@@ -20,13 +20,13 @@
     IN THE SOFTWARE.
 */
 
-use std::{ptr, fmt, convert::TryFrom};
+use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 
 use ncursesw::{menu, menu::MENU, menu::ITEM, normal};
-use crate::{Window, NCurseswWinError, menu::MenuItem, gen::HasHandle};
+use crate::{Window, NCurseswWinError, menu::MenuSize, menu::MenuItem, gen::HasHandle};
 
 pub use ncursesw::menu::{
-    MenuHook, MenuOptions, MenuRequest, MenuSpacing, MenuSize
+    MenuHook, MenuOptions, MenuRequest, MenuSpacing
 };
 
 /// Menu.
@@ -91,8 +91,8 @@ impl Menu {
         menu::menu_fore(self.handle)
     }
 
-    pub fn menu_format(&self) -> MenuSize {
-        menu::menu_format(self.handle)
+    pub fn menu_format(&self) -> result!(MenuSize) {
+        Ok(MenuSize::try_from(menu::menu_format(self.handle))?)
     }
 
     pub fn menu_grey(&self) -> normal::Attributes {
@@ -166,7 +166,7 @@ impl Menu {
     }
 
     pub fn scale_menu(&self) -> result!(MenuSize) {
-        Ok(menu::scale_menu(self.handle)?)
+        Ok(MenuSize::try_from(menu::scale_menu(self.handle)?)?)
     }
 
     pub fn set_current_item(&self, item: &MenuItem) -> result!(()) {
@@ -190,7 +190,7 @@ impl Menu {
     }
 
     pub fn set_menu_format(&self, menu_size: MenuSize) -> result!(()) {
-        Ok(menu::set_menu_format(Some(self.handle), menu_size)?)
+        Ok(menu::set_menu_format(Some(self.handle), menu_size.try_into()?)?)
     }
 
     pub fn set_menu_grey(&self, attr: normal::Attributes) -> result!(()) {

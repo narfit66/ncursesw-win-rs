@@ -23,7 +23,7 @@
 use std::{num, convert};
 
 use ncursesw::{
-    NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
+    Origin, NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
     menu::NCurseswMenuError, shims::constants::ERR
 };
 use crate::ripoff::MAX_LINES;
@@ -52,6 +52,9 @@ pub NCurseswWinError
     TryFromSizeError { lines: i32, columns: i32 } = "invalid size: Size {{ lines: {lines}, columns: {columns} }}",
     TryIntoRegionError { top: u16, bottom: u16 } = "invalid region: Region {{ top: {top}, bottom: {bottom} }}",
     TryFromRegionError { top: i32, bottom: i32 } = "invalid region: Region {{ top: {top}, bottom: {bottom} }}",
+    TryFromOriginResultError { origin: Origin, to_screen: bool, result: bool } = "invalid origin: OriginResult {{ origin: {origin}, to_screen: {to_screen}, result: {result} }}",
+    TryIntoMenuSizeError { rows: u16, columns: u16 } = "invalid size: MenuSize {{ rows: {rows}, columns: {columns} }}",
+    TryFromMenuSizeError { rows: i32, columns: i32 } = "invalid size: MenuSize {{ rows: {rows}, columns: {columns} }}",
 }
 
 impl PartialEq for NCurseswWinError {

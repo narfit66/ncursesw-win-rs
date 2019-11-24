@@ -20,15 +20,25 @@
     IN THE SOFTWARE.
 */
 
+#![allow(non_snake_case)]
+
 use std::{sync::atomic::Ordering, convert::TryFrom};
 
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes,
-    CursorType, LcCategory, LINES, COLS
+    CursorType, LcCategory
 };
 use crate::{
     InputMode, Origin, Size, NCurseswWinError, ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
+
+pub fn LINES() -> result!(u16) {
+    Ok(u16::try_from(ncursesw::LINES())?)
+}
+
+pub fn COLS() -> result!(u16) {
+    Ok(u16::try_from(ncursesw::COLS())?)
+}
 
 /// Set the locale to be used, required if using unicode representation.
 pub fn setlocale(lc: LcCategory, locale: &str) -> result!(String) {
@@ -171,10 +181,10 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
 
 /// The terminal/screen `Size` i.e. lines and columns using 0,0 as top left.
 pub fn terminal_size() -> result!(Size) {
-    Size::try_from(ncursesw::Size { lines: LINES() - 1, columns: COLS() - 1 })
+    Ok(Size { lines: LINES()? - 1, columns: COLS()? - 1 })
 }
 
 // The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
 pub(in crate) fn terminal_bottom_right_origin() -> result!(Origin) {
-    Origin::try_from(ncursesw::Origin { y: LINES() - 1, x: COLS() - 1 })
+    Ok(Origin { y: LINES()? - 1, x: COLS()? - 1 })
 }

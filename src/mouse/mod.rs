@@ -22,6 +22,7 @@
 
 #![allow(clippy::module_inception)]
 
+mod funcs;
 mod mouse;
 mod mousebutton;
 mod mousebuttonevent;
@@ -30,7 +31,9 @@ mod mouseevent;
 mod mouseevents;
 mod mousemask;
 mod mouseorigin;
+mod originresult;
 
+pub use funcs::*;
 pub use mouse::*;
 pub use mousebutton::*;
 pub use mousebuttonevent::*;
@@ -38,3 +41,4 @@ pub use mousebuttonstate::*;
 pub use mouseevents::*;
 pub use mousemask::*;
 pub use mouseorigin::*;
+pub use originresult::*;

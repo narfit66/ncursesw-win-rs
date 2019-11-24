@@ -1,5 +1,5 @@
 /*
-    src/menu/mod.rs
+    src/mouse/funcs.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,12 +20,11 @@
     IN THE SOFTWARE.
 */
 
-mod funcs;
-mod menu;
-mod menuitem;
-mod menusize;
+use std::convert::{TryFrom, TryInto};
 
-pub use funcs::*;
-pub use menu::*;
-pub use menuitem::*;
-pub use menusize::*;
+use ncursesw::mouse;
+use crate::{Origin, OriginResult, NCurseswWinError};
+
+pub fn mouse_trafo(origin: Origin, to_screen: bool) -> result!(OriginResult) {
+    Ok(OriginResult::try_from(mouse::mouse_trafo(origin.try_into()?, to_screen))?)
+}

@@ -20,10 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use std::ptr;
+use std::{ptr, convert::TryInto};
 
-use ncursesw::{panels, panels::PANEL, Origin};
-use crate::{Window, NCurseswWinError, gen::HasHandle, panels::funcs};
+use ncursesw::{panels, panels::PANEL};
+use crate::{Origin, Window, NCurseswWinError, gen::HasHandle, panels::funcs};
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
@@ -98,7 +98,7 @@ impl Panel {
     ///
     /// It does not change the position of the panel in the stack. Be sure to use this function, not mvwin(), to move a panel window.
     pub fn move_panel(&self, origin: Origin) -> result!(()) {
-        Ok(panels::move_panel(self.handle, origin)?)
+        Ok(panels::move_panel(self.handle, origin.try_into()?)?)
     }
 
     /// Returns true if the panel is in the panel stack, false if it is not.

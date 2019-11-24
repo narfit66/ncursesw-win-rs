@@ -1,5 +1,5 @@
 /*
-    src/mouse/mouseorigin.rs
+    src/mouse/originresult.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,45 +20,49 @@
     IN THE SOFTWARE.
 */
 
-use std::fmt::{Display, Formatter, Result};
+use std::convert::TryFrom;
 
-use crate::Origin;
+use crate::{Origin, NCurseswWinError};
 
-/// The type of origin as reported by a mouse.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct MouseOrigin {
-    origin: Origin,
-    z:      u16
+pub struct OriginResult {
+    origin:    Origin,
+    to_screen: bool,
+    result:    bool
 }
 
-impl MouseOrigin {
-    pub(in crate::mouse) fn new(y: u16, x: u16, z: u16) -> Self {
-        Self { origin: Origin { y, x }, z }
+impl OriginResult {
+    pub(in crate::mouse) fn new(y: u16, x: u16, to_screen: bool, result: bool) -> Self {
+        Self { origin: Origin { y, x }, to_screen, result }
     }
 
-    /// Mouse Y-X axis.
     pub fn origin(&self) -> Origin {
         self.origin
     }
 
-    /// Y-axis.
-    pub fn y(&self) -> u16 {
-        self.origin.y
+    pub fn to_screen(&self) -> bool {
+        self.to_screen
     }
 
-    /// X-axis.
-    pub fn x(&self) -> u16 {
-        self.origin.x
-    }
-
-    /// Z-axis.
-    pub fn z(&self) -> u16 {
-        self.z
+    pub fn result(&self) -> bool {
+        self.result
     }
 }
 
-impl Display for MouseOrigin {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "(y: {}, x: {}, z: {})", self.y(), self.x(), self.z())
+impl TryFrom<ncursesw::mouse::OriginResult> for OriginResult {
+    type Error = NCurseswWinError;
+
+    fn try_from(origin_result: ncursesw::mouse::OriginResult) -> Result<Self, Self::Error> {
+        let origin = if let Ok(origin) = Origin::try_from(origin_result.origin()) {
+            origin
+        } else {
+            return Err(NCurseswWinError::TryFromOriginResultError {
+                origin: origin_result.origin(),
+                to_screen: origin_result.to_screen(),
+                result: origin_result.result()
+            })
+        };
+
+        Ok(Self::new(origin.y, origin.x, origin_result.to_screen(), origin_result.result()))
     }
 }

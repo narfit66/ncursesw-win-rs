@@ -20,10 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
-use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
-use crate::{Origin, NCurseswWinError, gen::HasHandle};
+use ncursesw::mouse::{wenclose, wmouse_trafo};
+use crate::{Origin, OriginResult, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw mouse functions.
 pub trait Mouseable: HasHandle {
@@ -32,6 +32,6 @@ pub trait Mouseable: HasHandle {
     }
 
     fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> result!(OriginResult) {
-        Ok(wmouse_trafo(self._handle(), origin.try_into()?, to_screen))
+        Ok(OriginResult::try_from(wmouse_trafo(self._handle(), origin.try_into()?, to_screen))?)
     }
 }

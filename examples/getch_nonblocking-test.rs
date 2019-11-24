@@ -52,7 +52,7 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
 
     let display_origin = Origin { y: 2, x: 2 };
     let display_str = "Press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds:";
-    let getch_origin = Origin { y: display_origin.y, x: display_origin.x + display_str.len() as i32 + 1 };
+    let getch_origin = Origin { y: display_origin.y, x: display_origin.x + display_str.len() as u16 + 1 };
     let getch_result_origin = Origin { y: getch_origin.y, x: getch_origin.x + 3 };
 
     window.mvaddstr(display_origin, display_str)?;

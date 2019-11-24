@@ -20,10 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use std::hash::{Hash, Hasher};
+use std::{hash::{Hash, Hasher}, convert::TryFrom};
 
 use ncursesw::mouse::{MEVENT, mousemask, getmouse, ungetmouse};
-use crate::{MouseMask, MouseOrigin, NCurseswWinError, mouse::MouseEvents};
+use crate::{MouseMask, NCurseswWinError, mouse::MouseOrigin, mouse::MouseEvents};
 
 /// A mouse pointer device.
 pub struct Mouse {
@@ -75,8 +75,8 @@ impl Mouse {
     }
 
     /// The last reported mouse origin for this mouse.
-    pub fn origin(&self) -> MouseOrigin {
-        MouseOrigin::new(self.handle.y, self.handle.x, self.handle.z)
+    pub fn origin(&self) -> result!(MouseOrigin) {
+        Ok(MouseOrigin::new(u16::try_from(self.handle.y)?, u16::try_from(self.handle.x)?, u16::try_from(self.handle.z)?))
     }
 
     /// The last reported mouse events for this mouse.

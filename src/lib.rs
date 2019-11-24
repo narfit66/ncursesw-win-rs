@@ -84,8 +84,8 @@ pub use ncursesw::{
     ColorsType
 };
 pub use ncursesw::{
-    COLORS, COLOR_PAIRS, COLS, ESCDELAY, LINES, TABSIZE, baudrate,
-    beep, can_change_color, def_prog_mode, def_shell_mode, define_key,
+    COLORS, COLOR_PAIRS, ESCDELAY, TABSIZE, baudrate, beep,
+    can_change_color, def_prog_mode, def_shell_mode, define_key,
     delay_output, doupdate, flash, get_escdelay, getcchar, halfdelay,
     has_colors, has_ic, has_il, has_key, is_term_resized, key_defined,
     key_name, keybound, keyname, keyok, killchar, killwchar, longname,
@@ -93,8 +93,7 @@ pub use ncursesw::{
     reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
     resize_term, resizeterm, setcchar, use_legacy_coding
 };
-pub use ncursesw::mouse::OriginResult;
 pub use ncursesw::mouse::{
-    has_mouse, mouseinterval, set_mouseinterval, mouse_trafo,
-    mouse_version, has_mouse_interface
+    has_mouse, mouseinterval, set_mouseinterval, mouse_version,
+    has_mouse_interface
 };

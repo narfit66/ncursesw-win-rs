@@ -85,7 +85,7 @@ fn mouse_test(window: &Window) -> result!(()) {
                                         origin,
                                         button_event.button().number(),
                                         &format!("{}", button_event.event()),
-                                        mouse.origin()
+                                        mouse.origin()?
                                     )?;
                                 } else {
                                     other_event(window, origin, "no mouse button event!!!!")?;
