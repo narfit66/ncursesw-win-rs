@@ -36,6 +36,8 @@ pub struct MenuItem {
 impl MenuItem {
     // make a new instance from the passed ncurses menu item pointer.
     pub(in crate::menu) fn _from(handle: ITEM, free_on_drop: bool) -> Self {
+        assert!(!handle.is_null(), "MenuItem::_from() : handle.is_null()");
+
         Self { handle, free_on_drop }
     }
 

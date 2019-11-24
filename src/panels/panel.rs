@@ -39,6 +39,8 @@ impl Panel {
     // 'peeking' the Panel but it would be invalid to free the handle when
     // our instance goes out of scope.
     pub(in crate::panels) fn _from(handle: PANEL, free_on_drop: bool) -> Self {
+        assert!(!handle.is_null(), "Panel::_from() : handle.is_null()");
+
         Self { handle, free_on_drop }
     }
 

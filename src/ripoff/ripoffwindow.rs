@@ -36,6 +36,8 @@ pub struct RipoffWindow {
 
 impl HasHandle for RipoffWindow {
     fn _from(handle: WINDOW, _: bool) -> Self {
+        assert!(!handle.is_null(), "RipoffWindow::_from() : handle.is_null()");
+
         Self { handle }
     }
 

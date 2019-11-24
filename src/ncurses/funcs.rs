@@ -1,5 +1,5 @@
 /*
-    src/ncurses.rs
+    src/ncurses/funcs.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -22,57 +22,13 @@
 
 #![allow(deprecated)]
 
-use std::panic::{UnwindSafe, catch_unwind};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::{sync::atomic::AtomicBool, panic::{UnwindSafe, catch_unwind}};
 
-use ncursesw;
-use ncursesw::WINDOW;
-use crate::{Window, NCurseswWinError};
-use crate::gen::*;
+use crate::{Window, NCurseswWinError, ncurses::ncurses::NCurses};
 
 lazy_static! {
-    pub(crate) static ref INITSCR_CALLED: AtomicBool = AtomicBool::new(false);
-    pub(crate) static ref COLOR_STARTED: AtomicBool = AtomicBool::new(false);
-}
-
-// NCurses context.
-struct NCurses {
-    handle: WINDOW
-}
-
-// NCurses context, initialise and when out of scope drop ncurses structure.
-impl NCurses {
-    // Initialise ncurses.
-    fn initscr() -> result!(Self) {
-        if !INITSCR_CALLED.load(Ordering::SeqCst) {
-            let handle = ncursesw::initscr()?;
-
-            COLOR_STARTED.store(false, Ordering::SeqCst);
-            INITSCR_CALLED.store(true, Ordering::SeqCst);
-
-            Ok(Self { handle })
-        } else {
-            Err(NCurseswWinError::InitscrAlreadyCalled)
-        }
-    }
-
-    // Returns the initial window(stdscr) after initialisation.
-    fn initial_window(&self) -> Window {
-        Window::_from(self.handle, true)
-    }
-}
-
-impl Drop for NCurses {
-    // Unallocate the initialised ncurses instance.
-    fn drop(&mut self) {
-        match ncursesw::endwin() {
-            Err(source) => panic!(source.to_string()),
-            _           => {
-                COLOR_STARTED.store(false, Ordering::SeqCst);
-                INITSCR_CALLED.store(false, Ordering::SeqCst);
-            }
-        }
-    }
+    pub(in crate) static ref INITSCR_CALLED: AtomicBool = AtomicBool::new(false);
+    pub(in crate) static ref COLOR_STARTED: AtomicBool = AtomicBool::new(false);
 }
 
 /// Safely initialise ncurses, panic's will be caught correctly and
@@ -113,7 +69,7 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) 
     // so try and convert it into a string.
     catch_unwind(|| {
         // initilise ncurses.
-        let ncurses = match NCurses::initscr() {
+        let ncurses = match NCurses::new() {
             Err(source)  => panic!(match source {
                 NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
                 _                                      => "ncursesw::initscr() has failed!"

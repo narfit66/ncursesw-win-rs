@@ -37,6 +37,8 @@ pub struct Window {
 
 impl HasHandle for Window {
     fn _from(handle: WINDOW, free_on_drop: bool) -> Self {
+        assert!(!handle.is_null(), "Window::_from() : handle.is_null()");
+
         Self { handle, free_on_drop }
     }
 
