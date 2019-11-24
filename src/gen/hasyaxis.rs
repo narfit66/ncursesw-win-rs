@@ -41,7 +41,11 @@ pub trait HasYAxis: HasHandle {
     fn insdelln(&self, position: Position, lines: u16) -> result!(()) {
         let lines = match position {
             Position::InsertAbove => i32::try_from(lines)?,
-            Position::DeleteBelow => i32::try_from(lines)? * -1
+            Position::DeleteBelow => {
+                let neg = i32::try_from(lines)?.overflowing_neg();
+
+                neg.0
+            }
         };
 
         Ok(ncursesw::winsdelln(self._handle(), lines)?)

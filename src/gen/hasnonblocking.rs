@@ -54,9 +54,11 @@ pub trait HasNonBlocking: HasHandle {
 
     /// set the non-blocking read timeout in milliseconds, use `ms: None` to set blocking read mode.
     fn set_timeout(&self, ms: Timeout) -> result!(()) {
-        Ok(match ms {
+        match ms {
             None     => unsafe { ncurses::wtimeout(self._handle(), -1) },
             Some(ms) => ncursesw::wtimeout(self._handle(), ms)?
-        })
+        }
+
+        Ok(())
     }
 }

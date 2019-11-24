@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::too_many_arguments)]
+
 use std::collections::HashMap;
 
 use crate::{

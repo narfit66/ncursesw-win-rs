@@ -37,22 +37,22 @@ impl MouseOrigin {
     }
 
     /// Mouse Y-X axis.
-    pub fn origin(&self) -> Origin {
+    pub fn origin(self) -> Origin {
         self.origin
     }
 
     /// Y-axis.
-    pub fn y(&self) -> u16 {
+    pub fn y(self) -> u16 {
         self.origin.y
     }
 
     /// X-axis.
-    pub fn x(&self) -> u16 {
+    pub fn x(self) -> u16 {
         self.origin.x
     }
 
     /// Z-axis.
-    pub fn z(&self) -> u16 {
+    pub fn z(self) -> u16 {
         self.z
     }
 }

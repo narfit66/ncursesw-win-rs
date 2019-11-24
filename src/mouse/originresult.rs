@@ -36,15 +36,15 @@ impl OriginResult {
         Self { origin: Origin { y, x }, to_screen, result }
     }
 
-    pub fn origin(&self) -> Origin {
+    pub fn origin(self) -> Origin {
         self.origin
     }
 
-    pub fn to_screen(&self) -> bool {
+    pub fn to_screen(self) -> bool {
         self.to_screen
     }
 
-    pub fn result(&self) -> bool {
+    pub fn result(self) -> bool {
         self.result
     }
 }
