@@ -20,15 +20,17 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{Origin, Size};
+use std::convert::{TryFrom, TryInto};
+
 use crate::{
-    NCurseswWinError, window::Window, gen::{HasHandle, HasYXAxis, NCurseswWindow, IsWindow}
+    Origin, Size, NCurseswWinError,
+    window::Window, gen::{HasHandle, HasYXAxis, NCurseswWindow, IsWindow}
 };
 
 /// Is the window canvas type capable of creating a sub-window.
 pub trait CanSubWindow: HasHandle + HasYXAxis + NCurseswWindow + IsWindow {
     fn subwin(&self, size: Size, origin: Origin) -> result!(Window) {
-        Ok(Window::_from(ncursesw::subwin(self._handle(), size, origin)?, true))
+        Ok(Window::_from(ncursesw::subwin(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
@@ -39,15 +41,15 @@ pub trait CanSubWindow: HasHandle + HasYXAxis + NCurseswWindow + IsWindow {
         }
     }
 
-    fn getparx(&self) -> result!(i32) {
-        Ok(ncursesw::getparx(self._handle())?)
+    fn getparx(&self) -> result!(u16) {
+        Ok(u16::try_from(ncursesw::getparx(self._handle())?)?)
     }
 
-    fn getpary(&self) -> result!(i32) {
-        Ok(ncursesw::getpary(self._handle())?)
+    fn getpary(&self) -> result!(u16) {
+        Ok(u16::try_from(ncursesw::getpary(self._handle())?)?)
     }
 
     fn getparyx(&self) -> result!(Origin) {
-        Ok(ncursesw::getparyx(self._handle())?)
+        Ok(Origin::try_from(ncursesw::getparyx(self._handle())?)?)
     }
 }

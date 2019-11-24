@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::convert::TryFrom;
+
 use ncursesw::{ChtypeChar, ComplexChar, WideString};
 use crate::{NCurseswWinError, gen::HasHandle};
 
@@ -29,16 +31,12 @@ pub trait HasInsFunctions: HasHandle {
         Ok(ncursesw::winsch(self._handle(), ch)?)
     }
 
-    fn insnstr(&self, str: &str, length: i32) -> result!(()) {
-        assert_length!("insnstr", length);
-
-        Ok(ncursesw::winsnstr(self._handle(), str, length)?)
+    fn insnstr(&self, str: &str, length: u16) -> result!(()) {
+        Ok(ncursesw::winsnstr(self._handle(), str, i32::try_from(length)?)?)
     }
 
-    fn ins_nwstr(&self, wstr: &WideString, length: i32) -> result!(()) {
-        assert_length!("ins_nwstr", length);
-
-        Ok(ncursesw::wins_nwstr(self._handle(), wstr, length)?)
+    fn ins_nwstr(&self, wstr: &WideString, length: u16) -> result!(()) {
+        Ok(ncursesw::wins_nwstr(self._handle(), wstr, i32::try_from(length)?)?)
     }
 
     fn insstr(&self, str: &str) -> result!(()) {

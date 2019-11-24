@@ -20,9 +20,8 @@
     IN THE SOFTWARE.
 */
 
-use std::sync::{Mutex, atomic::{AtomicUsize, Ordering}};
+use std::{convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
 
-use ncursesw;
 use ncursesw::{WINDOW, Orientation};
 use crate::{RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
 
@@ -94,7 +93,7 @@ impl RipoffLine {
     }
 
     /// Update the ripoff line.
-    pub fn update<F: Fn(&RipoffWindow, i32) -> result!(T), T>(&self, user_function: F) -> result!(T) {
+    pub fn update<F: Fn(&RipoffWindow, u16) -> result!(T), T>(&self, user_function: F) -> result!(T) {
         // check that initscr() has been called.
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
             Err(NCurseswWinError::InitscrNotCalled)
@@ -108,7 +107,7 @@ impl RipoffLine {
                 Err(NCurseswWinError::RipoffNotInitialized { number: self.number })
             } else {
                 // call the passed closure to process against the ripoff.
-                user_function(&ripoff_window, *ripoff_columns)
+                user_function(&ripoff_window, u16::try_from(*ripoff_columns)?)
             }
         }
     }

@@ -20,16 +20,16 @@
     IN THE SOFTWARE.
 */
 
-use std::path;
+use std::{path, convert::TryInto};
 
-use ncursesw::{ChtypeChar, ComplexChar, Origin, Size};
-use crate::{Pad, NCurseswWinError, gen::HasHandle};
+use ncursesw::{ChtypeChar, ComplexChar};
+use crate::{Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a pad.
 pub trait IsPad: HasHandle + Drop + Sync + Send {
     /// Create a new instance of a Window that will act as a pad.
     fn new(size: Size) -> result!(Pad) {
-        Ok(Pad::_from(ncursesw::newpad(size)?, true))
+        Ok(Pad::_from(ncursesw::newpad(size.try_into()?)?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Pad::new() instead")]
@@ -39,7 +39,7 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     }
 
     fn subpad(&self, size: Size, origin: Origin) -> result!(Pad) {
-        Ok(Pad::_from(ncursesw::subpad(self._handle(), size, origin)?, true))
+        Ok(Pad::_from(ncursesw::subpad(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
@@ -78,10 +78,10 @@ pub trait IsPad: HasHandle + Drop + Sync + Send {
     }
 
     fn pnoutrefresh(&self, pmin: Origin, smin: Origin, smax: Origin) -> result!(()) {
-        Ok(ncursesw::pnoutrefresh(self._handle(), pmin, smin, smax)?)
+        Ok(ncursesw::pnoutrefresh(self._handle(), pmin.try_into()?, smin.try_into()?, smax.try_into()?)?)
     }
 
     fn prefresh(&self, pmin: Origin, smin: Origin, smax: Origin) -> result!(()) {
-        Ok(ncursesw::prefresh(self._handle(), pmin, smin, smax)?)
+        Ok(ncursesw::prefresh(self._handle(), pmin.try_into()?, smin.try_into()?, smax.try_into()?)?)
     }
 }

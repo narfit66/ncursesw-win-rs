@@ -20,15 +20,15 @@
     IN THE SOFTWARE.
 */
 
+use std::convert::TryFrom;
+
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw add functions.
 pub trait HasAddFunctions: HasHandle {
-    fn addchnstr(&self, chstr: &ChtypeString, length: i32) -> result!(()) {
-        assert_length!("addchnstr", length);
-
-        Ok(ncursesw::waddchnstr(self._handle(), chstr, length)?)
+    fn addchnstr(&self, chstr: &ChtypeString, length: u16) -> result!(()) {
+        Ok(ncursesw::waddchnstr(self._handle(), chstr, i32::try_from(length)?)?)
     }
 
     fn addch(&self, ch: ChtypeChar) -> result!(()) {
@@ -39,26 +39,20 @@ pub trait HasAddFunctions: HasHandle {
         Ok(ncursesw::waddchstr(self._handle(), chstr)?)
     }
 
-    fn addnstr(&self, str: &str, length: i32) -> result!(()) {
-        assert_length!("addnstr", length);
-
-        Ok(ncursesw::waddnstr(self._handle(), str, length)?)
+    fn addnstr(&self, str: &str, length: u16) -> result!(()) {
+        Ok(ncursesw::waddnstr(self._handle(), str, i32::try_from(length)?)?)
     }
 
-    fn addnwstr(&self, wstr: &WideString, length: i32) -> result!(()) {
-        assert_length!("addnwstr", length);
-
-        Ok(ncursesw::waddnwstr(self._handle(), wstr, length)?)
+    fn addnwstr(&self, wstr: &WideString, length: u16) -> result!(()) {
+        Ok(ncursesw::waddnwstr(self._handle(), wstr, i32::try_from(length)?)?)
     }
 
     fn addstr(&self, str: &str) -> result!(()) {
         Ok(ncursesw::waddstr(self._handle(), str)?)
     }
 
-    fn add_wchnstr(&self, wchstr: &ComplexString, length: i32) -> result!(()) {
-        assert_length!("add_wchnstr", length);
-
-        Ok(ncursesw::wadd_wchnstr(self._handle(), wchstr, length)?)
+    fn add_wchnstr(&self, wchstr: &ComplexString, length: u16) -> result!(()) {
+        Ok(ncursesw::wadd_wchnstr(self._handle(), wchstr, i32::try_from(length)?)?)
     }
 
     fn add_wch(&self, wch: ComplexChar) -> result!(()) {

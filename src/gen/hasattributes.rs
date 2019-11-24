@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+use std::convert::TryFrom;
+
 use ncursesw::{
     AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType, normal
 };
@@ -72,14 +74,12 @@ pub trait HasAttributes: HasHandle {
         Ok(ncursesw::wcolor_set(self._handle(), color_pair)?)
     }
 
-    fn chgat<A, P, T>(&self, length: i32, attrs: A, color_pair: P) -> result!(())
+    fn chgat<A, P, T>(&self, length: u16, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        assert_length!("chgat", length);
-
-        Ok(ncursesw::wchgat(self._handle(), length, attrs, color_pair)?)
+        Ok(ncursesw::wchgat(self._handle(), i32::try_from(length)?, attrs, color_pair)?)
     }
 
     fn getattrs(&self) -> normal::Attributes {

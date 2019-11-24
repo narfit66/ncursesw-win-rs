@@ -22,6 +22,8 @@
 
 #![allow(deprecated)]
 
+use std::convert::TryFrom;
+
 use ncursesw::{CharacterResult, WideChar, WideString};
 use crate::{NonBlockingResult, Timeout, NCurseswWinError, gen::{HasHandle, HasNonBlocking}};
 
@@ -31,16 +33,12 @@ pub trait HasGetFunctions: HasHandle + HasNonBlocking {
         Ok(ncursesw::wgetch(self._handle())?)
     }
 
-    fn getnstr(&self, length: i32) -> result!(String) {
-        assert_length!("getnstr", length);
-
-        Ok(ncursesw::wgetnstr(self._handle(), length)?)
+    fn getnstr(&self, length: u16) -> result!(String) {
+        Ok(ncursesw::wgetnstr(self._handle(), i32::try_from(length)?)?)
     }
 
-    fn getn_wstr(&self, length: i32) -> result!(WideString) {
-        assert_length!("getn_wstr", length);
-
-        Ok(ncursesw::wgetn_wstr(self._handle(), length)?)
+    fn getn_wstr(&self, length: u16) -> result!(WideString) {
+        Ok(ncursesw::wgetn_wstr(self._handle(), i32::try_from(length)?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use getnstr() instead")]

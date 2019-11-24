@@ -20,20 +20,22 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{Origin, Size};
+use std::convert::TryInto;
+
 use crate::{
-    NCurseswWinError, window::Window, gen::{HasHandle, NCurseswWindow, HasYXAxis, IsWindow}
+    Origin, Size, NCurseswWinError,
+    window::Window, gen::{HasHandle, NCurseswWindow, HasYXAxis, IsWindow}
 };
 
 /// Is the window canvas type capable of creating a derived window.
 pub trait Derivable: HasHandle + NCurseswWindow + HasYXAxis + IsWindow {
     fn derwin(&self, size: Size, origin: Origin) -> result!(Window) {
-        Ok(Window::_from(ncursesw::derwin(self._handle(), size, origin)?, true))
+        Ok(Window::_from(ncursesw::derwin(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
     fn mvderwin(&self, origin: Origin) -> result!(()) {
         assert_origin!("mvderwin", self.size()?, origin);
 
-        Ok(ncursesw::mvderwin(self._handle(), origin)?)
+        Ok(ncursesw::mvderwin(self._handle(), origin.try_into()?)?)
     }
 }

@@ -1,5 +1,5 @@
 /*
-    src/gen/hasmvdelfunctions.rs
+    src/position.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,15 +20,11 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::TryInto;
-
-use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
-
-/// Does the window canvas type have ncursesw delete origin functions.
-pub trait HasMvDelFunctions: HasHandle + HasYXAxis {
-    fn mvdelch(&self, origin: Origin) -> result!(()) {
-        assert_origin!("mvdelch", self.size()?, origin);
-
-        Ok(ncursesw::mvwdelch(self._handle(), origin.try_into()?)?)
-    }
+/// Position to insert/delete line see insdelln() and winsdelln().
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum Position {
+    /// Insert above the current line.
+    InsertAbove,
+    /// Delete below the current line.
+    DeleteBelow
 }

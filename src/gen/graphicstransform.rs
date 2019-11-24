@@ -22,12 +22,14 @@
 
 #![allow(clippy::never_loop)]
 
+use std::convert::TryInto;
+
 use ncursesw::{
     AttributesColorPairType, AttributesColorPairSet, ComplexChar,
-    Origin, Size, WideChar, getcchar
+    WideChar, getcchar
 };
 use crate::{
-    graphics::WIDEBOXDRAWING,
+    graphics::WIDEBOXDRAWING, Origin, Size,
     BoxDrawingType, BoxDrawingGraphic, NCurseswWinError,
     complex_box_graphic, gen::*
 };
@@ -144,10 +146,10 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
             // if we are at the bottom right origin of the screen then
             // insert our new graphic otherwise add the character
             // (mvadd_wch() will error otherwise!).
-            if origin == crate::terminal_bottom_right_origin() {
-                self.mvins_wch(origin, new_complex_char)?;
+            if origin == crate::terminal_bottom_right_origin()? {
+                self.mvins_wch(Origin::try_into(origin)?, new_complex_char)?;
             } else {
-                self.mvadd_wch(origin, new_complex_char)?;
+                self.mvadd_wch(Origin::try_into(origin)?, new_complex_char)?;
             }
         }
 

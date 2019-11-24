@@ -22,72 +22,74 @@
 
 #![allow(deprecated)]
 
-use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin, WideString};
-use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
+use std::convert::{TryInto, TryFrom};
+
+use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
+use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw in origin functions.
 pub trait HasMvInFunctions: HasHandle + HasYXAxis {
-    fn mvinchnstr(&self, origin: Origin, length: i32) -> result!(ChtypeString) {
+    fn mvinchnstr(&self, origin: Origin, length: u16) -> result!(ChtypeString) {
         assert_origin_hlength!("mvinchnstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwinchnstr(self._handle(), origin, length)?)
+        Ok(ncursesw::mvwinchnstr(self._handle(), origin.try_into()?, i32::try_from(length)?)?)
     }
 
     fn mvinch(&self, origin: Origin) -> result!(ChtypeChar) {
         assert_origin!("mvinch", self.size()?, origin);
 
-        Ok(ncursesw::mvwinch(self._handle(), origin))
+        Ok(ncursesw::mvwinch(self._handle(), origin.try_into()?))
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinchnstr() instead")]
     fn mvinchstr(&self, origin: Origin) -> result!(ChtypeString) {
         assert_origin!("mvinchstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwinchstr(self._handle(), origin)?)
+        Ok(ncursesw::mvwinchstr(self._handle(), origin.try_into()?)?)
     }
 
-    fn mvinnstr(&self, origin: Origin, length: i32) -> result!(String) {
+    fn mvinnstr(&self, origin: Origin, length: u16) -> result!(String) {
         assert_origin_hlength!("mvinnstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwinnstr(self._handle(), origin, length)?)
+        Ok(ncursesw::mvwinnstr(self._handle(), origin.try_into()?, i32::try_from(length)?)?)
     }
 
-    fn mvinnwstr(&self, origin: Origin, length: i32) -> result!(WideString) {
+    fn mvinnwstr(&self, origin: Origin, length: u16) -> result!(WideString) {
         assert_origin_hlength!("mvinnwstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwinnwstr(self._handle(), origin, length)?)
+        Ok(ncursesw::mvwinnwstr(self._handle(), origin.try_into()?, i32::try_from(length)?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinnstr() instead")]
     fn mvinstr(&self, origin: Origin) -> result!(String) {
         assert_origin!("mvinstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwinstr(self._handle(), origin)?)
+        Ok(ncursesw::mvwinstr(self._handle(), origin.try_into()?)?)
     }
 
-    fn mvin_wchnstr(&self, origin: Origin, length: i32) -> result!(ComplexString) {
+    fn mvin_wchnstr(&self, origin: Origin, length: u16) -> result!(ComplexString) {
         assert_origin_hlength!("mvin_wchnstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwin_wchnstr(self._handle(), origin, length)?)
+        Ok(ncursesw::mvwin_wchnstr(self._handle(), origin.try_into()?, i32::try_from(length)?)?)
     }
 
     fn mvin_wch(&self, origin: Origin) -> result!(ComplexChar) {
         assert_origin!("mvin_wch", self.size()?, origin);
 
-        Ok(ncursesw::mvwin_wch(self._handle(), origin)?)
+        Ok(ncursesw::mvwin_wch(self._handle(), origin.try_into()?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvin_wchnstr() instead")]
     fn mvin_wchstr(&self, origin: Origin) -> result!(ComplexString) {
         assert_origin!("mvin_wchstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwin_wchstr(self._handle(), origin)?)
+        Ok(ncursesw::mvwin_wchstr(self._handle(), origin.try_into()?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvinnwstr() instead")]
     fn mvinwstr(&self, origin: Origin) -> result!(WideString) {
         assert_origin!("mvinwstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwinwstr(self._handle(), origin)?)
+        Ok(ncursesw::mvwinwstr(self._handle(), origin.try_into()?)?)
     }
 }

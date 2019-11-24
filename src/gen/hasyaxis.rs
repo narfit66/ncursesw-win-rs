@@ -20,31 +20,34 @@
     IN THE SOFTWARE.
 */
 
-use crate::{NCurseswWinError, gen::HasHandle};
+use std::convert::TryFrom;
+
+use crate::{Position, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas have an y-axis.
 pub trait HasYAxis: HasHandle {
-    fn getbegy(&self) -> result!(i32) {
-        Ok(ncursesw::getbegy(self._handle())?)
+    fn getbegy(&self) -> result!(u16) {
+        Ok(u16::try_from(ncursesw::getbegy(self._handle())?)?)
     }
 
-    fn getmaxy(&self) -> result!(i32) {
-        Ok(ncursesw::getmaxy(self._handle())?)
+    fn getmaxy(&self) -> result!(u16) {
+        Ok(u16::try_from(ncursesw::getmaxy(self._handle())?)?)
     }
 
-    fn getcury(&self) -> result!(i32) {
-        Ok(ncursesw::getcury(self._handle())?)
+    fn getcury(&self) -> result!(u16) {
+        Ok(u16::try_from(ncursesw::getcury(self._handle())?)?)
     }
 
-    fn insdelln(&self, length: i32) -> result!(()) {
-        assert_length!("insdelln", length);
+    fn insdelln(&self, position: Position, lines: u16) -> result!(()) {
+        let lines = match position {
+            Position::InsertAbove => i32::try_from(lines)?,
+            Position::DeleteBelow => i32::try_from(lines)? * -1
+        };
 
-        Ok(ncursesw::winsdelln(self._handle(), length)?)
+        Ok(ncursesw::winsdelln(self._handle(), lines)?)
     }
 
-    fn is_linetouched(&self, line: i32) -> bool {
-        assert!(line > 0, "is_linetouched() : line={} > 0", line);
-
-        ncursesw::is_linetouched(self._handle(), line)
+    fn is_linetouched(&self, line: u16) -> result!(bool) {
+        Ok(ncursesw::is_linetouched(self._handle(), i32::try_from(line)?))
     }
 }

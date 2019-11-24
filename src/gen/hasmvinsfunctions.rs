@@ -20,44 +20,46 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{ChtypeChar, ComplexChar, Origin, WideString};
-use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
+use std::convert::{TryFrom, TryInto};
+
+use ncursesw::{ChtypeChar, ComplexChar, WideString};
+use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw insert origin functions.
 pub trait HasMvInsFunctions: HasHandle + HasYXAxis {
     fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
         assert_origin!("mvinsch", self.size()?, origin);
 
-        Ok(ncursesw::mvwinsch(self._handle(), origin, ch)?)
+        Ok(ncursesw::mvwinsch(self._handle(), origin.try_into()?, ch)?)
     }
 
-    fn mvinsnstr(&self, origin: Origin, str: &str, length: i32) -> result!(()) {
+    fn mvinsnstr(&self, origin: Origin, str: &str, length: u16) -> result!(()) {
         assert_origin_hlength!("mvinsnstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwinsnstr(self._handle(), origin, str, length)?)
+        Ok(ncursesw::mvwinsnstr(self._handle(), origin.try_into()?, str, i32::try_from(length)?)?)
     }
 
-    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, length: i32) -> result!(()) {
+    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, length: u16) -> result!(()) {
         assert_origin_hlength!("mvins_nwstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwins_nwstr(self._handle(), origin, wstr, length)?)
+        Ok(ncursesw::mvwins_nwstr(self._handle(), origin.try_into()?, wstr, i32::try_from(length)?)?)
     }
 
     fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
         assert_origin!("mvinsstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwinsstr(self._handle(), origin, str)?)
+        Ok(ncursesw::mvwinsstr(self._handle(), origin.try_into()?, str)?)
     }
 
     fn mvins_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {
         assert_origin!("mvins_wch", self.size()?, origin);
 
-        Ok(ncursesw::mvwins_wch(self._handle(), origin, wch)?)
+        Ok(ncursesw::mvwins_wch(self._handle(), origin.try_into()?, wch)?)
     }
 
     fn mvins_wstr(&self, origin: Origin, wstr: &WideString) -> result!(()) {
         assert_origin!("mvins_wstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwins_wstr(self._handle(), origin, wstr)?)
+        Ok(ncursesw::mvwins_wstr(self._handle(), origin.try_into()?, wstr)?)
     }
 }

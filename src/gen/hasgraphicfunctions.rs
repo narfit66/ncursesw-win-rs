@@ -22,12 +22,18 @@
 
 #![allow(clippy::too_many_arguments)]
 
+use std::convert::{TryFrom, TryInto};
+
 use ncursesw::{
-    ChtypeChar, ComplexChar, ComplexString, Origin, Size
+    ChtypeChar, ComplexChar, ComplexString
 };
 use crate::{
     BoxDrawingType, BoxDrawingGraphic, HorizontalGraphic, VerticalGraphic,
-    NCurseswWinError, gen::{HasYXAxis, HasMvAddFunctions, HasMvInFunctions, HasMvInsFunctions, GraphicsTransform, _Direction}
+    Origin, Size, NCurseswWinError,
+    gen::{
+        HasYXAxis, HasMvAddFunctions, HasMvInFunctions, HasMvInsFunctions,
+        GraphicsTransform, _Direction
+    }
 };
 
 /// Does the window canvas type have ncursesw graphics functions.
@@ -68,52 +74,44 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         Ok(ncursesw::box_set(self._handle(), verch, horch)?)
     }
 
-    fn hline(&self, ch: ChtypeChar, length: i32) -> result!(()) {
-        assert_length!("hline", length);
-
-        Ok(ncursesw::whline(self._handle(), ch, length)?)
+    fn hline(&self, ch: ChtypeChar, length: u16) -> result!(()) {
+        Ok(ncursesw::whline(self._handle(), ch, i32::try_from(length)?)?)
     }
 
-    fn hline_set(&self, wch: ComplexChar, length: i32) -> result!(()) {
-        assert_length!("hline_set", length);
-
-        Ok(ncursesw::whline_set(self._handle(), wch, length)?)
+    fn hline_set(&self, wch: ComplexChar, length: u16) -> result!(()) {
+        Ok(ncursesw::whline_set(self._handle(), wch, i32::try_from(length)?)?)
     }
 
-    fn mvhline(&self, origin: Origin, ch: ChtypeChar, length: i32) -> result!(()) {
+    fn mvhline(&self, origin: Origin, ch: ChtypeChar, length: u16) -> result!(()) {
         assert_origin_hlength!("mvhline", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwhline(self._handle(), origin, ch, length)?)
+        Ok(ncursesw::mvwhline(self._handle(), origin.try_into()?, ch, i32::try_from(length)?)?)
     }
 
-    fn mvhline_set(&self, origin: Origin, wch: ComplexChar, length: i32) -> result!(()) {
+    fn mvhline_set(&self, origin: Origin, wch: ComplexChar, length: u16) -> result!(()) {
         assert_origin_hlength!("mvhline_set", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwhline_set(self._handle(), origin, wch, length)?)
+        Ok(ncursesw::mvwhline_set(self._handle(), origin.try_into()?, wch, i32::try_from(length)?)?)
     }
 
-    fn mvvline(&self, origin: Origin, ch: ChtypeChar, length: i32) -> result!(()) {
+    fn mvvline(&self, origin: Origin, ch: ChtypeChar, length: u16) -> result!(()) {
         assert_origin_vlength!("mvvline", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwvline(self._handle(), origin, ch, length)?)
+        Ok(ncursesw::mvwvline(self._handle(), origin.try_into()?, ch, i32::try_from(length)?)?)
     }
 
-    fn mvvline_set(&self, origin: Origin, wch: ComplexChar, length: i32) -> result!(()) {
+    fn mvvline_set(&self, origin: Origin, wch: ComplexChar, length: u16) -> result!(()) {
         assert_origin_vlength!("mvvline_set", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwvline_set(self._handle(), origin, wch, length)?)
+        Ok(ncursesw::mvwvline_set(self._handle(), origin.try_into()?, wch, i32::try_from(length)?)?)
     }
 
-    fn vline(&self, ch: ChtypeChar, length: i32) -> result!(()) {
-        assert_length!("vline", length);
-
-        Ok(ncursesw::wvline(self._handle(), ch, length)?)
+    fn vline(&self, ch: ChtypeChar, length: u16) -> result!(()) {
+        Ok(ncursesw::wvline(self._handle(), ch, i32::try_from(length)?)?)
     }
 
-    fn vline_set(&self, wch: ComplexChar, length: i32) -> result!(()) {
-        assert_length!("vline_set", length);
-
-        Ok(ncursesw::wvline_set(self._handle(), wch, length)?)
+    fn vline_set(&self, wch: ComplexChar, length: u16) -> result!(()) {
+        Ok(ncursesw::wvline_set(self._handle(), wch, i32::try_from(length)?)?)
     }
 
     // Transformative box drawing.
@@ -125,7 +123,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         &self,
         box_drawing_type: BoxDrawingType,
         graphic:          HorizontalGraphic,
-        length:           i32
+        length:           u16
     ) -> result!(()) {
         self.mvthline_set(self.cursor()?, box_drawing_type, graphic, length)
     }
@@ -138,7 +136,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         origin:           Origin,
         box_drawing_type: BoxDrawingType,
         graphic:          HorizontalGraphic,
-        length:           i32
+        length:           u16
     ) -> result!(()) {
         let window_size = self.size()?;
 
@@ -189,7 +187,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         &self,
         box_drawing_type: BoxDrawingType,
         graphic:          VerticalGraphic,
-        length:           i32
+        length:           u16
     ) -> result!(()) {
         self.mvtvline_set(self.cursor()?, box_drawing_type, graphic, length)
     }
@@ -202,7 +200,7 @@ pub trait HasGraphicFunctions: HasYXAxis + HasMvAddFunctions + HasMvInFunctions 
         origin:           Origin,
         box_drawing_type: BoxDrawingType,
         graphic:          VerticalGraphic,
-        length:           i32
+        length:           u16
     ) -> result!(()) {
         let window_size = self.size()?;
 

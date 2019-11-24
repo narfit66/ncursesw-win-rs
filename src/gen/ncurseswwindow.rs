@@ -20,14 +20,15 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{Origin, Size};
-use crate::{Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
+use std::convert::TryInto;
+
+use crate::{Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 
 /// Is the window canvas a ncursesw window type.
 pub trait NCurseswWindow: HasHandle + IsWindow {
     /// Create a new instance of a Window
     fn new(size: Size, origin: Origin) -> result!(Window) {
-        Ok(Window::_from(ncursesw::newwin(size, origin)?, true))
+        Ok(Window::_from(ncursesw::newwin(size.try_into()?, origin.try_into()?)?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Window::new() instead")]
@@ -44,7 +45,7 @@ pub trait NCurseswWindow: HasHandle + IsWindow {
         dmax: Origin,
         overlay: bool) -> result!(())
     {
-        Ok(ncursesw::copywin(self._handle(), dstwin._handle(), smin, dmin, dmax, overlay)?)
+        Ok(ncursesw::copywin(self._handle(), dstwin._handle(), smin.try_into()?, dmin.try_into()?, dmax.try_into()?, overlay)?)
     }
 
     fn overlay(&self, srcwin: &Window) -> result!(()) {

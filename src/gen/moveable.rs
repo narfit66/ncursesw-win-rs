@@ -20,12 +20,13 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::Origin;
-use crate::{NCurseswWinError, gen::HasHandle};
+use std::convert::TryInto;
+
+use crate::{Origin, NCurseswWinError, gen::HasHandle};
 
 /// Is the window canvas type moveable.
 pub trait Moveable: HasHandle {
     fn mvwin(&self, origin: Origin) -> result!(()) {
-        Ok(ncursesw::mvwin(self._handle(), origin)?)
+        Ok(ncursesw::mvwin(self._handle(), origin.try_into()?)?)
     }
 }

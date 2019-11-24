@@ -20,10 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use std::fmt;
+use std::{fmt, convert::{TryFrom, TryInto}};
 
-use ncursesw::{Origin, WINDOW};
-use crate::{NCurseswWinError, gen::*};
+use ncursesw::WINDOW;
+use crate::{Origin, NCurseswWinError, gen::*};
 
 /// A ripoff line window canvas.
 ///
@@ -60,13 +60,13 @@ impl HasGetFunctions for RipoffWindow { }
 
 impl RipoffWindow {
     /// get the cursor column on the ripoff window.
-    pub fn column(&self) -> result!(i32) {
-        Ok(ncursesw::getcurx(self._handle())?)
+    pub fn column(&self) -> result!(u16) {
+        Ok(u16::try_from(ncursesw::getcurx(self._handle())?)?)
     }
 
     /// set the cursor column on the ripoff window.
-    pub fn set_column(&self, column: i32) -> result!(()) {
-        Ok(ncursesw::wmove(self._handle(), Origin { y: 0, x: column })?)
+    pub fn set_column(&self, column: u16) -> result!(()) {
+        Ok(ncursesw::wmove(self._handle(), Origin { y: 0, x: column }.try_into()?)?)
     }
 }
 

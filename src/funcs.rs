@@ -20,14 +20,14 @@
     IN THE SOFTWARE.
 */
 
-use std::sync::atomic::Ordering;
+use std::{sync::atomic::Ordering, convert::TryFrom};
 
-use crate::{
-    InputMode, Origin, Size, NCurseswWinError, ncurses::{INITSCR_CALLED, COLOR_STARTED}
-};
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes,
     CursorType, LcCategory, LINES, COLS
+};
+use crate::{
+    InputMode, Origin, Size, NCurseswWinError, ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
 
 /// Set the locale to be used, required if using unicode representation.
@@ -170,11 +170,11 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
 }
 
 /// The terminal/screen `Size` i.e. lines and columns using 0,0 as top left.
-pub fn terminal_size() -> Size {
-    Size { lines: LINES() - 1, columns: COLS() - 1 }
+pub fn terminal_size() -> result!(Size) {
+    Size::try_from(ncursesw::Size { lines: LINES() - 1, columns: COLS() - 1 })
 }
 
 // The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
-pub(in crate) fn terminal_bottom_right_origin() -> Origin {
-    Origin { y: LINES() - 1, x: COLS() - 1 }
+pub(in crate) fn terminal_bottom_right_origin() -> result!(Origin) {
+    Origin::try_from(ncursesw::Origin { y: LINES() - 1, x: COLS() - 1 })
 }

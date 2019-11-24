@@ -40,9 +40,13 @@ mod mouse;
 mod ncurses;
 mod ncurseswwinerror;
 mod nonblockingresult;
+mod origin;
 mod pad;
 mod panels;
+mod position;
+mod region;
 mod ripoff;
+mod size;
 mod timeout;
 mod window;
 
@@ -54,16 +58,20 @@ pub use mouse::*;
 pub use ncurses::*;
 pub use ncurseswwinerror::*;
 pub use nonblockingresult::*;
+pub use origin::*;
 pub use pad::*;
 pub use panels::*;
+pub use position::*;
+pub use region::*;
 pub use ripoff::*;
+pub use size::*;
 pub use timeout::*;
 pub use window::*;
 
 pub use ncursesw::{normal, extend};
 pub use ncursesw::{
-    ChtypeChar, ChtypeString, ComplexChar, ComplexString, Origin,
-    Region, Size, WideChar, WideCharAndAttributes, WideString
+    ChtypeChar, ChtypeString, ComplexChar, ComplexString,
+    WideChar, WideCharAndAttributes, WideString
 };
 pub use ncursesw::{
     AttributesColorPairSet, BaseColor, Changed, CharacterResult,

@@ -22,15 +22,15 @@
 
 #![allow(deprecated)]
 
+use std::convert::TryFrom;
+
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw in functions.
 pub trait HasInFunctions: HasHandle {
-    fn inchnstr(&self, length: i32) -> result!(ChtypeString) {
-        assert_length!("inchnstr", length);
-
-        Ok(ncursesw::winchnstr(self._handle(), length)?)
+    fn inchnstr(&self, length: u16) -> result!(ChtypeString) {
+        Ok(ncursesw::winchnstr(self._handle(), i32::try_from(length)?)?)
     }
 
     fn inch(&self) -> ChtypeChar {
@@ -42,16 +42,12 @@ pub trait HasInFunctions: HasHandle {
         Ok(ncursesw::winchstr(self._handle())?)
     }
 
-    fn innstr(&self, length: i32) -> result!(String) {
-        assert_length!("innstr", length);
-
-        Ok(ncursesw::winnstr(self._handle(), length)?)
+    fn innstr(&self, length: u16) -> result!(String) {
+        Ok(ncursesw::winnstr(self._handle(), i32::try_from(length)?)?)
     }
 
-    fn innwstr(&self, length: i32) -> result!(WideString) {
-        assert_length!("innwstr", length);
-
-        Ok(ncursesw::winnwstr(self._handle(), length)?)
+    fn innwstr(&self, length: u16) -> result!(WideString) {
+        Ok(ncursesw::winnwstr(self._handle(), i32::try_from(length)?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use innstr() instead")]
@@ -59,10 +55,8 @@ pub trait HasInFunctions: HasHandle {
         Ok(ncursesw::winstr(self._handle())?)
     }
 
-    fn in_wchnstr(&self, length: i32) -> result!(ComplexString) {
-        assert_length!("in_wchnstr", length);
-
-        Ok(ncursesw::win_wchnstr(self._handle(), length)?)
+    fn in_wchnstr(&self, length: u16) -> result!(ComplexString) {
+        Ok(ncursesw::win_wchnstr(self._handle(), i32::try_from(length)?)?)
     }
 
     fn in_wch(&self) -> result!(ComplexChar) {

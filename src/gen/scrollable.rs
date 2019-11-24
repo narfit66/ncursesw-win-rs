@@ -20,8 +20,9 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::Region;
-use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
+use std::convert::{TryFrom, TryInto};
+
+use crate::{Region, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Is the window canvas type scrollable.
 pub trait Scrollable: HasHandle + HasYXAxis {
@@ -29,8 +30,8 @@ pub trait Scrollable: HasHandle + HasYXAxis {
         Ok(ncursesw::scroll(self._handle())?)
     }
 
-    fn scrl(&self, n: i32) -> result!(()) {
-        Ok(ncursesw::wscrl(self._handle(), n)?)
+    fn scrl(&self, lines: u16) -> result!(()) {
+        Ok(ncursesw::wscrl(self._handle(), i32::try_from(lines)?)?)
     }
 
     fn scrollok(&self, bf: bool) -> result!(()) {
@@ -42,10 +43,10 @@ pub trait Scrollable: HasHandle + HasYXAxis {
     }
 
     fn setscrreg(&self, region: Region) -> result!(()) {
-        Ok(ncursesw::wsetscrreg(self._handle(), region)?)
+        Ok(ncursesw::wsetscrreg(self._handle(), region.try_into()?)?)
     }
 
     fn getscrreg(&self) -> result!(Region) {
-        Ok(ncursesw::wgetscrreg(self._handle())?)
+        Ok(Region::try_from(ncursesw::wgetscrreg(self._handle())?)?)
     }
 }

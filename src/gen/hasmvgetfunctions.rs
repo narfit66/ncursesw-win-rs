@@ -22,47 +22,52 @@
 
 #![allow(deprecated)]
 
-use ncursesw::{CharacterResult, Origin, WideChar, WideString};
-use crate::{NonBlockingResult, Timeout, NCurseswWinError, gen::{HasHandle, HasYXAxis, HasNonBlocking}};
+use std::convert::{TryInto, TryFrom};
+
+use ncursesw::{CharacterResult, WideChar, WideString};
+use crate::{
+    Origin, NonBlockingResult, Timeout, NCurseswWinError,
+    gen::{HasHandle, HasYXAxis, HasNonBlocking}
+};
 
 /// Does the window canvas type have ncursesw get origin functions.
 pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
     fn mvgetch(&self, origin: Origin) -> result!(CharacterResult<char>) {
         assert_origin!("mvgetch", self.size()?, origin);
 
-        Ok(ncursesw::mvwgetch(self._handle(), origin)?)
+        Ok(ncursesw::mvwgetch(self._handle(), origin.try_into()?)?)
     }
 
-    fn mvgetnstr(&self, origin: Origin, length: i32) -> result!(String) {
+    fn mvgetnstr(&self, origin: Origin, length: u16) -> result!(String) {
         assert_origin_hlength!("mvgetnstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwgetnstr(self._handle(), origin, length)?)
+        Ok(ncursesw::mvwgetnstr(self._handle(), origin.try_into()?, i32::try_from(length)?)?)
     }
 
-    fn mvgetn_wstr(&self, origin: Origin, length: i32) -> result!(WideString) {
+    fn mvgetn_wstr(&self, origin: Origin, length: u16) -> result!(WideString) {
         assert_origin_hlength!("mvgetn_wstr", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwgetn_wstr(self._handle(), origin, length)?)
+        Ok(ncursesw::mvwgetn_wstr(self._handle(), origin.try_into()?, i32::try_from(length)?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetnstr() instead")]
     fn mvgetstr(&self, origin: Origin) -> result!(String) {
         assert_origin!("mvgetstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwgetstr(self._handle(), origin)?)
+        Ok(ncursesw::mvwgetstr(self._handle(), origin.try_into()?)?)
     }
 
     fn mvget_wch(&self, origin: Origin) -> result!(CharacterResult<WideChar>) {
         assert_origin!("mvget_wch", self.size()?, origin);
 
-        Ok(ncursesw::mvwget_wch(self._handle(), origin)?)
+        Ok(ncursesw::mvwget_wch(self._handle(), origin.try_into()?)?)
     }
 
     #[deprecated(since = "0.1.1", note = "underlying native function can cause issues. Use mvgetn_wstr() instead")]
     fn mvget_wstr(&self, origin: Origin) -> result!(WideString) {
         assert_origin!("mvget_wstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwget_wstr(self._handle(), origin)?)
+        Ok(ncursesw::mvwget_wstr(self._handle(), origin.try_into()?)?)
     }
 
     nonblocking_get_with_origin!(mvgetch_nonblocking, "mvgetch_nonblocking", mvgetch, "mvwgetch", char);

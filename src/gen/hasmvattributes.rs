@@ -20,18 +20,20 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{AttributesType, ColorPairType, ColorAttributeTypes, Origin};
-use crate::{NCurseswWinError, gen::{HasHandle, HasYXAxis}};
+use std::convert::{TryFrom, TryInto};
+
+use ncursesw::{AttributesType, ColorPairType, ColorAttributeTypes};
+use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw attribute origin functions.
 pub trait HasMvAttributes: HasHandle + HasYXAxis {
-    fn mvchgat<A, P, T>(&self, origin: Origin, length: i32, attrs: A, color_pair: P) -> result!(())
+    fn mvchgat<A, P, T>(&self, origin: Origin, length: u16, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
         assert_origin_hlength!("mvchgat", self.size()?, origin, length);
 
-        Ok(ncursesw::mvwchgat(self._handle(), origin, length, attrs, color_pair)?)
+        Ok(ncursesw::mvwchgat(self._handle(), origin.try_into()?, i32::try_from(length)?, attrs, color_pair)?)
     }
 }

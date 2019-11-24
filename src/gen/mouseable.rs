@@ -20,16 +20,18 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{Origin, mouse::{wenclose, wmouse_trafo, OriginResult}};
-use crate::gen::HasHandle;
+use std::convert::TryInto;
+
+use ncursesw::mouse::{wenclose, wmouse_trafo, OriginResult};
+use crate::{Origin, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw mouse functions.
 pub trait Mouseable: HasHandle {
-    fn enclose(&self, origin: Origin) -> bool {
-        wenclose(self._handle(), origin)
+    fn enclose(&self, origin: Origin) -> result!(bool) {
+        Ok(wenclose(self._handle(), origin.try_into()?))
     }
 
-    fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> OriginResult {
-        wmouse_trafo(self._handle(), origin, to_screen)
+    fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> result!(OriginResult) {
+        Ok(wmouse_trafo(self._handle(), origin.try_into()?, to_screen))
     }
 }
