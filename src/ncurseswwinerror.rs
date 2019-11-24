@@ -46,15 +46,15 @@ pub NCurseswWinError
     MouseError { source: NCurseswMouseError } = "{source}",
     MenuError { source: NCurseswMenuError } = "{source}",
 
-    TryIntoOriginError { y: u16, x: u16 } = "invalid origin: Origin {{ y: {y}, x: {x} }}",
-    TryFromOriginError { y: i32, x: i32 } = "invalid origin: Origin {{ y: {y}, x: {x} }}",
-    TryIntoSizeError { lines: u16, columns: u16 } = "invalid size: Size {{ lines: {lines}, columns: {columns} }}",
-    TryFromSizeError { lines: i32, columns: i32 } = "invalid size: Size {{ lines: {lines}, columns: {columns} }}",
-    TryIntoRegionError { top: u16, bottom: u16 } = "invalid region: Region {{ top: {top}, bottom: {bottom} }}",
-    TryFromRegionError { top: i32, bottom: i32 } = "invalid region: Region {{ top: {top}, bottom: {bottom} }}",
-    TryFromOriginResultError { origin: Origin, to_screen: bool, result: bool } = "invalid origin: OriginResult {{ origin: {origin}, to_screen: {to_screen}, result: {result} }}",
-    TryIntoMenuSizeError { rows: u16, columns: u16 } = "invalid size: MenuSize {{ rows: {rows}, columns: {columns} }}",
-    TryFromMenuSizeError { rows: i32, columns: i32 } = "invalid size: MenuSize {{ rows: {rows}, columns: {columns} }}",
+    TryIntoOriginError { y: u16, x: u16 } = "invalid: Origin {{ y: {y}, x: {x} }}",
+    TryFromOriginError { y: i32, x: i32 } = "invalid: ncursesw::Origin {{ y: {y}, x: {x} }}",
+    TryIntoSizeError { lines: u16, columns: u16 } = "invalid: Size {{ lines: {lines}, columns: {columns} }}",
+    TryFromSizeError { lines: i32, columns: i32 } = "invalid: ncursesw::Size {{ lines: {lines}, columns: {columns} }}",
+    TryIntoRegionError { top: u16, bottom: u16 } = "invalid: Region {{ top: {top}, bottom: {bottom} }}",
+    TryFromRegionError { top: i32, bottom: i32 } = "invalid: ncursesw::Region {{ top: {top}, bottom: {bottom} }}",
+    TryFromOriginResultError { origin: Origin, to_screen: bool, result: bool } = "invalid: ncursesw::OriginResult {{ origin: {origin}, to_screen: {to_screen}, result: {result} }}",
+    TryIntoMenuSizeError { rows: u16, columns: u16 } = "invalid: MenuSize {{ rows: {rows}, columns: {columns} }}",
+    TryFromMenuSizeError { rows: i32, columns: i32 } = "invalid: ncursesw::MenuSize {{ rows: {rows}, columns: {columns} }}"
 }
 
 impl PartialEq for NCurseswWinError {

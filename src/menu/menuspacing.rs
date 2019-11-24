@@ -1,5 +1,5 @@
 /*
-    src/menu/mod.rs
+    src/menu/menuspacing.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,14 +20,35 @@
     IN THE SOFTWARE.
 */
 
-mod funcs;
-mod menu;
-mod menuitem;
-mod menusize;
-mod menuspacing;
+use std::convert::{TryFrom, TryInto};
 
-pub use funcs::*;
-pub use menu::*;
-pub use menuitem::*;
-pub use menusize::*;
-pub use menuspacing::*;
+use crate::{NCurseswWinError, menu::MenuSize};
+
+/// Menu spacing (layout spacing).
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct MenuSpacing {
+    pub description: u16,
+    pub menu_size:   MenuSize
+}
+
+impl TryInto<ncursesw::menu::MenuSpacing> for MenuSpacing {
+    type Error = NCurseswWinError;
+
+    fn try_into(self) -> Result<ncursesw::menu::MenuSpacing, Self::Error> {
+        Ok(ncursesw::menu::MenuSpacing {
+            description: u16::try_into(self.description)?,
+            menu_size:   MenuSize::try_into(self.menu_size)?
+        })
+    }
+}
+
+impl TryFrom<ncursesw::menu::MenuSpacing> for MenuSpacing {
+    type Error = NCurseswWinError;
+
+    fn try_from(menu_spacing: ncursesw::menu::MenuSpacing) -> Result<Self, Self::Error> {
+        Ok(Self {
+            description: u16::try_from(menu_spacing.description)?,
+            menu_size:   MenuSize::try_from(menu_spacing.menu_size)?
+        })
+    }
+}

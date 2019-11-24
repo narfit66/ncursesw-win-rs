@@ -23,10 +23,13 @@
 use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 
 use ncursesw::{menu, menu::MENU, menu::ITEM, normal};
-use crate::{Window, NCurseswWinError, menu::MenuSize, menu::MenuItem, gen::HasHandle};
+use crate::{
+    Window, NCurseswWinError,
+    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, gen::HasHandle
+};
 
 pub use ncursesw::menu::{
-    MenuHook, MenuOptions, MenuRequest, MenuSpacing
+    MenuHook, MenuOptions, MenuRequest
 };
 
 /// Menu.
@@ -139,7 +142,7 @@ impl Menu {
     }
 
     pub fn menu_spacing(&self) -> result!(MenuSpacing) {
-        Ok(menu::menu_spacing(self.handle)?)
+        Ok(MenuSpacing::try_from(menu::menu_spacing(self.handle)?)?)
     }
 
     pub fn menu_sub(&self) -> result!(Window) {
@@ -229,7 +232,7 @@ impl Menu {
     }
 
     pub fn set_menu_spacing(&self, menu_spacing: MenuSpacing) -> result!(()) {
-        Ok(menu::set_menu_spacing(self.handle, menu_spacing)?)
+        Ok(menu::set_menu_spacing(self.handle, menu_spacing.try_into()?)?)
     }
 
     pub fn set_menu_sub(&self, win: &Window) -> result!(()) {
