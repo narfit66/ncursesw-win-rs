@@ -53,15 +53,7 @@ impl TryFrom<ncursesw::mouse::OriginResult> for OriginResult {
     type Error = NCurseswWinError;
 
     fn try_from(origin_result: ncursesw::mouse::OriginResult) -> Result<Self, Self::Error> {
-        let origin = if let Ok(origin) = Origin::try_from(origin_result.origin()) {
-            origin
-        } else {
-            return Err(NCurseswWinError::TryFromOriginResultError {
-                origin: origin_result.origin(),
-                to_screen: origin_result.to_screen(),
-                result: origin_result.result()
-            })
-        };
+        let origin = Origin::try_from(origin_result.origin())?;
 
         Ok(Self::new(origin.y, origin.x, origin_result.to_screen(), origin_result.result()))
     }

@@ -59,6 +59,6 @@ impl MouseOrigin {
 
 impl Display for MouseOrigin {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "(y: {}, x: {}, z: {})", self.y(), self.x(), self.z())
+        write!(f, "(origin: {}, z: {})", self.origin, self.z)
     }
 }

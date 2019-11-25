@@ -59,19 +59,7 @@ impl TryInto<ncursesw::menu::MenuSize> for MenuSize {
     type Error = NCurseswWinError;
 
     fn try_into(self) -> Result<ncursesw::menu::MenuSize, Self::Error> {
-        let rows = if let Ok(rows) = i32::try_from(self.rows) {
-            rows
-        } else {
-            return Err(NCurseswWinError::TryIntoMenuSizeError { rows: self.rows, columns: self.columns })
-        };
-
-        let columns = if let Ok(columns) = i32::try_from(self.columns) {
-            columns
-        } else {
-            return Err(NCurseswWinError::TryIntoMenuSizeError { rows: self.rows, columns: self.columns })
-        };
-
-        Ok(ncursesw::menu::MenuSize { rows, columns })
+        Ok(ncursesw::menu::MenuSize { rows: u16::try_into(self.rows)?, columns: u16::try_into(self.columns)? })
     }
 }
 
@@ -79,19 +67,7 @@ impl TryFrom<ncursesw::menu::MenuSize> for MenuSize {
     type Error = NCurseswWinError;
 
     fn try_from(menu_size: ncursesw::menu::MenuSize) -> Result<Self, Self::Error> {
-        let rows = if let Ok(rows) = u16::try_from(menu_size.rows) {
-            rows
-        } else {
-            return Err(NCurseswWinError::TryFromMenuSizeError { rows: menu_size.rows, columns: menu_size.columns })
-        };
-
-        let columns = if let Ok(columns) = u16::try_from(menu_size.columns) {
-            columns
-        } else {
-            return Err(NCurseswWinError::TryFromMenuSizeError { rows: menu_size.rows, columns: menu_size.columns })
-        };
-
-        Ok(Self { rows, columns })
+        Ok(Self { rows: u16::try_from(menu_size.rows)?, columns: u16::try_from(menu_size.columns)? })
     }
 }
 

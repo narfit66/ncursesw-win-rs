@@ -34,19 +34,7 @@ impl TryInto<ncursesw::Region> for Region {
     type Error = NCurseswWinError;
 
     fn try_into(self) -> Result<ncursesw::Region, Self::Error> {
-        let top = if let Ok(top) = i32::try_from(self.top) {
-            top
-        } else {
-            return Err(NCurseswWinError::TryIntoRegionError { top: self.top, bottom: self.bottom })
-        };
-
-        let bottom = if let Ok(bottom) = i32::try_from(self.bottom) {
-            bottom
-        } else {
-            return Err(NCurseswWinError::TryIntoRegionError { top: self.top, bottom: self.bottom })
-        };
-
-        Ok(ncursesw::Region { top, bottom })
+        Ok(ncursesw::Region { top: u16::try_into(self.top)?, bottom: u16::try_into(self.bottom)? })
     }
 }
 
@@ -54,19 +42,7 @@ impl TryFrom<ncursesw::Region> for Region {
     type Error = NCurseswWinError;
 
     fn try_from(region: ncursesw::Region) -> Result<Self, Self::Error> {
-        let top = if let Ok(top) = u16::try_from(region.top) {
-            top
-        } else {
-            return Err(NCurseswWinError::TryFromRegionError { top: region.top, bottom: region.bottom })
-        };
-
-        let bottom = if let Ok(bottom) = u16::try_from(region.bottom) {
-            bottom
-        } else {
-            return Err(NCurseswWinError::TryFromRegionError { top: region.top, bottom: region.bottom })
-        };
-
-        Ok(Self { top, bottom })
+        Ok(Self { top: u16::try_from(region.top)?, bottom: u16::try_from(region.bottom)? })
     }
 }
 

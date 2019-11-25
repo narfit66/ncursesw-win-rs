@@ -23,7 +23,7 @@
 use std::{num, convert};
 
 use ncursesw::{
-    Origin, NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
+    NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
     menu::NCurseswMenuError, shims::constants::ERR
 };
 use crate::ripoff::MAX_LINES;
@@ -44,17 +44,7 @@ pub NCurseswWinError
     NCurseswError { source: NCurseswError } = "{source}",
     PanelsError { source: NCurseswPanelsError } = "{source}",
     MouseError { source: NCurseswMouseError } = "{source}",
-    MenuError { source: NCurseswMenuError } = "{source}",
-
-    TryIntoOriginError { y: u16, x: u16 } = "invalid: Origin {{ y: {y}, x: {x} }}",
-    TryFromOriginError { y: i32, x: i32 } = "invalid: ncursesw::Origin {{ y: {y}, x: {x} }}",
-    TryIntoSizeError { lines: u16, columns: u16 } = "invalid: Size {{ lines: {lines}, columns: {columns} }}",
-    TryFromSizeError { lines: i32, columns: i32 } = "invalid: ncursesw::Size {{ lines: {lines}, columns: {columns} }}",
-    TryIntoRegionError { top: u16, bottom: u16 } = "invalid: Region {{ top: {top}, bottom: {bottom} }}",
-    TryFromRegionError { top: i32, bottom: i32 } = "invalid: ncursesw::Region {{ top: {top}, bottom: {bottom} }}",
-    TryFromOriginResultError { origin: Origin, to_screen: bool, result: bool } = "invalid: ncursesw::OriginResult {{ origin: {origin}, to_screen: {to_screen}, result: {result} }}",
-    TryIntoMenuSizeError { rows: u16, columns: u16 } = "invalid: MenuSize {{ rows: {rows}, columns: {columns} }}",
-    TryFromMenuSizeError { rows: i32, columns: i32 } = "invalid: ncursesw::MenuSize {{ rows: {rows}, columns: {columns} }}"
+    MenuError { source: NCurseswMenuError } = "{source}"
 }
 
 impl PartialEq for NCurseswWinError {
@@ -66,6 +56,6 @@ impl PartialEq for NCurseswWinError {
 
 impl Eq for NCurseswWinError { }
 
-pub(crate) fn timeout_error(func: &str) -> NCurseswWinError {
+pub(in crate) fn timeout_error(func: &str) -> NCurseswWinError {
     NCurseswWinError::from(NCurseswError::LibraryError { func: func.to_string(), rc: ERR })
 }

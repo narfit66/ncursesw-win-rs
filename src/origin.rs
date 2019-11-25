@@ -44,19 +44,7 @@ impl TryInto<ncursesw::Origin> for Origin {
     type Error = NCurseswWinError;
 
     fn try_into(self) -> Result<ncursesw::Origin, Self::Error> {
-        let y = if let Ok(y) = i32::try_from(self.y) {
-            y
-        } else {
-            return Err(NCurseswWinError::TryIntoOriginError { y: self.y, x: self.x })
-        };
-
-        let x = if let Ok(x) = i32::try_from(self.x) {
-            x
-        } else {
-            return Err(NCurseswWinError::TryIntoOriginError { y: self.y, x: self.x })
-        };
-
-        Ok(ncursesw::Origin { y, x })
+        Ok(ncursesw::Origin { y: u16::try_into(self.y)? , x: u16::try_into(self.x)? })
     }
 }
 
@@ -64,19 +52,7 @@ impl TryFrom<ncursesw::Origin> for Origin {
     type Error = NCurseswWinError;
 
     fn try_from(origin: ncursesw::Origin) -> Result<Self, Self::Error> {
-        let y = if let Ok(y) = u16::try_from(origin.y) {
-            y
-        } else {
-            return Err(NCurseswWinError::TryFromOriginError { y: origin.y, x: origin.x })
-        };
-
-        let x = if let Ok(x) = u16::try_from(origin.x) {
-            x
-        } else {
-            return Err(NCurseswWinError::TryFromOriginError { y: origin.y, x: origin.x })
-        };
-
-        Ok(Self { y, x })
+        Ok(Self { y: u16::try_from(origin.y)?, x: u16::try_from(origin.x)? })
     }
 }
 

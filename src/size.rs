@@ -44,19 +44,7 @@ impl TryInto<ncursesw::Size> for Size {
     type Error = NCurseswWinError;
 
     fn try_into(self) -> Result<ncursesw::Size, Self::Error> {
-        let lines = if let Ok(lines) = i32::try_from(self.lines) {
-            lines
-        } else {
-            return Err(NCurseswWinError::TryIntoSizeError { lines: self.lines, columns: self.columns })
-        };
-
-        let columns = if let Ok(columns) = i32::try_from(self.columns) {
-            columns
-        } else {
-            return Err(NCurseswWinError::TryIntoSizeError { lines: self.lines, columns: self.columns })
-        };
-
-        Ok(ncursesw::Size { lines, columns })
+        Ok(ncursesw::Size { lines: u16::try_into(self.lines)?, columns: u16::try_into(self.columns)? })
     }
 }
 
@@ -64,19 +52,7 @@ impl TryFrom<ncursesw::Size> for Size {
     type Error = NCurseswWinError;
 
     fn try_from(size: ncursesw::Size) -> Result<Self, Self::Error> {
-        let lines = if let Ok(lines) = u16::try_from(size.lines) {
-            lines
-        } else {
-            return Err(NCurseswWinError::TryFromSizeError { lines: size.lines, columns: size.columns })
-        };
-
-        let columns = if let Ok(columns) = u16::try_from(size.columns) {
-            columns
-        } else {
-            return Err(NCurseswWinError::TryFromSizeError { lines: size.lines, columns: size.columns })
-        };
-
-        Ok(Self { lines, columns })
+        Ok(Self { lines: u16::try_from(size.lines)?, columns: u16::try_from(size.columns)? })
     }
 }
 
