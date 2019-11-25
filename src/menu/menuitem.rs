@@ -116,7 +116,7 @@ impl Drop for MenuItem {
     fn drop(&mut self) {
         if self.free_on_drop {
             if let Err(source) = menu::free_item(self.handle) {
-                panic!(source.to_string())
+                panic!("{} @ ({:p})", source, self.handle)
             }
         }
     }

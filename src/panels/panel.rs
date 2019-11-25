@@ -139,7 +139,7 @@ impl Drop for Panel {
     fn drop(&mut self) {
         if self.free_on_drop {
             if let Err(source) = panels::del_panel(self.handle) {
-                panic!(source.to_string())
+                panic!("{} @ ({:p})", source, self.handle)
             }
         }
     }

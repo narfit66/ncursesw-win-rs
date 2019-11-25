@@ -76,7 +76,7 @@ impl Drop for Pad {
     fn drop(&mut self) {
         if self.free_on_drop {
             if let Err(source) = ncursesw::delwin(self.handle) {
-                panic!(source.to_string())
+                panic!("{} @ ({:p})", source, self.handle)
             }
         }
     }

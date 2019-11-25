@@ -75,7 +75,7 @@ impl RipoffWindow {
 impl Drop for RipoffWindow {
     fn drop(&mut self) {
         if let Err(source) = ncursesw::delwin(self.handle) {
-            panic!(source.to_string())
+            panic!("{} @ ({:p})", source, self.handle)
         }
     }
 }
