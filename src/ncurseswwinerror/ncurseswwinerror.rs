@@ -24,7 +24,7 @@ use std::{num, convert};
 
 use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
-    menu::NCurseswMenuError, shims::constants::ERR
+    menu::NCurseswMenuError
 };
 use crate::ripoff::MAX_LINES;
 
@@ -55,7 +55,3 @@ impl PartialEq for NCurseswWinError {
 }
 
 impl Eq for NCurseswWinError { }
-
-pub(in crate) fn timeout_error(func: &str) -> NCurseswWinError {
-    NCurseswWinError::from(NCurseswError::LibraryError { func: func.to_string(), rc: ERR })
-}
