@@ -45,7 +45,7 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
         }
-    }).unwrap_or_else(|e| Err(match e {
+    }).unwrap_or_else(|source| Err(match source {
         // This block only runs if there was an error. We might or might not
         // have been able to recover an error message. You technically can pass
         // any value into a panic, but we only get an error message if the panic
@@ -74,13 +74,13 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) 
                 NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
                 _                                      => "ncursesw::initscr() has failed!"
             }),
-            Ok(ptr)      => ptr
+            Ok(handle)   => handle
         };
 
         user_function(&ncurses.initial_window())
-    }).map_err(|e| match e.downcast_ref::<&str>() {
+    }).map_err(|source| match source.downcast_ref::<&str>() {
         Some(andstr) => Some(andstr.to_string()),
-        None         => match e.downcast_ref::<String>() {
+        None         => match source.downcast_ref::<String>() {
             Some(string) => Some(string.to_string()),
             None         => None
         }

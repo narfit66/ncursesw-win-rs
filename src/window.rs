@@ -106,6 +106,6 @@ impl Eq for Window { }
 
 impl fmt::Debug for Window {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Window {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+        write!(f, "{{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
     }
 }

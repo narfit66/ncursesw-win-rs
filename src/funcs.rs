@@ -32,10 +32,12 @@ use crate::{
     InputMode, Origin, Size, NCurseswWinError, ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
 
+/// The number of lines the terminal supports.
 pub fn LINES() -> result!(u16) {
     Ok(u16::try_from(ncursesw::LINES())?)
 }
 
+/// The number of columns the terminal supports.
 pub fn COLS() -> result!(u16) {
     Ok(u16::try_from(ncursesw::COLS())?)
 }

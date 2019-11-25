@@ -85,6 +85,6 @@ unsafe impl Sync for RipoffWindow { } // too make thread safe
 
 impl fmt::Debug for RipoffWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "RipoffWindow {{ handle: {:p} }}", self.handle)
+        write!(f, "{{ handle: {:p} }}", self.handle)
     }
 }
