@@ -52,7 +52,7 @@ impl MenuItem {
         Ok(Self::_from(menu::new_item(name, description)?, true))
     }
 
-    #[deprecated(since = "0.3.2", note = "Use MenuItem::new() instead")]
+    #[deprecated(since = "0.4.0", note = "Use MenuItem::new() instead")]
     pub fn new_item(name: &str, description: &str) -> result!(Self) {
         Self::new(name, description)
     }

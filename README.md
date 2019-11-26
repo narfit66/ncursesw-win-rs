@@ -1,7 +1,7 @@
 ncursesw-win [![Build Status](https://travis-ci.com/narfit66/ncursesw-win-rs.svg?branch=master)](https://travis-ci.com/narfit66/ncursesw-win-rs) [![Crates.io](https://img.shields.io/crates/v/ncursesw-win.svg)](https://crates.io/crates/ncursesw-win)
 ============
 
-This is a wrapper crate around the [ncursesw](https://crates.io/crates/ncursesw) crate, it's purpose is too abstracts away the raw pointers that ncurses uses and function in a more safe way, however a knowledge of how ncurses works is advised to use the true power of this library.
+This is a wrapper crate around the [ncursesw](https://crates.io/crates/ncursesw) crate, it's purpose is too abstracts away the raw pointers that NCurses uses and function in a more safe way, however a knowledge of how NCurses works is advised to use the true power of this library.
 
 Please see the [README.md](https://github.com/narfit66/ncursesw-rs/blob/master/README.md) for `ncursesw` for more details.
 
@@ -43,6 +43,14 @@ To use menus (this is still under active development)
 ```
 use ncurseswwin::menu::*;
 ```
+
+Instead of calling `initscr()` and `endwin()` to initialise and teardown the NCurses library (these can still be called as the [ncursesw](https://crates.io/crates/ncursesw) crate is public) use the `ncursesw_entry()`. This initialises and tears down NCurses and provided the ability to catch panics in a controlled maner by passing them back to the client code as the error type `NCurseswWinError::Panic { message }`.
+
+To create a window use `Window::new()` which will teardown correctly when going out of scope and provides all NCurses functionality associatiated with a NCurses window. Likewise a pad is created using `Pad::new()` and a panel using `Panel::new()`.
+
+All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either there original ncurses name or were specificlly passed the pointer `_win_st` the 'w' has been removed, for example the ncurses 'C' function `mvwgetn_wstr(*WINDOW)` has become the method `self.mvgetn_wstr()`.
+
+The NCurses ripoff and mouse features are encapsulated, please see example code for how to use these features.
 
 ## Examples
 

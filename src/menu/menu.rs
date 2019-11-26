@@ -55,15 +55,13 @@ impl Menu {
     pub fn new(items: Vec<&MenuItem>) -> result!(Self) {
         let item_handles = items.iter().map(|item| item._handle()).collect();
 
-        /*
         eprintln!("Menu::new()");
         eprintln!("item_handles: {:?}", item_handles);
-        */
 
         Ok(Self::_from(menu::new_menu(item_handles)?, true))
     }
 
-    #[deprecated(since = "0.3.2", note = "Use Menu::new() instead")]
+    #[deprecated(since = "0.4.0", note = "Use Menu::new() instead")]
     pub fn new_menu(items: Vec<&MenuItem>) -> result!(Self) {
         Self::new(items)
     }
