@@ -48,7 +48,7 @@ Instead of calling `initscr()` and `endwin()` to initialise and teardown the NCu
 
 To create a window use `Window::new()` which will teardown correctly when going out of scope and provides all NCurses functionality associatiated with a NCurses window. Likewise a pad is created using `Pad::new()` and a panel using `Panel::new()`.
 
-All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either there original ncurses name or were specificlly passed the pointer `_win_st` the 'w' has been removed, for example the ncurses 'C' function `mvwgetn_wstr(*WINDOW)` has become the method `self.mvgetn_wstr()`.
+All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either their original ncurses name or where specificlly passed the pointer `_win_st` the 'w' has been removed, for example the ncurses 'C' function `mvwgetn_wstr(*WINDOW)` has become the method `self.mvgetn_wstr()`.
 
 The NCurses ripoff and mouse features are encapsulated, please see example code for how to use these features.
 
@@ -58,9 +58,9 @@ Examples are built by `cargo build --examples`. To run them, use `cargo run --ex
 
 Current examples are [Safe Initialisation/Calling Of NCurses](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ncursesw_entry-test.rs) (**ncursesw_entry-test**), [Ansi Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border-test.rs) (**border-test**), [Unicode Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border_set-test.rs) (**border_set-test**), [Unicode Box Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/box_drawing-test.rs) (**box_drawing-test**), [Mouse Events](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/mouse-test.rs) (**mouse-test**), [Ripoff Lines](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ripoff-test.rs) (**ripoff-test**) and [Non-Blocking Get](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/getch_nonblocking-test.rs) (**getch_nonblocking-test**).
 
-## [Documentation](https://narfit66.github.io/ncursesw-win-rs/ncursesw-win/index.html)
+## Documentation
 
-This at the moment is only *partial* but the end objective is to document the whole crate/library.
+Please use `cargo doc --open` for this crate for the time being!.
 
 ## License
 
