@@ -24,6 +24,14 @@ use std::convert::TryInto;
 
 use crate::{NCurseswWinError, menu::MenuSize};
 
+pub fn menu_request_by_name(name: &str) -> result!(bool) {
+    Ok(ncursesw::menu::menu_request_by_name(name)?)
+}
+
+pub fn menu_request_name(request: i32) -> result!(String) {
+    Ok(ncursesw::menu::menu_request_name(request)?)
+}
+
 pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
     Ok(ncursesw::menu::set_menu_format(None, menu_size.try_into()?)?)
 }

@@ -9,6 +9,10 @@ readme = "README.md"
 keywords = ["ncurses", "TUI"]
 license = "MIT"
 
+[badges]
+travis-ci = { repository = "narfit66/ncursesw-win-rs", branch = "master" }
+maintenance = { status = "actively-developed" }
+
 [workspace]
 
 [dependencies]

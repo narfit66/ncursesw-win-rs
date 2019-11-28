@@ -25,11 +25,12 @@ use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 use ncursesw::{menu, menu::MENU, normal};
 use crate::{
     Window, NCurseswWinError,
-    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, gen::HasHandle
+    menu::MenuSize, menu::MenuItem, menu::MenuSpacing,
+    gen::HasHandle
 };
 
 pub use ncursesw::menu::{
-    MenuHook, MenuOptions, MenuRequest
+    Menu_Hook, MenuOptions, MenuRequest
 };
 
 /// Menu.
@@ -55,9 +56,6 @@ impl Menu {
     pub fn new(items: Vec<&MenuItem>) -> result!(Self) {
         let item_handles = items.iter().map(|item| item._handle()).collect();
 
-        eprintln!("Menu::new()");
-        eprintln!("item_handles: {:?}", item_handles);
-
         Ok(Self::_from(menu::new_menu(item_handles)?, true))
     }
 
@@ -74,11 +72,11 @@ impl Menu {
         Ok(usize::try_from(menu::item_count(self.handle)?)?)
     }
 
-    pub fn item_init(&self) -> result!(MenuHook) {
+    pub fn item_init(&self) -> result!(Menu_Hook) {
         Ok(menu::item_init(self.handle)?)
     }
 
-    pub fn item_term(&self) -> result!(MenuHook) {
+    pub fn item_term(&self) -> result!(Menu_Hook) {
         Ok(menu::item_term(self.handle)?)
     }
 
@@ -102,17 +100,12 @@ impl Menu {
         menu::menu_grey(self.handle)
     }
 
-    pub fn menu_init(&self) -> result!(MenuHook) {
+    pub fn menu_init(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_init(self.handle)?)
     }
 
     pub fn menu_items(&self) -> result!(Vec<MenuItem>) {
         let handles = menu::menu_items(self.handle)?;
-
-        /*
-        eprintln!("{:?}::menu_items()", self);
-        eprintln!("handles: {:?}", handles);
-        */
 
         Ok(handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect())
     }
@@ -149,7 +142,7 @@ impl Menu {
         Ok(Window::_from(menu::menu_sub(self.handle)?, false))
     }
 
-    pub fn menu_term(&self) -> result!(MenuHook) {
+    pub fn menu_term(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_term(self.handle)?)
     }
 
@@ -176,11 +169,11 @@ impl Menu {
         Ok(menu::set_current_item(self.handle, item._handle())?)
     }
 
-    pub fn set_item_init(&self, hook: MenuHook) -> result!(()) {
+    pub fn set_item_init(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_item_init(self.handle, hook)?)
     }
 
-    pub fn set_item_term(&self, hook: MenuHook) -> result!(()) {
+    pub fn set_item_term(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_item_term(self.handle, hook)?)
     }
 
@@ -200,17 +193,12 @@ impl Menu {
         Ok(menu::set_menu_grey(self.handle, attr)?)
     }
 
-    pub fn set_menu_init(&self, hook: MenuHook) -> result!(()) {
+    pub fn set_menu_init(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_menu_init(self.handle, hook)?)
     }
 
     pub fn set_menu_items(&self, items: Vec<&MenuItem>) -> result!(()) {
         let item_handles = items.iter().map(|item| item._handle()).collect();
-
-        /*
-        eprintln!("{:?}::set_menu_items()", self);
-        eprintln!("item_handles: {:?}", item_handles);
-        */
 
         Ok(menu::set_menu_items(self.handle, item_handles)?)
     }
@@ -239,7 +227,7 @@ impl Menu {
         Ok(menu::set_menu_sub(self.handle, Some(win._handle()))?)
     }
 
-    pub fn set_menu_term(&self, hook: MenuHook) -> result!(()) {
+    pub fn set_menu_term(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_menu_term(self.handle, hook)?)
     }
 
