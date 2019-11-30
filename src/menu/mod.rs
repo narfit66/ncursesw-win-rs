@@ -22,12 +22,14 @@
 
 #![allow(clippy::module_inception)]
 
+mod activemenu;
 mod funcs;
 mod menu;
 mod menuitem;
 mod menusize;
 mod menuspacing;
 
+pub use activemenu::*;
 pub use funcs::*;
 pub use menu::*;
 pub use menuitem::*;

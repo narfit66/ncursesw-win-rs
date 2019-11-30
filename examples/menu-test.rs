@@ -28,10 +28,15 @@ use ncurseswwin::{*, normal::*, menu::*};
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
-const CHOICES: [&str; 11] = ["Choice 1", "Choice 2", "Choice 3",
-                             "Choice 4", "Choice 5", "Choice 6",
-                             "Choice 7", "Choice 8", "Choice 9",
-                             "Choice 10", "Exit"];
+const CHOICES: [&str; 11] = ["Choice-1", "Choice-2", "Choice-3",
+                             "Choice-4", "Choice-5", "Choice-6",
+                             "Choice-7", "Choice-8", "Choice-9",
+                             "Choice-10", "Exit"];
+
+const CHOICES_DESC: [&str; 11] = ["Choice 1 Description", "Choice 2 Description", "Choice 3 Description",
+                                  "Choice 4 Description", "Choice 5 Description", "Choice 6 Description",
+                                  "Choice 7 Description", "Choice 8 Description", "Choice 9 Description",
+                                  "Choice 10 Description", "Exit Description"];
 
 fn main() {
     if let Err(source) = main_routine() { match source {
@@ -45,7 +50,7 @@ fn main_routine() -> result!(()) {
 
     // initialize ncurses in a safe way.
     ncursesw_entry(|window| {
-        menu_test(&window)
+        menu_test(window)
     })
 }
 
@@ -57,32 +62,34 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     stdscr.keypad(true)?;
 
     // Initialize all the colors.
-    let red = Color::Light(BaseColor::Red);
-    let cyan = Color::Light(BaseColor::Cyan);
-    let black = Color::Light(BaseColor::Black);
+    let red = Color::Dark(BaseColor::Red);
+    let cyan = Color::Dark(BaseColor::Cyan);
+    let black = Color::Dark(BaseColor::Black);
 
     let color_pairs: [ColorPair; 2] = [ColorPair::new(1, Colors::new(red, black))?,
                                        ColorPair::new(2, Colors::new(cyan, black))?];
 
-    let my_items: [&MenuItem; 11] = [&MenuItem::new(CHOICES[0], CHOICES[0])?,
-                                     &MenuItem::new(CHOICES[1], CHOICES[1])?,
-                                     &MenuItem::new(CHOICES[2], CHOICES[2])?,
-                                     &MenuItem::new(CHOICES[3], CHOICES[3])?,
-                                     &MenuItem::new(CHOICES[4], CHOICES[4])?,
-                                     &MenuItem::new(CHOICES[5], CHOICES[5])?,
-                                     &MenuItem::new(CHOICES[6], CHOICES[6])?,
-                                     &MenuItem::new(CHOICES[7], CHOICES[7])?,
-                                     &MenuItem::new(CHOICES[8], CHOICES[8])?,
-                                     &MenuItem::new(CHOICES[9], CHOICES[9])?,
-                                     &MenuItem::new(CHOICES[10], CHOICES[10])?];
+    let my_items: [&MenuItem; 11] = [&MenuItem::new(CHOICES[0],  CHOICES_DESC[0])?,
+                                     &MenuItem::new(CHOICES[1],  CHOICES_DESC[1])?,
+                                     &MenuItem::new(CHOICES[2],  CHOICES_DESC[2])?,
+                                     &MenuItem::new(CHOICES[3],  CHOICES_DESC[3])?,
+                                     &MenuItem::new(CHOICES[4],  CHOICES_DESC[4])?,
+                                     &MenuItem::new(CHOICES[5],  CHOICES_DESC[5])?,
+                                     &MenuItem::new(CHOICES[6],  CHOICES_DESC[6])?,
+                                     &MenuItem::new(CHOICES[7],  CHOICES_DESC[7])?,
+                                     &MenuItem::new(CHOICES[8],  CHOICES_DESC[8])?,
+                                     &MenuItem::new(CHOICES[9],  CHOICES_DESC[9])?,
+                                     &MenuItem::new(CHOICES[10], CHOICES_DESC[10])?];
 
     for i in 0..my_items.len() {
         eprintln!("my_items[{}]: {:?}", i, my_items[i]);
         assert!(my_items[i].item_name()? == CHOICES[i]);
-        assert!(my_items[i].item_description()? == CHOICES[i]);
+        assert!(my_items[i].item_description()? == CHOICES_DESC[i]);
     }
 
+    eprintln!("{:?} == {:?}", my_items[0], my_items[0]);
     assert!(my_items[0] == my_items[0]);
+    eprintln!("{:?} != {:?}", my_items[0], my_items[1]);
     assert!(my_items[0] != my_items[1]);
 
     let my_menu = &Menu::new(my_items.to_vec())?;
@@ -96,6 +103,9 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     eprintln!("my_menu.current_item().item_name(): '{}'", current_item.item_name()?);
     eprintln!("my_menu.current_item().item_description(): '{}'", current_item.item_description()?);
 
+    eprintln!("{:?} == {:?}", my_items[0], current_item);
+    assert!(my_items[0] == current_item);
+
     eprintln!("before my_menu.set_current_item({:?})", my_items[0]);
     my_menu.set_current_item(my_items[0])?;
 
@@ -105,17 +115,17 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     for (i, test_item) in test_items.iter().enumerate() {
         eprintln!("test_item: {:?}", test_item);
         assert!(test_item.item_name()? == CHOICES[i]);
-        assert!(test_item.item_description()? == CHOICES[i]);
+        assert!(test_item.item_description()? == CHOICES_DESC[i]);
     }
 
     let my_menu_win = &Window::new(Size { lines: 10, columns: 40 }, Origin { y: 4, x: 4 })?;
     my_menu_win.keypad(true)?;
 
     eprintln!("before my_menu.set_menu_win()");
-    my_menu.set_menu_win(my_menu_win)?;
+    my_menu.set_menu_win(Some(my_menu_win))?;
     let my_menu_win_derwin = &my_menu_win.derwin(Size { lines: 6, columns: 38 }, Origin { y: 3, x: 1 })?;
     eprintln!("before my_menu.set_menu_sub()");
-    my_menu.set_menu_sub(my_menu_win_derwin)?;
+    my_menu.set_menu_sub(Some(my_menu_win_derwin))?;
 
     eprintln!("(1) my_menu.menu_mark(): '{}'", my_menu.menu_mark()?);
 
@@ -141,11 +151,7 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     print_in_middle(my_menu_win, Origin { y: 1, x: 0 }, 40, "My Menu", color_pairs[0])?;
 
     eprintln!("before my_menu.post_menu()");
-    //my_menu.post_menu()?;
-    /* */
-    let r = my_menu.post_menu();
-    eprintln!("r = {:?}", r);
-    /* */
+    let active_menu = &my_menu.post_menu()?;
 
     eprintln!("before my_menu_win.refresh()");
     my_menu_win.refresh()?;
@@ -163,16 +169,13 @@ fn menu_test(stdscr: &Window) -> result!(()) {
                 if key == KeyBinding::FunctionKey(1) {
                     break;
                 } else if key == KeyBinding::DownArrow {
-                    my_menu.menu_driver(MenuRequest::DownItem)?;
+                    active_menu.menu_driver(MenuRequest::DownItem)?;
                 } else if key == KeyBinding::UpArrow {
-                    my_menu.menu_driver(MenuRequest::UpItem)?;
+                    active_menu.menu_driver(MenuRequest::UpItem)?;
                 }
             }
         }
     }
-
-    eprintln!("before my_menu.unpost_menu()");
-    my_menu.unpost_menu()?;
 
     Ok(())
 }

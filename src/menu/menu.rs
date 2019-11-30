@@ -25,7 +25,7 @@ use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 use ncursesw::{menu, menu::MENU, normal};
 use crate::{
     Window, NCurseswWinError,
-    menu::MenuSize, menu::MenuItem, menu::MenuSpacing,
+    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::ActiveMenu,
     gen::HasHandle
 };
 
@@ -47,7 +47,7 @@ impl Menu {
         Self { handle, free_on_drop }
     }
 
-    fn _handle(&self) -> MENU {
+    pub(in crate::menu) fn _handle(&self) -> MENU {
         self.handle
     }
 }
@@ -82,10 +82,6 @@ impl Menu {
 
     pub fn menu_back(&self) -> normal::Attributes {
         menu::menu_back(self.handle)
-    }
-
-    pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
-        Ok(menu::menu_driver(self.handle, request)?)
     }
 
     pub fn menu_fore(&self) -> normal::Attributes {
@@ -157,8 +153,8 @@ impl Menu {
         Ok(menu::pos_menu_cursor(self.handle)?)
     }
 
-    pub fn post_menu(&self) -> result!(()) {
-        Ok(menu::post_menu(self.handle)?)
+    pub fn post_menu(&self) -> result!(ActiveMenu) {
+        Ok(ActiveMenu::new(self)?)
     }
 
     pub fn scale_menu(&self) -> result!(MenuSize) {
@@ -254,10 +250,6 @@ impl Menu {
 
     pub fn top_row(&self) -> result!(usize) {
         Ok(usize::try_from(menu::top_row(self.handle))?)
-    }
-
-    pub fn unpost_menu(&self) -> result!(()) {
-        Ok(menu::unpost_menu(self.handle)?)
     }
 }
 
