@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::too_many_arguments)]
+
 use ncursesw::WideChar;
 
 /// Custom box drawing graphics.

@@ -34,7 +34,7 @@ impl<'a> PostedMenu<'a> {
     pub(in crate::menu) fn new(menu: &'a Menu) -> result!(Self) {
         menu::post_menu(menu._handle())?;
 
-        Ok(Self { menu: menu })
+        Ok(Self { menu })
     }
 
     pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
