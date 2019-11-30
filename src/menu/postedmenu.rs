@@ -57,14 +57,6 @@ impl<'a> Drop for PostedMenu<'a> {
 unsafe impl<'a> Send for PostedMenu<'a> { } // too make thread safe
 unsafe impl<'a> Sync for PostedMenu<'a> { } // too make thread safe
 
-impl<'a> PartialEq for PostedMenu<'a> {
-    fn eq(&self, rhs: &Self) -> bool {
-        self.menu == rhs.menu
-    }
-}
-
-impl<'a> Eq for PostedMenu<'a> { }
-
 impl<'a> fmt::Debug for PostedMenu<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "PostedMenu {{ menu: {:?} }}", self.menu)
