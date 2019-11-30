@@ -223,8 +223,11 @@ impl Menu {
         Ok(menu::set_menu_spacing(self.handle, menu_spacing.try_into()?)?)
     }
 
-    pub fn set_menu_sub(&self, win: &Window) -> result!(()) {
-        Ok(menu::set_menu_sub(self.handle, Some(win._handle()))?)
+    pub fn set_menu_sub(&self, win: Option<&Window>) -> result!(()) {
+        Ok(menu::set_menu_sub(Some(self.handle), match win {
+            Some(window) => Some(window._handle()),
+            None         => None
+        })?)
     }
 
     pub fn set_menu_term(&self, hook: Menu_Hook) -> result!(()) {
@@ -238,8 +241,11 @@ impl Menu {
         })
     }
 
-    pub fn set_menu_win(&self, win: &Window) -> result!(()) {
-        Ok(menu::set_menu_win(self.handle, Some(win._handle()))?)
+    pub fn set_menu_win(&self, win: Option<&Window>) -> result!(()) {
+        Ok(menu::set_menu_win(Some(self.handle), match win {
+            Some(window) => Some(window._handle()),
+            None         => None
+        })?)
     }
 
     pub fn set_top_row(&self, row: usize) -> result!(()) {
