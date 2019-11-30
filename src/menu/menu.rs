@@ -154,7 +154,7 @@ impl Menu {
     }
 
     pub fn post_menu(&self) -> result!(PostedMenu) {
-        Ok(PostedMenu::new(self)?)
+        PostedMenu::new(self)
     }
 
     pub fn scale_menu(&self) -> result!(MenuSize) {

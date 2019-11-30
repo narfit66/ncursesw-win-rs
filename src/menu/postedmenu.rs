@@ -22,34 +22,53 @@
 
 use std::fmt;
 
-use ncursesw::menu;
+use ncursesw::menu::{post_menu, unpost_menu, menu_driver};
 use crate::{NCurseswWinError, menu::{Menu, MenuRequest}};
 
-/// Menu Loop.
+/// A Posted (Visible) Menu.
 pub struct PostedMenu<'a> {
-    menu: &'a Menu
+    menu:   &'a Menu,
+    posted: bool
 }
 
 impl<'a> PostedMenu<'a> {
     pub(in crate::menu) fn new(menu: &'a Menu) -> result!(Self) {
-        menu::post_menu(menu._handle())?;
+        post_menu(menu._handle())?;
 
-        Ok(Self { menu })
+        Ok(Self { menu, posted: true })
     }
 
     pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
-        Ok(menu::menu_driver(self.menu._handle(), request)?)
+        Ok(menu_driver(self.menu._handle(), request)?)
     }
 
     pub fn menu(&self) -> Menu {
         Menu::_from(self.menu._handle(), false)
     }
+
+    pub fn repost(&mut self) -> result!(()) {
+        post_menu(self.menu._handle())?;
+
+        self.posted = true;
+
+        Ok(())
+    }
+
+    pub fn unpost(&mut self) -> result!(()) {
+        unpost_menu(self.menu._handle())?;
+
+        self.posted = false;
+
+        Ok(())
+    }
 }
 
 impl<'a> Drop for PostedMenu<'a> {
     fn drop(&mut self) {
-        if let Err(source) = menu::unpost_menu(self.menu._handle()) {
-            panic!("{} @ ({:?})", source, self.menu)
+        if self.posted {
+            if let Err(source) = unpost_menu(self.menu._handle()) {
+                panic!("{} @ ({:?})", source, self.menu)
+            }
         }
     }
 }
