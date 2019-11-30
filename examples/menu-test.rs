@@ -151,7 +151,7 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     print_in_middle(my_menu_win, Origin { y: 1, x: 0 }, 40, "My Menu", color_pairs[0])?;
 
     eprintln!("before my_menu.post_menu()");
-    let active_menu = &my_menu.post_menu()?;
+    let posted_menu = &my_menu.post_menu()?;
 
     eprintln!("before my_menu_win.refresh()");
     my_menu_win.refresh()?;
@@ -169,9 +169,9 @@ fn menu_test(stdscr: &Window) -> result!(()) {
                 if key == KeyBinding::FunctionKey(1) {
                     break;
                 } else if key == KeyBinding::DownArrow {
-                    active_menu.menu_driver(MenuRequest::DownItem)?;
+                    posted_menu.menu_driver(MenuRequest::DownItem)?;
                 } else if key == KeyBinding::UpArrow {
-                    active_menu.menu_driver(MenuRequest::UpItem)?;
+                    posted_menu.menu_driver(MenuRequest::UpItem)?;
                 }
             }
         }

@@ -25,7 +25,7 @@ use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 use ncursesw::{menu, menu::MENU, normal};
 use crate::{
     Window, NCurseswWinError,
-    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::ActiveMenu,
+    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::PostedMenu,
     gen::HasHandle
 };
 
@@ -41,7 +41,7 @@ pub struct Menu {
 
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
-    fn _from(handle: MENU, free_on_drop: bool) -> Self {
+    pub(in crate::menu) fn _from(handle: MENU, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
@@ -153,8 +153,8 @@ impl Menu {
         Ok(menu::pos_menu_cursor(self.handle)?)
     }
 
-    pub fn post_menu(&self) -> result!(ActiveMenu) {
-        Ok(ActiveMenu::new(self)?)
+    pub fn post_menu(&self) -> result!(PostedMenu) {
+        Ok(PostedMenu::new(self)?)
     }
 
     pub fn scale_menu(&self) -> result!(MenuSize) {

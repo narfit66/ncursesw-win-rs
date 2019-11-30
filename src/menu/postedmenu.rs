@@ -1,5 +1,5 @@
 /*
-    src/menu/activemenu.rs
+    src/menu/postedmenu.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -26,11 +26,11 @@ use ncursesw::menu;
 use crate::{NCurseswWinError, menu::{Menu, MenuRequest}};
 
 /// Menu Loop.
-pub struct ActiveMenu<'a> {
+pub struct PostedMenu<'a> {
     menu: &'a Menu
 }
 
-impl<'a> ActiveMenu<'a> {
+impl<'a> PostedMenu<'a> {
     pub(in crate::menu) fn new(menu: &'a Menu) -> result!(Self) {
         menu::post_menu(menu._handle())?;
 
@@ -40,9 +40,13 @@ impl<'a> ActiveMenu<'a> {
     pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
         Ok(menu::menu_driver(self.menu._handle(), request)?)
     }
+
+    pub fn menu(&self) -> Menu {
+        Menu::_from(self.menu._handle(), false)
+    }
 }
 
-impl<'a> Drop for ActiveMenu<'a> {
+impl<'a> Drop for PostedMenu<'a> {
     fn drop(&mut self) {
         if let Err(source) = menu::unpost_menu(self.menu._handle()) {
             panic!("{} @ ({:?})", source, self.menu)
@@ -50,19 +54,19 @@ impl<'a> Drop for ActiveMenu<'a> {
     }
 }
 
-unsafe impl<'a> Send for ActiveMenu<'a> { } // too make thread safe
-unsafe impl<'a> Sync for ActiveMenu<'a> { } // too make thread safe
+unsafe impl<'a> Send for PostedMenu<'a> { } // too make thread safe
+unsafe impl<'a> Sync for PostedMenu<'a> { } // too make thread safe
 
-impl<'a> PartialEq for ActiveMenu<'a> {
+impl<'a> PartialEq for PostedMenu<'a> {
     fn eq(&self, rhs: &Self) -> bool {
         self.menu == rhs.menu
     }
 }
 
-impl<'a> Eq for ActiveMenu<'a> { }
+impl<'a> Eq for PostedMenu<'a> { }
 
-impl<'a> fmt::Debug for ActiveMenu<'a> {
+impl<'a> fmt::Debug for PostedMenu<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ActiveMenu {{ menu: {:?} }}", self.menu)
+        write!(f, "PostedMenu {{ menu: {:?} }}", self.menu)
     }
 }
