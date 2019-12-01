@@ -38,14 +38,17 @@ impl<'a> PostedMenu<'a> {
         Ok(Self { menu, posted: true })
     }
 
+    /// Command processing of `Menu` events.
     pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
         Ok(menu_driver(self.menu._handle(), request)?)
     }
 
+    /// The `Menu` that has this instance represents.
     pub fn menu(&self) -> Menu {
         Menu::_from(self.menu._handle(), false)
     }
 
+    /// Repost (make visible) this instance, will error if the instance is already posted.
     pub fn repost(&mut self) -> result!(()) {
         post_menu(self.menu._handle())?;
 
@@ -54,6 +57,7 @@ impl<'a> PostedMenu<'a> {
         Ok(())
     }
 
+    /// Unpost (make invisible) this instance, will error if the instance is not posted.
     pub fn unpost(&mut self) -> result!(()) {
         unpost_menu(self.menu._handle())?;
 

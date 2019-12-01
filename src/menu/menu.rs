@@ -24,9 +24,8 @@ use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 
 use ncursesw::{menu, menu::MENU, normal};
 use crate::{
-    Window, NCurseswWinError,
-    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::PostedMenu,
-    gen::HasHandle
+    Window, HasHandle, NCurseswWinError,
+    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::PostedMenu
 };
 
 pub use ncursesw::menu::{
