@@ -69,17 +69,31 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     let color_pairs: [ColorPair; 2] = [ColorPair::new(1, Colors::new(red, black))?,
                                        ColorPair::new(2, Colors::new(cyan, black))?];
 
-    let my_items: [&MenuItem; 11] = [&MenuItem::new(CHOICES[0],  CHOICES_DESC[0])?,
-                                     &MenuItem::new(CHOICES[1],  CHOICES_DESC[1])?,
-                                     &MenuItem::new(CHOICES[2],  CHOICES_DESC[2])?,
-                                     &MenuItem::new(CHOICES[3],  CHOICES_DESC[3])?,
-                                     &MenuItem::new(CHOICES[4],  CHOICES_DESC[4])?,
-                                     &MenuItem::new(CHOICES[5],  CHOICES_DESC[5])?,
-                                     &MenuItem::new(CHOICES[6],  CHOICES_DESC[6])?,
-                                     &MenuItem::new(CHOICES[7],  CHOICES_DESC[7])?,
-                                     &MenuItem::new(CHOICES[8],  CHOICES_DESC[8])?,
-                                     &MenuItem::new(CHOICES[9],  CHOICES_DESC[9])?,
-                                     &MenuItem::new(CHOICES[10], CHOICES_DESC[10])?];
+    let my_item1 = &MenuItem::new(CHOICES[0], CHOICES_DESC[0])?;
+    let my_item2 = &MenuItem::new(CHOICES[1], CHOICES_DESC[1])?;
+    let my_item3 = &MenuItem::new(CHOICES[2], CHOICES_DESC[2])?;
+    let my_item4 = &MenuItem::new(CHOICES[3], CHOICES_DESC[3])?;
+    let my_item5 = &MenuItem::new(CHOICES[4], CHOICES_DESC[4])?;
+    let my_item6 = &MenuItem::new(CHOICES[5], CHOICES_DESC[5])?;
+    let my_item7 = &MenuItem::new(CHOICES[6], CHOICES_DESC[6])?;
+    let my_item8 = &MenuItem::new(CHOICES[7], CHOICES_DESC[7])?;
+    let my_item9 = &MenuItem::new(CHOICES[8], CHOICES_DESC[8])?;
+    let my_item10 = &MenuItem::new(CHOICES[9], CHOICES_DESC[9])?;
+    let my_item11 = &MenuItem::new(CHOICES[10], CHOICES_DESC[10])?;
+
+    let mut my_items = vec!();
+
+    my_items.push(my_item1);
+    my_items.push(my_item2);
+    my_items.push(my_item3);
+    my_items.push(my_item4);
+    my_items.push(my_item5);
+    my_items.push(my_item6);
+    my_items.push(my_item7);
+    my_items.push(my_item8);
+    my_items.push(my_item9);
+    my_items.push(my_item10);
+    my_items.push(my_item11);
 
     for i in 0..my_items.len() {
         eprintln!("my_items[{}]: {:?}", i, my_items[i]);
@@ -92,7 +106,7 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     eprintln!("{:?} != {:?}", my_items[0], my_items[1]);
     assert!(my_items[0] != my_items[1]);
 
-    let my_menu = &Menu::new(my_items.to_vec())?;
+    let my_menu = &Menu::new(&my_items)?;
     eprintln!("my_menu: {:?}", my_menu);
 
     assert!(my_menu.item_count()? == my_items.len());

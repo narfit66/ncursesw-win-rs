@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use ncursesw::menu::{post_menu, unpost_menu, menu_driver};
+use ncursesw::menu;
 use crate::{NCurseswWinError, menu::{Menu, MenuRequest}};
 
 /// A Posted (Visible) Menu.
@@ -33,14 +33,14 @@ pub struct PostedMenu<'a> {
 
 impl<'a> PostedMenu<'a> {
     pub(in crate::menu) fn new(menu: &'a Menu) -> result!(Self) {
-        post_menu(menu._handle())?;
+        menu::post_menu(menu._handle())?;
 
         Ok(Self { menu, posted: true })
     }
 
     /// Command processing of `Menu` events.
     pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
-        Ok(menu_driver(self.menu._handle(), request)?)
+        Ok(menu::menu_driver(self.menu._handle(), request)?)
     }
 
     /// The `Menu` that has this instance represents.
@@ -50,7 +50,7 @@ impl<'a> PostedMenu<'a> {
 
     /// Repost (make visible) this instance, will error if the instance is already posted.
     pub fn repost(&mut self) -> result!(()) {
-        post_menu(self.menu._handle())?;
+        menu::post_menu(self.menu._handle())?;
 
         self.posted = true;
 
@@ -59,7 +59,7 @@ impl<'a> PostedMenu<'a> {
 
     /// Unpost (make invisible) this instance, will error if the instance is not posted.
     pub fn unpost(&mut self) -> result!(()) {
-        unpost_menu(self.menu._handle())?;
+        menu::unpost_menu(self.menu._handle())?;
 
         self.posted = false;
 
@@ -70,7 +70,7 @@ impl<'a> PostedMenu<'a> {
 impl<'a> Drop for PostedMenu<'a> {
     fn drop(&mut self) {
         if self.posted {
-            if let Err(source) = unpost_menu(self.menu._handle()) {
+            if let Err(source) = menu::unpost_menu(self.menu._handle()) {
                 panic!("{} @ ({:?})", source, self.menu)
             }
         }
