@@ -22,7 +22,7 @@
 
 use std::{ptr, fmt, convert::{TryFrom, TryInto}};
 
-use ncursesw::{normal, menu, menu::MENU/*, menu::ITEM*/};
+use ncursesw::{normal, menu, menu::MENU, menu::ITEM};
 use crate::{
     Window, HasHandle, NCurseswWinError,
     menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::PostedMenu
@@ -52,35 +52,24 @@ impl Menu {
 }
 
 impl Menu {
-    pub fn new(items: &Vec<&MenuItem>) -> result!(Self) {
+    pub fn new(items: &[&MenuItem]) -> result!(Self) {
+        //let mut item_handles: Vec<ITEM> = items.iter().map(|item| item._handle()).collect();
+        let mut item_handles = items.iter().map(|item| item._handle()).collect();
         /*
-        let item_handles = &items.iter().map(|item| item._handle()).collect();
-
-        Ok(Self::_from(menu::new_menu(item_handles)?, true))
-        */
         let mut item_handles = vec!();
 
-        for item in items {
-            item_handles.push(item._handle())
+        for handle in items.iter().map(|item| item._handle()) {
+            item_handles.push(handle);
         }
-
-        Ok(Self::_from(menu::new_menu(&item_handles)?, true))
-        /*
-        let item_handles: &mut Vec<ITEM> = &mut items.iter().map(|item| item._handle()).collect();
-
-        item_handles.push(ptr::null_mut());
+        */
 
         eprintln!("Menu::new() item_handles: {:?}", item_handles);
 
-        match unsafe { ncursesw::shims::nmenu::new_menu(item_handles.as_mut_ptr()) } {
-            Some(menu) => Ok(Self::_from(menu, true)),
-            None       => panic!("Menu::new() failed!")
-        }
-        */
+        Ok(Self::_from(menu::new_menu(&mut item_handles)?, true))
     }
 
     #[deprecated(since = "0.4.0", note = "Use Menu::new() instead")]
-    pub fn new_menu(items: &Vec<&MenuItem>) -> result!(Self) {
+    pub fn new_menu(items: &[&MenuItem]) -> result!(Self) {
         Self::new(items)
     }
 
@@ -213,10 +202,10 @@ impl Menu {
         Ok(menu::set_menu_init(self.handle, hook)?)
     }
 
-    pub fn set_menu_items(&self, items: Vec<&MenuItem>) -> result!(()) {
-        let item_handles = items.iter().map(|item| item._handle()).collect();
+    pub fn set_menu_items(&self, items: &[&MenuItem]) -> result!(()) {
+        let mut item_handles: Vec<ITEM> = items.iter().map(|item| item._handle()).collect();
 
-        Ok(menu::set_menu_items(self.handle, &item_handles)?)
+        Ok(menu::set_menu_items(self.handle, &mut item_handles)?)
     }
 
     pub fn set_menu_mark(&self, mark: &str) -> result!(()) {
