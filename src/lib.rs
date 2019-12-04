@@ -27,6 +27,7 @@ extern crate custom_error;
 extern crate lazy_static;
 extern crate strum;
 extern crate strum_macros;
+extern crate errno;
 
 mod macros;
 

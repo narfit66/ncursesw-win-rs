@@ -22,6 +22,7 @@ custom_error = "1.7"
 lazy_static = "1.4"
 strum = "0.16"
 strum_macros = "0.16"
+errno = "*"
 
 [dev-dependencies]
 ascii = "1.0"

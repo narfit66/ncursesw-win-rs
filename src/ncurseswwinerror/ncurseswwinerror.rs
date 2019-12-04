@@ -44,7 +44,8 @@ pub NCurseswWinError
     NCurseswError { source: NCurseswError } = "{source}",
     PanelsError { source: NCurseswPanelsError } = "{source}",
     MouseError { source: NCurseswMouseError } = "{source}",
-    MenuError { source: NCurseswMenuError } = "{source}"
+    MenuError { source: NCurseswMenuError } = "{source}",
+    OutOfMemory { func: String } = "{func}() out of memory!!!"
 }
 
 impl PartialEq for NCurseswWinError {

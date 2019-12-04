@@ -39,7 +39,7 @@ use ncurseswwin::normal::*; // for 'ansi' color pairs and attributes...
 use ncurseswwin::extend::*; // or for 'extended' color pairs and attributes.
 ```
 
-To use menus (this is still under active development)
+To use menus
 ```
 use ncurseswwin::menu::*;
 ```
@@ -56,7 +56,7 @@ The NCurses ripoff and mouse features are encapsulated, please see example code 
 
 Examples are built by `cargo build --examples`. To run them, use `cargo run --example <EXAMPLE>`.
 
-Current examples are [Safe Initialisation/Calling Of NCurses](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ncursesw_entry-test.rs) (**ncursesw_entry-test**), [Ansi Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border-test.rs) (**border-test**), [Unicode Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border_set-test.rs) (**border_set-test**), [Unicode Box Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/box_drawing-test.rs) (**box_drawing-test**), [Mouse Events](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/mouse-test.rs) (**mouse-test**), [Ripoff Lines](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ripoff-test.rs) (**ripoff-test**) and [Non-Blocking Get](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/getch_nonblocking-test.rs) (**getch_nonblocking-test**).
+Current examples are [Safe Initialisation/Calling Of NCurses](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ncursesw_entry-test.rs) (**ncursesw_entry-test**), [Ansi Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border-test.rs) (**border-test**), [Unicode Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border_set-test.rs) (**border_set-test**), [Unicode Box Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/box_drawing-test.rs) (**box_drawing-test**), [Mouse Events](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/mouse-test.rs) (**mouse-test**), [Ripoff Lines](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ripoff-test.rs) (**ripoff-test**), [Non-Blocking Get](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/getch_nonblocking-test.rs) (**getch_nonblocking-test**) and [Menu](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/menu-test.rs) (**menu-test**).
 
 ## Documentation
 

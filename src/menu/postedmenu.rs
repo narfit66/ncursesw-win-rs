@@ -43,11 +43,6 @@ impl<'a> PostedMenu<'a> {
         Ok(menu::menu_driver(self.menu._handle(), request)?)
     }
 
-    /// The `Menu` that has this instance represents.
-    pub fn menu(&self) -> Menu {
-        Menu::_from(self.menu._handle(), false)
-    }
-
     /// Repost (make visible) this instance, will error if the instance is already posted.
     pub fn repost(&mut self) -> result!(()) {
         menu::post_menu(self.menu._handle())?;

@@ -40,8 +40,8 @@ const CHOICES_DESC: [&str; 11] = ["Choice 1 Description", "Choice 2 Description"
 
 fn main() {
     if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-        _                                   => eprintln!("error: {}", source)
+        NCurseswWinError::Panic { message } => println!("panic: {}", message),
+        _                                   => println!("error: {}", source)
     }}
 }
 
@@ -96,26 +96,30 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     my_items.push(&my_item10);
 
     for i in 0..my_items.len() {
-        eprintln!("my_items[{}]: {:?}", i, my_items[i]);
+        //eprintln!("my_items[{}]: {:?}", i, my_items[i]);
         assert!(my_items[i].item_name()? == CHOICES[i]);
         assert!(my_items[i].item_description()? == CHOICES_DESC[i]);
     }
 
-    eprintln!("{:?} == {:?}", my_items[0], my_items[0]);
+    //eprintln!("{:?} == {:?}", my_items[0], my_items[0]);
     assert!(my_items[0] == my_items[0]);
-    eprintln!("{:?} != {:?}", my_items[0], my_items[1]);
+    //eprintln!("{:?} != {:?}", my_items[0], my_items[1]);
     assert!(my_items[0] != my_items[1]);
 
+    eprintln!("before Menu::new()");
     let my_menu = &Menu::new(&mut my_items)?;
     eprintln!("my_menu: {:?}", my_menu);
 
+    /*
     assert!(my_menu.item_count()? == my_items.len());
 
     let current_item = &my_menu.current_item()?;
     eprintln!("current_item: {:?}", current_item);
 
-    eprintln!("my_menu.current_item().item_name(): '{}'", current_item.item_name()?);
-    eprintln!("my_menu.current_item().item_description(): '{}'", current_item.item_description()?);
+    eprintln!("current_item.item_name(): '{}'", current_item.item_name()?);
+    eprintln!("current_item.item_description(): '{}'", current_item.item_description()?);
+    eprintln!("my_menu.current_item().item_name(): '{}'", &my_menu.current_item()?.item_name()?);
+    eprintln!("my_menu.current_item().item_description(): '{}'", &my_menu.current_item()?.item_description()?);
 
     eprintln!("{:?} == {:?}", my_items[0], current_item);
     assert!(my_items[0] == current_item);
@@ -131,21 +135,16 @@ fn menu_test(stdscr: &Window) -> result!(()) {
         assert!(test_item.item_name()? == CHOICES[i]);
         assert!(test_item.item_description()? == CHOICES_DESC[i]);
     }
+    */
 
     let my_menu_win = &Window::new(Size { lines: 10, columns: 40 }, Origin { y: 4, x: 4 })?;
     my_menu_win.keypad(true)?;
 
-    eprintln!("before my_menu.set_menu_win()");
     my_menu.set_menu_win(Some(my_menu_win))?;
     let my_menu_win_derwin = &my_menu_win.derwin(Size { lines: 6, columns: 38 }, Origin { y: 3, x: 1 })?;
-    eprintln!("before my_menu.set_menu_sub()");
     my_menu.set_menu_sub(Some(my_menu_win_derwin))?;
 
-    eprintln!("(1) my_menu.menu_mark(): '{}'", my_menu.menu_mark()?);
-
     my_menu.set_menu_mark(" * ")?;
-
-    eprintln!("(2) my_menu.menu_mark(): '{}'", my_menu.menu_mark()?);
 
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);

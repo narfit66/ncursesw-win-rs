@@ -12,3 +12,4 @@ install:
 script:
     - cargo build --verbose
     - cargo build --examples --verbose
+    - cargo run --example ncursesw-version
