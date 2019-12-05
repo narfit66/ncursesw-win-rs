@@ -26,7 +26,7 @@ use ncursesw::{ChtypeChar, ComplexChar};
 use crate::{Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a pad.
-pub trait IsPad: HasHandle + Drop + Sync + Send {
+pub trait IsPad: HasHandle {
     /// Create a new instance of a Window that will act as a pad.
     fn new(size: Size) -> result!(Pad) {
         Ok(Pad::_from(ncursesw::newpad(size.try_into()?)?, true))

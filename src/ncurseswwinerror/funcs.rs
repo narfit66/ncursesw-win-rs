@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use crate::ncurseswwinerror::ncurseswwinerror::NCurseswWinError;
+use crate::ncurseswwinerror::NCurseswWinError;
 use ncursesw::{NCurseswError, shims::constants::ERR};
 
 pub(in crate) fn timeout_error(func: &str) -> NCurseswWinError {

@@ -36,15 +36,15 @@ pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
     Ok(ncursesw::menu::set_menu_format(None, menu_size.try_into()?)?)
 }
 
-pub fn set_menu_sub(win: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_sub(None, match win {
+pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
+    Ok(ncursesw::menu::set_menu_sub(None, match window {
         Some(window) => Some(window._handle()),
         None         => None
     })?)
 }
 
-pub fn set_menu_win(win: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_win(None, match win {
+pub fn set_menu_win(window: Option<&Window>) -> result!(()) {
+    Ok(ncursesw::menu::set_menu_win(None, match window {
         Some(window) => Some(window._handle()),
         None         => None
     })?)

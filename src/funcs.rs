@@ -29,17 +29,43 @@ use ncursesw::{
     CursorType, LcCategory
 };
 use crate::{
-    InputMode, Origin, Size, NCurseswWinError, ncurses::{INITSCR_CALLED, COLOR_STARTED}
+    InputMode, Origin, Size, Window, NCurseswWinError,
+    gen::HasHandle,
+    ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
 
 /// The number of lines the terminal supports.
 pub fn LINES() -> result!(u16) {
-    Ok(u16::try_from(ncursesw::LINES())?)
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        Ok(u16::try_from(ncursesw::LINES())?)
+    }
 }
 
 /// The number of columns the terminal supports.
 pub fn COLS() -> result!(u16) {
-    Ok(u16::try_from(ncursesw::COLS())?)
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        Ok(u16::try_from(ncursesw::COLS())?)
+    }
+}
+
+pub fn curscr() -> result!(Window) {
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        Ok(Window::_from(ncursesw::curscr(), false))
+    }
+}
+
+pub fn stdscr() -> result!(Window) {
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        Ok(Window::_from(ncursesw::stdscr(), false))
+    }
 }
 
 /// Set the locale to be used, required if using unicode representation.

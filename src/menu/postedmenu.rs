@@ -23,7 +23,7 @@
 use std::fmt;
 
 use ncursesw::menu;
-use crate::{NCurseswWinError, menu::{Menu, MenuRequest}};
+use crate::{NCurseswWinError, gen::NCurseswWindow, menu::{Menu, MenuRequest}};
 
 /// A Posted (Visible) Menu.
 pub struct PostedMenu<'a> {
@@ -32,8 +32,12 @@ pub struct PostedMenu<'a> {
 }
 
 impl<'a> PostedMenu<'a> {
-    pub(in crate::menu) fn new(menu: &'a Menu) -> result!(Self) {
+    pub(in crate::menu) fn new(menu: &'a Menu, refresh: bool) -> result!(Self) {
         menu::post_menu(menu._handle())?;
+
+        if refresh {
+            menu.menu_win()?.refresh()?;
+        }
 
         Ok(Self { menu, posted: true })
     }

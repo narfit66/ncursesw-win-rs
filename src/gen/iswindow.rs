@@ -26,7 +26,7 @@ use ncursesw::{ChtypeChar, ComplexChar};
 use crate::{Window, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a window.
-pub trait IsWindow: HasHandle + Drop {
+pub trait IsWindow: HasHandle {
     fn dupwin(&self) -> result!(Window) {
         Ok(Window::_from(ncursesw::dupwin(self._handle())?, true))
     }

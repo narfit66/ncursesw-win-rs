@@ -77,7 +77,8 @@ pub use ncursesw::{
 pub use ncursesw::{
     AttributesColorPairSet, BaseColor, Changed, CharacterResult,
     CursorType, Justification, KeyBinding, LcCategory, Legacy,
-    NCursesColorType, NCurseswError, Orientation
+    NCursesColorType, NCurseswError, panels::NCurseswPanelsError,
+    mouse::NCurseswMouseError, menu::NCurseswMenuError, Orientation
 };
 pub use ncursesw::{
     AttributesColorPairType, AttributesGeneric, AttributesType,

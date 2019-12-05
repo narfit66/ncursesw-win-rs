@@ -22,7 +22,7 @@
 
 use ncursesw::WINDOW;
 
-pub trait HasHandle {
+pub trait HasHandle: Drop + Sync + Send {
     fn _from(handle: WINDOW, free_on_drop: bool) -> Self;
     fn _handle(&self) -> WINDOW;
 }
