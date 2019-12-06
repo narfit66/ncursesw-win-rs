@@ -2,10 +2,10 @@
 
 All breaking changes are marked with [BC] and potentially require API consumer changes after updating to the respective version.
 
-## [0.4.0] - ????-??-??
+## [0.4.0] - ????-??-?? [BC]
 - Coordinate system used within the crate has been changed from using axis basic types of `i32` to `u16`. [BC]
 - Now links correctly to NCurses `panels` and `menu` libraries.
-- NCurses menu module implemented in `ncurseswwin::menu` (still in active development, non-functional at the moment!).
+- NCurses menu module implemented as `ncurseswwin::menu`.
 
 ## [0.3.1] - 2019-11-07
 - NCurses `mouse` functionality added.
@@ -20,9 +20,6 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - ...
 
 ## [0.2.0] - 2019-10-15 [BC]
-- ...
-
-## [0.1.6] - 2019-10-15
 - ...
 
 ## [0.1.5] - 2019-10-14

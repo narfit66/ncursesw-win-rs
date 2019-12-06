@@ -20,18 +20,13 @@
     IN THE SOFTWARE.
 */
 
-// based on example 17.5 at <http://www.tldp.org/HOWTO/NCURSES-Programming-HOWTO/menus.html>
-
 extern crate ncurseswwin;
 
-use ncurseswwin::{*, normal::*, menu::*};
+use ncurseswwin::{*, menu::*};
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
-const CHOICES: [&str; 11] = ["Choice 1", "Choice 2", "Choice 3",
-                             "Choice 4", "Choice 5", "Choice 6",
-                             "Choice 7", "Choice 8", "Choice 9",
-                             "Choice 10", "Exit"];
+const CHOICES: [&str; 5] = ["Choice 1", "Choice 2", "Choice 3", "Choice 4", "Exit"];
 
 fn main() {
     if let Err(source) = main_routine() { match source {
@@ -45,37 +40,24 @@ fn main_routine() -> result!(()) {
 
     // initialize ncurses in a safe way.
     ncursesw_entry(|window| {
-        menu_test(window)
+        set_input_mode(InputMode::Character)?;
+        set_echo(false)?;
+        cursor_set(CursorType::Invisible)?;
+
+        menu_test(&window)
     })
 }
 
 fn menu_test(stdscr: &Window) -> result!(()) {
-    // Initialize ncurses instance.
-    start_color()?;
-    set_input_mode(InputMode::Character)?;
-    set_echo(false)?;
     stdscr.keypad(true)?;
 
-    // Initialize all the colors.
-    let red = Color::Dark(BaseColor::Red);
-    let cyan = Color::Dark(BaseColor::Cyan);
-    let black = Color::Dark(BaseColor::Black);
+    let my_item0 = MenuItem::new(CHOICES[0], &format!("{} description", CHOICES[0]))?;
+    let my_item1 = MenuItem::new(CHOICES[1], &format!("{} description", CHOICES[1]))?;
+    let my_item2 = MenuItem::new(CHOICES[2], &format!("{} description", CHOICES[2]))?;
+    let my_item3 = MenuItem::new(CHOICES[3], &format!("{} description", CHOICES[3]))?;
+    let my_item4 = MenuItem::new(CHOICES[4], &format!("{} description", CHOICES[4]))?;
 
-    let color_pairs: [ColorPair; 2] = [ColorPair::new(1, Colors::new(red, black))?,
-                                       ColorPair::new(2, Colors::new(cyan, black))?];
-
-    let my_item0 = MenuItem::new(CHOICES[0], CHOICES[0])?;
-    let my_item1 = MenuItem::new(CHOICES[1], CHOICES[1])?;
-    let my_item2 = MenuItem::new(CHOICES[2], CHOICES[2])?;
-    let my_item3 = MenuItem::new(CHOICES[3], CHOICES[3])?;
-    let my_item4 = MenuItem::new(CHOICES[4], CHOICES[4])?;
-    let my_item5 = MenuItem::new(CHOICES[5], CHOICES[5])?;
-    let my_item6 = MenuItem::new(CHOICES[6], CHOICES[6])?;
-    let my_item7 = MenuItem::new(CHOICES[7], CHOICES[7])?;
-    let my_item8 = MenuItem::new(CHOICES[8], CHOICES[8])?;
-    let my_item9 = MenuItem::new(CHOICES[9], CHOICES[9])?;
-    let my_item10 = MenuItem::new(CHOICES[10], CHOICES[10])?;
-
+    // Create items.
     let mut my_items = vec!();
 
     my_items.push(&my_item0);
@@ -83,46 +65,40 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     my_items.push(&my_item2);
     my_items.push(&my_item3);
     my_items.push(&my_item4);
-    my_items.push(&my_item5);
-    my_items.push(&my_item6);
-    my_items.push(&my_item7);
-    my_items.push(&my_item8);
-    my_items.push(&my_item9);
-    my_items.push(&my_item10);
 
-    let my_menu = &Menu::new(&mut my_items)?;
+    // Crate menu.
+    let my_menu = &Menu::new(&my_items)?;
 
-    let my_menu_win = &Window::new(Size { lines: 10, columns: 40 }, Origin { y: 4, x: 4 })?;
+    let mut menu_opts = MenuOptions::default();
+    menu_opts.set_show_description(true);
+
+    my_menu.menu_opts_off(menu_opts)?;
+
+    let my_menu_win = &Window::new(Size { lines: 9, columns: 18 }, Origin { y: 4, x: 4 })?;
     my_menu_win.keypad(true)?;
 
+    // Set main window and sub window.
     my_menu.set_menu_win(Some(my_menu_win))?;
-    let my_menu_win_derwin = &my_menu_win.derwin(Size { lines: 6, columns: 38 }, Origin { y: 3, x: 1 })?;
-    my_menu.set_menu_sub(Some(my_menu_win_derwin))?;
-    my_menu.set_menu_format(MenuSize { rows: 5, columns: 1 })?;
+    let my_menu_win_der_win = &my_menu_win.derwin(Size { lines: 5, columns: 0 }, Origin { y: 2, x: 2 })?;
+    my_menu.set_menu_sub(Some(my_menu_win_der_win))?;
 
+    // Set menu mark to the string " * ".
     my_menu.set_menu_mark(" * ")?;
 
+    // Print a border around the main window.
     my_menu_win.r#box(ChtypeChar::from(0), ChtypeChar::from(0))?;
 
-    print_in_middle(my_menu_win, Origin { y: 1, x: 0 }, 40, "My Menu", color_pairs[0])?;
-    my_menu_win.mvaddch(Origin { y: 2, x: 0 }, chtype_box_graphic(BoxDrawingGraphic::LeftTee))?;
-    my_menu_win.mvhline(Origin { y: 2, x: 1 }, chtype_box_graphic(BoxDrawingGraphic::HorizontalLine), 38)?;
-    my_menu_win.mvaddch(Origin { y: 2, x: 39 }, chtype_box_graphic(BoxDrawingGraphic::RightTee))?;
-
-    let posted_menu = &my_menu.post_menu(true)?;
-    //my_menu_win.refresh()?;
-
-    stdscr.attron(Attributes::default() | color_pairs[1])?;
-    let mut origin = Origin { y: LINES()? - 2, x: 0 };
-    stdscr.mvaddstr(origin, "Use PageUp and PageDown to scoll down or up a page of items")?;
+    let mut origin = Origin { y: LINES()? - 3, x: 0 };
+    stdscr.mvaddstr(origin, "Press <Enter> to see the option selected")?;
     origin.y += 1;
-    stdscr.mvaddstr(origin, "Arrow Keys to navigate (F1 to Exit)")?;
-    stdscr.attroff(Attributes::default() | color_pairs[1])?;
-
+    stdscr.mvaddstr(origin, "F1 to exit")?;
     stdscr.refresh()?;
 
+    // Post the menu and refresh the menu's window.
+    let posted_menu = &my_menu.post_menu(true)?;
+
     loop {
-        match my_menu_win.getch() {
+        match stdscr.getch() {
             Err(source)     => return Err(source),
             Ok(char_result) => match char_result {
                 CharacterResult::Key(key) => {
@@ -140,22 +116,10 @@ fn menu_test(stdscr: &Window) -> result!(()) {
                                 return Err(source)
                             }
                         }
-                    } else if key == KeyBinding::NextPage {
-                        if let Err(source) = posted_menu.menu_driver(MenuRequest::ScrollDownPage) {
-                            if source != request_denied_error() {
-                                return Err(source)
-                            }
-                        }
-                    } else if key == KeyBinding::PreviousPage {
-                        if let Err(source) = posted_menu.menu_driver(MenuRequest::ScrollUpPage) {
-                            if source != request_denied_error() {
-                                return Err(source)
-                            }
-                        }
                     }
                 },
                 CharacterResult::Character(key) => {
-                    if key == 's' {
+                    if key == '\n' {
                         origin = Origin { y: 20, x: 0 };
 
                         stdscr.set_cursor(origin)?;
@@ -172,33 +136,6 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     }
 
     Ok(())
-}
-
-fn print_in_middle(
-    window:       &Window,
-    start_origin: Origin,
-    width:        u16,
-    string:       &str,
-    color_pair:   ColorPair
-) -> result!(()) {
-    let mut origin = window.cursor()?;
-    let mut width = width;
-
-    if start_origin.y != 0 {
-        origin.y = start_origin.y;
-    }
-    if start_origin.x != 0 {
-        origin.x = start_origin.x;
-    }
-    if width == 0 {
-        width = 80;
-    }
-    origin.x = start_origin.x + ((width / string.len() as u16) / 2);
-
-    window.attron(Attributes::default() | color_pair)?;
-    window.mvaddstr(origin, string)?;
-    window.attroff(Attributes::default() | color_pair)?;
-    window.refresh()
 }
 
 fn request_denied_error() -> NCurseswWinError {

@@ -82,10 +82,7 @@ impl MenuItem {
     }
 
     pub fn item_userptr<T>(&self) -> Option<Box<T>> {
-        match menu::item_userptr(self.handle) {
-            Some(ptr) => Some(unsafe { Box::from_raw(ptr as *mut T) }),
-            None      => None
-        }
+        menu::item_userptr(self.handle).as_mut().map(|ptr| unsafe { Box::from_raw(*ptr as *mut T) })
     }
 
     pub fn item_value(&self) -> bool {

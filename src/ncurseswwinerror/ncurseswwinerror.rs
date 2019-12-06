@@ -30,6 +30,7 @@ use crate::ripoff::MAX_LINES;
 
 custom_error::custom_error! {
 /// NCurseswWin Errors.
+#[derive(PartialEq, Eq)]
 pub NCurseswWinError
     InitscrAlreadyCalled = "ncurses has already been initialised",
     InitscrNotCalled = "ncurses has not been initialised",
@@ -47,12 +48,3 @@ pub NCurseswWinError
     MenuError { source: NCurseswMenuError } = "{source}",
     OutOfMemory { func: String } = "{func}() out of memory!!!"
 }
-
-impl PartialEq for NCurseswWinError {
-    fn eq(&self, rhs: &Self) -> bool {
-        // TODO: must be a better way of doing this!!!
-        format!("{}", self) == format!("{}", rhs)
-    }
-}
-
-impl Eq for NCurseswWinError { }

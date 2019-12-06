@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::forget_copy)]
+
 use std::{ptr, fmt, mem, convert::{TryFrom, TryInto}};
 
 use errno::errno;
@@ -36,17 +38,17 @@ pub use ncursesw::menu::{
 
 /// Menu.
 pub struct Menu {
-    handle:            MENU,      // pointer to ncurses menu item internal structure
-    menu_item_handles: *mut ITEM  // double-pointer to allocated memory that the ncurses menu module uses for menu items.
+    handle:       MENU,      // pointer to ncurses menu item internal structure
+    item_handles: *mut ITEM  // double-pointer to allocated memory that the ncurses menu module uses for menu items.
 }
 
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
-    fn _from(handle: MENU, menu_item_handles: *mut ITEM) -> Self {
+    fn _from(handle: MENU, item_handles: *mut ITEM) -> Self {
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
-        assert!(!menu_item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
+        assert!(!item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
 
-        Self { handle, menu_item_handles }
+        Self { handle, item_handles }
     }
 
     pub(in crate::menu) fn _handle(&self) -> MENU {
@@ -58,24 +60,24 @@ impl Menu {
     pub fn new(menu_items: &[&MenuItem]) -> result!(Self) {
         // allocate enougth memory to store all the menu item handles plus
         // a null and set all pointers initially to null.
-        let menu_item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
+        let item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
 
-        if menu_item_handles.is_null() {
+        if item_handles.is_null() {
             Err(NCurseswWinError::OutOfMemory { func: "Menu::new".to_string() })
         } else {
             // get all the menu item handles and write them to memory.
             for (offset, menu_item_handle) in menu_items.iter().map(|menu_item| menu_item._handle()).enumerate() {
-                unsafe { ptr::write(menu_item_handles.offset(offset as isize), menu_item_handle) };
+                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), menu_item_handle) };
             }
 
-            // don't unallocate menu_item_handles so it can be assigned to self.menu_item_handles
+            // don't unallocate item_handles so it can be assigned to self.item_handles
             // when we create Self.
-            mem::forget(menu_item_handles);
+            mem::forget(item_handles);
 
             // call the ncursesw shims new_menu() function with our allocated memory.
-            match unsafe { nmenu::new_menu(menu_item_handles as *mut ITEM) } {
-                Some(menu) => Ok(Self::_from(menu, menu_item_handles)),
-                None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("nmenu::new_menu", errno().into()) })
+            match unsafe { nmenu::new_menu(item_handles as *mut ITEM) } {
+                Some(menu) => Ok(Self::_from(menu, item_handles)),
+                None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new", errno().into()) })
             }
         }
     }
@@ -122,9 +124,9 @@ impl Menu {
     }
 
     pub fn menu_items(&self) -> result!(Vec<MenuItem>) {
-        let menu_item_handles = menu::menu_items(self.handle)?;
+        let item_handles = menu::menu_items(self.handle)?;
 
-        Ok(menu_item_handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect())
+        Ok(item_handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect())
     }
 
     pub fn menu_mark(&self) -> result!(String) {
@@ -164,10 +166,7 @@ impl Menu {
     }
 
     pub fn menu_userptr<T>(&self) -> Option<Box<T>> {
-        match menu::menu_userptr(self.handle) {
-            Some(ptr) => Some(unsafe { Box::from_raw(ptr as *mut T) }),
-            None      => None
-        }
+        menu::menu_userptr(self.handle).as_mut().map(|ptr| unsafe { Box::from_raw(*ptr as *mut T) })
     }
 
     pub fn menu_win(&self) -> result!(Window) {
@@ -220,27 +219,27 @@ impl Menu {
 
     pub fn set_menu_items(&mut self, menu_items: &[&MenuItem]) -> result!(()) {
         // unallocate the previous item_handles memory.
-        unsafe { libc::free(self.menu_item_handles as *mut libc::c_void) };
+        unsafe { libc::free(self.item_handles as *mut libc::c_void) };
 
         // allocate enougth memory to store all the menu item handles plus
         // a null and set all pointers initially to null.
-        let menu_item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
+        let item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
 
-        if menu_item_handles.is_null() {
+        if item_handles.is_null() {
             Err(NCurseswWinError::OutOfMemory { func: "Menu::set_menu_items".to_string() })
         } else {
             // get all the menu item handles and write them to memory.
             for (offset, menu_item_handle) in menu_items.iter().map(|menu_item| menu_item._handle()).enumerate() {
-                unsafe { ptr::write(menu_item_handles.offset(offset as isize), menu_item_handle) };
+                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), menu_item_handle) };
             }
 
-            // don't unallocate menu_item_handles so it can be assigned to self.menu_item_handles
-            mem::forget(menu_item_handles);
+            // don't unallocate item_handles so it can be assigned to self.item_handles
+            mem::forget(item_handles);
 
-            self.menu_item_handles = menu_item_handles;
+            self.item_handles = item_handles;
 
             // call the ncursesw shims set_menu_items() function with our allocated memory.
-            match unsafe { nmenu::set_menu_items(self.handle, menu_item_handles as *mut ITEM) } {
+            match unsafe { nmenu::set_menu_items(self.handle, item_handles as *mut ITEM) } {
                 E_OK => Ok(()),
                 rc   => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("nmenu::set_menu_items", rc) })
             }
@@ -308,8 +307,8 @@ impl Drop for Menu {
             panic!("{} @ ({:p})", source, self.handle)
         }
 
-        // unallocate the menu_item_handles memory.
-        unsafe { libc::free(self.menu_item_handles as *mut libc::c_void) };
+        // unallocate the item_handles memory.
+        unsafe { libc::free(self.item_handles as *mut libc::c_void) };
     }
 }
 
@@ -326,6 +325,6 @@ impl Eq for Menu { }
 
 impl fmt::Debug for Menu {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Menu {{ handle: {:p}, menu_item_handles: {:p} }}", self.handle, self.menu_item_handles)
+        write!(f, "Menu {{ handle: {:p}, item_handles: {:p} }}", self.handle, self.item_handles)
     }
 }

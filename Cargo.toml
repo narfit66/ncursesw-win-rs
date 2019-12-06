@@ -29,8 +29,8 @@ ascii = "1.0"
 rand = "0.7"
 
 [patch.crates-io]
-ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
-#ncursesw = { path = "../ncursesw-rs" }
+#ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
+ncursesw = { path = "../ncursesw-rs" }
 
 [features]
 key_resize_as_error = ["ncursesw/key_resize_as_error"]
