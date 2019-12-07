@@ -184,25 +184,23 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         //  for KeyBinding::ResizeEvent have the ncursesw.key_resize_as_error
         //  feature enabled and this will bubble up through the Err on the
         //  initial match).
-        match window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
-            Err(source) => return Err(source),
+        match window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
             #[cfg(feature = "key_resize_as_error")]
-            Ok(value)   => if let Some(CharacterResult::Character(character)) = value {
+            Some(char_result) => if let CharacterResult::Character(character) = char_result {
                 if character == 'q' || character == 'Q' {
                     break;
                 }
-            }
+            },
             #[cfg(not(feature = "key_resize_as_error"))]
-            Ok(value) => if let Some(char_result) = value {
-                match char_result {
-                    CharacterResult::Key(key_binding)     => if key_binding == KeyBinding::ResizeEvent {
-                        return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
-                    },
-                    CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
-                        break;
-                    }
+            Some(char_result) => match char_result {
+                CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
+                    return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                },
+                CharacterResult::Character(chracter) => if chracter == 'q' || chracter == 'Q' {
+                    break;
                 }
-            }
+            },
+            None              => () // Timeout
         }
 
         // clear the window

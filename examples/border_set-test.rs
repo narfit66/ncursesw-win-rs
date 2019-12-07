@@ -123,18 +123,16 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
         initial_window.refresh()?;
 
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds.
-        match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0))) {
-            Err(source) => return Err(source),
-            Ok(value)   => if let Some(char_result) = value {
-                match char_result {
-                    CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
-                        return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
-                    },
-                    CharacterResult::Character(chracter) => if chracter == 'q' || chracter == 'Q' {
-                        break;
-                    }
+        match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
+            Some(char_result) => match char_result {
+                CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
+                    return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                },
+                CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
+                    break;
                 }
-            }
+            },
+            None              => () // Timeout.
         }
     }
 

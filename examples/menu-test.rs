@@ -98,36 +98,33 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     let posted_menu = &my_menu.post_menu(true)?;
 
     loop {
-        match stdscr.getch() {
-            Err(source)     => return Err(source),
-            Ok(char_result) => match char_result {
-                CharacterResult::Key(key) => {
-                    if key == KeyBinding::FunctionKey(1) {
-                        break;
-                    } else if key == KeyBinding::DownArrow {
-                        if let Err(source) = posted_menu.menu_driver(MenuRequest::DownItem) {
-                            if source != request_denied_error() {
-                                return Err(source)
-                            }
-                        }
-                    } else if key == KeyBinding::UpArrow {
-                        if let Err(source) = posted_menu.menu_driver(MenuRequest::UpItem) {
-                            if source != request_denied_error() {
-                                return Err(source)
-                            }
+        match stdscr.getch()? {
+            CharacterResult::Key(key) => {
+                if key == KeyBinding::FunctionKey(1) {
+                    break;
+                } else if key == KeyBinding::DownArrow {
+                    if let Err(source) = posted_menu.menu_driver(MenuRequest::DownItem) {
+                        if source != request_denied_error() {
+                            return Err(source)
                         }
                     }
-                },
-                CharacterResult::Character(key) => {
-                    if key == '\n' {
-                        origin = Origin { y: 20, x: 0 };
+                } else if key == KeyBinding::UpArrow {
+                    if let Err(source) = posted_menu.menu_driver(MenuRequest::UpItem) {
+                        if source != request_denied_error() {
+                            return Err(source)
+                        }
+                    }
+                }
+            },
+            CharacterResult::Character(key) => {
+                if key == '\n' {
+                    origin = Origin { y: 20, x: 0 };
 
-                        stdscr.set_cursor(origin)?;
-                        stdscr.clrtoeol()?;
-                        stdscr.mvaddstr(origin, &format!("Item selected is : {}", my_menu.current_item()?.item_name()?))?;
-                        stdscr.refresh()?;
-                        my_menu.pos_menu_cursor()?;
-                    }
+                    stdscr.set_cursor(origin)?;
+                    stdscr.clrtoeol()?;
+                    stdscr.mvaddstr(origin, &format!("Item selected is : {}", my_menu.current_item()?.item_name()?))?;
+                    stdscr.refresh()?;
+                    my_menu.pos_menu_cursor()?;
                 }
             }
         }

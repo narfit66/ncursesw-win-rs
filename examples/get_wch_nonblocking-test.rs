@@ -62,19 +62,16 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
 
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
-        let getch_result = match window.mvget_wch_nonblocking(getch_origin, Some(time::Duration::new(5, 0))) {
-            Err(source) => return Err(source),
-            Ok(value)   => match value {
-                Some(char_result) => match char_result {
-                    CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
-                    CharacterResult::Character(character) => if character == lower_q || character == upper_q {
-                        break;
-                    } else {
-                        format!("character: '{:?}'", character)
-                    }
-                },
-                None              => "timeout!!!".to_string()
-            }
+        let getch_result = match window.mvget_wch_nonblocking(getch_origin, Some(time::Duration::new(5, 0)))? {
+            Some(char_result) => match char_result {
+                CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
+                CharacterResult::Character(character) => if character == lower_q || character == upper_q {
+                    break;
+                } else {
+                    format!("character: '{:?}'", character)
+                }
+            },
+            None              => "timeout!!!".to_string()
         };
 
         window.clrtoeol()?;
