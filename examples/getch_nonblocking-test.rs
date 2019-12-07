@@ -40,26 +40,26 @@ fn main_routine() -> result!(()) {
 
     // initialize ncurses in a safe way.
     ncursesw_entry(|window| {
+        cursor_set(CursorType::Visible)?;
+        set_echo(true)?;
+
         getch_nonblocking_test(&window)
     })
 }
 
-fn getch_nonblocking_test(window: &Window) -> result!(()) {
-    cursor_set(CursorType::Visible)?;
-    set_echo(true)?;
-
-    window.keypad(true)?;
+fn getch_nonblocking_test(stdscr: &Window) -> result!(()) {
+    stdscr.keypad(true)?;
 
     let display_origin = Origin { y: 2, x: 2 };
     let display_str = "Press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds:";
     let getch_origin = Origin { y: display_origin.y, x: display_origin.x + display_str.len() as u16 + 1 };
     let getch_result_origin = Origin { y: getch_origin.y, x: getch_origin.x + 3 };
 
-    window.mvaddstr(display_origin, display_str)?;
+    stdscr.mvaddstr(display_origin, display_str)?;
 
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
-        let getch_result = match window.mvgetch_nonblocking(getch_origin, Some(time::Duration::new(5, 0)))? {
+        let getch_result = match stdscr.mvgetch_nonblocking(getch_origin, Some(time::Duration::new(5, 0)))? {
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
                 CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
@@ -71,8 +71,8 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
             None              => "timeout!!!".to_string()
         };
 
-        window.clrtoeol()?;
-        window.mvaddstr(getch_result_origin, &getch_result)?;
+        stdscr.clrtoeol()?;
+        stdscr.mvaddstr(getch_result_origin, &getch_result)?;
     }
 
     Ok(())

@@ -31,6 +31,9 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 fn main() {
     // initialize ncurses in a safe way.
     if let Err(source) = ncursesw_entry(|window| {
+        cursor_set(CursorType::Visible)?;
+        set_echo(false)?;
+
         mouse_test(&window)
     }) {
         match source {
@@ -41,22 +44,19 @@ fn main() {
 
 }
 
-fn mouse_test(window: &Window) -> result!(()) {
-    cursor_set(CursorType::Visible)?;
-    set_echo(false)?;
-
-    window.keypad(true)?;
+fn mouse_test(stdscr: &Window) -> result!(()) {
+    stdscr.keypad(true)?;
 
     let mut origin = Origin { y: 1, x: 1 };
 
-    window.mvaddstr(origin, &format!("Mouse Version : {} ", mouse_version()))?;
+    stdscr.mvaddstr(origin, &format!("Mouse Version : {} ", mouse_version()))?;
     origin.y += 2;
-    window.mvaddstr(origin, "Hit <Return> to continue : ")?;
+    stdscr.mvaddstr(origin, "Hit <Return> to continue : ")?;
     origin.y += 2;
 
     let next_origin = Origin { y: origin.y + 1, x: origin.x };
 
-    window.getch()?;
+    stdscr.getch()?;
 
     cursor_set(CursorType::Invisible)?;
 
@@ -71,7 +71,7 @@ fn mouse_test(window: &Window) -> result!(()) {
     }
 
     loop {
-        match window.getch()? {
+        match stdscr.getch()? {
             CharacterResult::Key(key_binding)     => {
                 match key_binding {
                     KeyBinding::MouseEvent => {
@@ -81,31 +81,31 @@ fn mouse_test(window: &Window) -> result!(()) {
 
                                 if let Some(button_event) = mouse_events.button_state() {
                                     mouse_button_event(
-                                        window,
+                                        stdscr,
                                         origin,
                                         button_event.button().number(),
                                         &format!("{}", button_event.event()),
                                         mouse.origin()?
                                     )?;
                                 } else {
-                                    other_event(window, origin, "no mouse button event!!!!")?;
+                                    other_event(stdscr, origin, "no mouse button event!!!!")?;
                                 }
 
                                 if mouse_events.ctrl_button() {
-                                    other_event(window, next_origin, "with <ctrl> pressed")?;
+                                    other_event(stdscr, next_origin, "with <ctrl> pressed")?;
                                 } else if mouse_events.shift_button() {
-                                    other_event(window, next_origin, "with <shift> pressed")?;
+                                    other_event(stdscr, next_origin, "with <shift> pressed")?;
                                 } else if mouse_events.alt_button() {
-                                    other_event(window, next_origin, "with <alt> pressed")?;
+                                    other_event(stdscr, next_origin, "with <alt> pressed")?;
                                 }
                             }
                         }
                     },
-                    _                      => other_event(window, origin, &format!("{:?}", key_binding))?
+                    _                      => other_event(stdscr, origin, &format!("{:?}", key_binding))?
                 }
             },
             CharacterResult::Character(character) => {
-                other_event(window, origin, &format!("{}", character))?;
+                other_event(stdscr, origin, &format!("{}", character))?;
 
                 if character == 'q' || character == 'Q' {
                     break;

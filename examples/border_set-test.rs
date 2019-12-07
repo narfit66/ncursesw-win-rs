@@ -24,8 +24,7 @@ extern crate ncurseswwin;
 
 use std::time;
 
-use ncurseswwin::*;
-use ncurseswwin::extend::*;
+use ncurseswwin::{*, extend::*};
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
@@ -41,15 +40,15 @@ fn main_routine() -> result!(()) {
 
     // initialize ncurses in a safe way.
     ncursesw_entry(|window| {
+        // set the cursor to invisible and switch echoing off.
+        cursor_set(CursorType::Invisible)?;
+        set_echo(false)?;
+
         border_set_test(&window)
     })
 }
 
-fn border_set_test(initial_window: &Window) -> result!(()) {
-    // set the cursor to invisible and switch echoing off.
-    cursor_set(CursorType::Invisible)?;
-    set_echo(false)?;
-
+fn border_set_test(stdscr: &Window) -> result!(()) {
     // start colors and use the default color pair of white on black.
     start_color()?;
     use_default_colors()?;
@@ -59,14 +58,14 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
     let attrs = Attributes::default();
 
     // get the size of the initial window (stdscr).
-    let initial_size = initial_window.size()?;
+    let initial_size = stdscr.size()?;
 
     // workout the size of a inner window have a 1 character spacing all the way around.
     let inner_size = Size { lines: initial_size.lines - 2, columns: initial_size.columns - 2 };
     let inner_origin = Origin { y: 1, x: 1 };
 
     // create our sub window with the inital window.
-    let inner_window = initial_window.subwin(inner_size, inner_origin)?;
+    let inner_window = stdscr.subwin(inner_size, inner_origin)?;
 
     // add some default text to the inner window.
     let mut origin = Origin { y: 1, x: 1 };
@@ -107,7 +106,7 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
         let lower_right = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &color_pair)?;
 
         // create a border on the inital window (stdscr).
-        initial_window.border_set(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
+        stdscr.border_set(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
         // set our cursor position and clear to the end of line on our sub window.
         inner_window.set_cursor(origin)?;
@@ -119,8 +118,8 @@ fn border_set_test(initial_window: &Window) -> result!(()) {
         // add the type of box drawing type on the sub window.
         inner_window.mvaddstr(origin, &format!("box drawing type {:?}", box_drawing_type))?;
 
-        // by refreshing the initial_window we also refresh our inner_window which is a sub window of inital_window
-        initial_window.refresh()?;
+        // by refreshing the stdscr we also refresh our inner_window which is a sub window of inital_window
+        stdscr.refresh()?;
 
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds.
         match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {

@@ -29,6 +29,10 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 fn main() {
     // initialize ncurses in a safe way.
     if let Err(source) = ncursesw_entry(|window| {
+        // set the cursor to invisible and switch echoing off.
+        cursor_set(CursorType::Invisible)?;
+        set_echo(false)?;
+
         border_test(&window)
     }) {
         match source {
@@ -38,11 +42,7 @@ fn main() {
     }
 }
 
-fn border_test(initial_window: &Window) -> result!(()) {
-    // set the cursor to invisible and switch echoing off.
-    cursor_set(CursorType::Invisible)?;
-    set_echo(false)?;
-
+fn border_test(stdscr: &Window) -> result!(()) {
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
     let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);
@@ -54,20 +54,20 @@ fn border_test(initial_window: &Window) -> result!(()) {
     let lower_right = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
 
     // create a border on the inital window (stdscr).
-    initial_window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
+    stdscr.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
     // add some default text to the inner window.
     let mut origin = Origin { y: 1, x: 2 };
 
-    initial_window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
+    stdscr.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;
-    initial_window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
+    stdscr.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
 
     // refresh our window.
-    initial_window.refresh()?;
+    stdscr.refresh()?;
 
     // wait for user input (or an event).
-    initial_window.getch()?;
+    stdscr.getch()?;
 
     Ok(())
 }

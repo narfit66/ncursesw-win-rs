@@ -35,7 +35,7 @@ fn main() {
 
         ncursesw_entry_test_pass(window)?;
 
-        let rc = ncursesw_entry_test_fail(window)?;
+        let rc = ncursesw_entry_test_fail()?;
 
         Ok(rc)
     }) {
@@ -51,24 +51,24 @@ fn main() {
     }
 }
 
-fn ncursesw_entry_test_pass(window: &Window) -> result!(()) {
+fn ncursesw_entry_test_pass(stdscr: &Window) -> result!(()) {
     let mut origin = Origin { y: 0, x: 0};
 
-    window.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
+    stdscr.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;
-    window.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
+    stdscr.mvaddstr(origin, "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.")?;
     origin.y += 2;
-    window.mvaddstr(origin, "Press <Return> to continue: ")?;
+    stdscr.mvaddstr(origin, "Press <Return> to continue: ")?;
 
-    window.refresh()?;
+    stdscr.refresh()?;
 
-    window.getch()?;
+    stdscr.getch()?;
 
     Ok(())
 }
 
 // leave un-commented what needs testing
-fn ncursesw_entry_test_fail(_window: &Window) -> result!(i32) {
+fn ncursesw_entry_test_fail() -> result!(i32) {
     //panic!("there was a panic!");        // cause a panic
     Err(NCurseswWinError::InternalError) // return an error
     //Ok(-1)                               // return a value

@@ -47,8 +47,8 @@ fn main_routine() -> result!(()) {
     })
 }
 
-fn getch_nonblocking_test(window: &Window) -> result!(()) {
-    window.keypad(true)?;
+fn getch_nonblocking_test(stdscr: &Window) -> result!(()) {
+    stdscr.keypad(true)?;
 
     let timeout = time::Duration::new(5, 0);
 
@@ -57,14 +57,14 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
     let getch_origin = Origin { y: display_origin.y, x: display_origin.x + display_str.len() as u16 + 1 };
     let getch_result_origin = Origin { y: getch_origin.y, x: getch_origin.x + 3 };
 
-    window.mvaddstr(display_origin, display_str)?;
+    stdscr.mvaddstr(display_origin, display_str)?;
 
     let lower_q = WideChar::new('q');
     let upper_q = WideChar::new('Q');
 
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait until we timeout.
-        let getch_result = match window.mvget_wch_nonblocking(getch_origin, Some(timeout))? {
+        let getch_result = match stdscr.mvget_wch_nonblocking(getch_origin, Some(timeout))? {
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
                 CharacterResult::Character(character) => if character == lower_q || character == upper_q {
@@ -76,8 +76,8 @@ fn getch_nonblocking_test(window: &Window) -> result!(()) {
             None              => "timeout reached!!!".to_string()
         };
 
-        window.clrtoeol()?;
-        window.mvaddstr(getch_result_origin, &getch_result)?;
+        stdscr.clrtoeol()?;
+        stdscr.mvaddstr(getch_result_origin, &getch_result)?;
     }
 
     Ok(())

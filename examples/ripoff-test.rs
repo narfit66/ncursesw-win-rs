@@ -43,14 +43,14 @@ fn main_routine() -> result!(()) {
 
     // We wrap all our use of ncurseswin with this function.
     ncursesw_entry(|window| {
+        cursor_set(CursorType::Invisible)?;
+        set_echo(false)?;
+
         ripoff_line_test(&window, &top_ripoff, &bottom_ripoff)
     })
 }
 
-fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
-    cursor_set(CursorType::Invisible)?;
-    set_echo(false)?;
-
+fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
     let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);
@@ -62,19 +62,19 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
     let lower_right = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
 
     // create a border on the inital window (stdscr).
-    initial_window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
+    stdscr.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
-    let initial_window_size = initial_window.size()?;
+    let stdscr_size = stdscr.size()?;
 
     let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
     let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
 
-    let mut origin = Origin { y: (initial_window_size.lines / 2) - 1, x: (initial_window_size.columns / 2) - (line1.len() as u16 / 2) + 1};
+    let mut origin = Origin { y: (stdscr_size.lines / 2) - 1, x: (stdscr_size.columns / 2) - (line1.len() as u16 / 2) + 1};
 
-    initial_window.mvaddstr(origin, line1)?;
+    stdscr.mvaddstr(origin, line1)?;
     origin.y += 1;
-    origin.x = (initial_window_size.columns / 2) - (line2.len() as u16 / 2) + 1;
-    initial_window.mvaddstr(origin, line2)?;
+    origin.x = (stdscr_size.columns / 2) - (line2.len() as u16 / 2) + 1;
+    stdscr.mvaddstr(origin, line2)?;
 
     //  update the top ripoff line.
     top_ripoff.update(|ripoff_window, columns| -> result!(()) {
@@ -88,7 +88,7 @@ fn ripoff_line_test(initial_window: &Window, top_ripoff: &RipoffLine, bottom_rip
 
     doupdate()?;
 
-    initial_window.getch()?;
+    stdscr.getch()?;
 
     Ok(())
 }

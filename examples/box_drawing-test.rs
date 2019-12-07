@@ -25,11 +25,9 @@ extern crate rand;
 extern crate strum;
 extern crate strum_macros;
 
-use std::time;
-use std::collections::HashMap;
+use std::{time, collections::HashMap};
 
-use ncurseswwin::*;
-use ncurseswwin::normal::*;
+use ncurseswwin::{*, normal::*};
 
 use rand::prelude::*;
 use strum_macros::{Display, EnumIter};
@@ -57,14 +55,14 @@ fn main_routine() -> result!(()) {
 
     // initialize ncurses in a safe way.
     ncursesw_entry(|window| {
+        cursor_set(CursorType::Invisible)?;
+        set_echo(false)?;
+
         box_drawing_test(&window)
     })
 }
 
-fn box_drawing_test(window: &Window) -> result!(()) {
-    cursor_set(CursorType::Invisible)?;
-    set_echo(false)?;
-
+fn box_drawing_test(stdscr: &Window) -> result!(()) {
     start_color()?;
     use_default_colors()?;
 
@@ -77,7 +75,7 @@ fn box_drawing_test(window: &Window) -> result!(()) {
     let display_color_pair = ColorPair::new(2, Colors::new(dark_red, dark_green))?;
     let attrs = Attributes::default();
 
-    let window_size = window.size()?;
+    let stdscr_size = stdscr.size()?;
     let display_origin = Origin { y: 1, x: 1 };
     let corner_box_size = Size { lines: 10, columns: 10 };
 
@@ -104,9 +102,9 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         let mut corner_origins: HashMap<Corner, Origin> = HashMap::new();
 
         corner_origins.insert(Corner::TopLeft, Origin { y: 0, x: 0 });
-        corner_origins.insert(Corner::TopRight, Origin { y: 0, x: window_size.columns - corner_box_size.columns });
-        corner_origins.insert(Corner::BottomLeft, Origin { y: window_size.lines - corner_box_size.lines, x: 0 });
-        corner_origins.insert(Corner::BottomRight, Origin { y: window_size.lines - corner_box_size.lines, x: window_size.columns - corner_box_size.columns });
+        corner_origins.insert(Corner::TopRight, Origin { y: 0, x: stdscr_size.columns - corner_box_size.columns });
+        corner_origins.insert(Corner::BottomLeft, Origin { y: stdscr_size.lines - corner_box_size.lines, x: 0 });
+        corner_origins.insert(Corner::BottomRight, Origin { y: stdscr_size.lines - corner_box_size.lines, x: stdscr_size.columns - corner_box_size.columns });
 
         corner_origins
     };
@@ -142,12 +140,12 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         let lower_left  = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerLeftCorner, &attrs, &border_color_pair)?;
         let lower_right = complex_box_graphic(box_drawing_type, BoxDrawingGraphic::LowerRightCorner, &attrs, &border_color_pair)?;
 
-        // create a border on the window.
-        window.border_set(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
+        // create a border on the stdscr.
+        stdscr.border_set(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
         // iterate over the box corners and draw a box at the origin.
         for corner in Corner::iter() {
-            window.mvtbox_set(
+            stdscr.mvtbox_set(
                 *(corner_origins.get(&corner).unwrap_or_else(|| panic!("unable to retrive corner {} graphic!", corner))),
                 corner_box_size,
                 box_drawing_type
@@ -157,26 +155,26 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         // generate 20 random sized box's and add them with a random origin.
         for _ in 0..20 {
             let box_size = Size {
-                lines:   rng.gen_range(2, window_size.lines - 2),
-                columns: rng.gen_range(2, window_size.columns - 2)
+                lines:   rng.gen_range(2, stdscr_size.lines - 2),
+                columns: rng.gen_range(2, stdscr_size.columns - 2)
             };
 
             let box_origin = Origin {
-                y: rng.gen_range(0, window_size.lines - box_size.lines),
-                x: rng.gen_range(0, window_size.columns - box_size.columns)
+                y: rng.gen_range(0, stdscr_size.lines - box_size.lines),
+                x: rng.gen_range(0, stdscr_size.columns - box_size.columns)
             };
 
-            window.mvtbox_set(box_origin, box_size, box_drawing_type)?;
+            stdscr.mvtbox_set(box_origin, box_size, box_drawing_type)?;
         }
 
-        // add the type of box drawing type on the window.
+        // add the type of box drawing type on the stdscr.
         let display_str = if let BoxDrawingType::Custom(_) = box_drawing_type {
             "box drawing type Custom()".to_string()
         } else {
             format!("box drawing type {:?}", box_drawing_type)
         };
 
-        window.mvadd_wchstr(display_origin, &ComplexString::from_str(&display_str, &attrs, &display_color_pair)?)?;
+        stdscr.mvadd_wchstr(display_origin, &ComplexString::from_str(&display_str, &attrs, &display_color_pair)?)?;
 
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
         // if a resize event happens then error this back up the call chain.
@@ -184,7 +182,7 @@ fn box_drawing_test(window: &Window) -> result!(()) {
         //  for KeyBinding::ResizeEvent have the ncursesw.key_resize_as_error
         //  feature enabled and this will bubble up through the Err on the
         //  initial match).
-        match window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
+        match stdscr.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
             #[cfg(feature = "key_resize_as_error")]
             Some(char_result) => if let CharacterResult::Character(character) = char_result {
                 if character == 'q' || character == 'Q' {
@@ -203,8 +201,8 @@ fn box_drawing_test(window: &Window) -> result!(()) {
             None              => () // Timeout
         }
 
-        // clear the window
-        window.clear()?;
+        // clear the stdscr
+        stdscr.clear()?;
     }
 
     Ok(())
