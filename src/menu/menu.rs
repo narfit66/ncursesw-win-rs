@@ -173,10 +173,6 @@ impl Menu {
         Ok(Window::_from(menu::menu_win(self.handle)?, false))
     }
 
-    pub fn pos_menu_cursor(&self) -> result!(()) {
-        Ok(menu::pos_menu_cursor(self.handle)?)
-    }
-
     pub fn post_menu(&self, refresh: bool) -> result!(PostedMenu) {
         PostedMenu::new(self, refresh)
     }

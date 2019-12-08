@@ -64,6 +64,21 @@ impl<'a> PostedMenu<'a> {
 
         Ok(())
     }
+
+    /// Has the instance been posted i.e. is it visible.
+    pub fn posted(&self) -> bool {
+        self.posted
+    }
+
+    /// Refresh the menu's main window.
+    pub fn refresh(&self) -> result!(()) {
+        self.menu.menu_win()?.refresh()
+    }
+
+    /// Restore the cursor to te current position associated with te menu's selected item.
+    pub fn pos_menu_cursor(&self) -> result!(()) {
+        Ok(menu::pos_menu_cursor(self.menu._handle())?)
+    }
 }
 
 impl<'a> Drop for PostedMenu<'a> {
@@ -81,6 +96,6 @@ unsafe impl<'a> Sync for PostedMenu<'a> { } // too make thread safe
 
 impl<'a> fmt::Debug for PostedMenu<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "PostedMenu {{ menu: {:?} }}", self.menu)
+        write!(f, "PostedMenu {{ menu: {:?}, posted: {} }}", self.menu, self.posted)
     }
 }

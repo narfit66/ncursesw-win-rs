@@ -124,12 +124,12 @@ fn menu_test(stdscr: &Window) -> result!(()) {
                     stdscr.clrtoeol()?;
                     stdscr.mvaddstr(origin, &format!("Item selected is : {}", my_menu.current_item()?.item_name()?))?;
                     stdscr.refresh()?;
-                    my_menu.pos_menu_cursor()?;
+                    posted_menu.pos_menu_cursor()?;
                 }
             }
         }
 
-        my_menu_win.refresh()?;
+        posted_menu.refresh()?;
     }
 
     Ok(())
