@@ -23,9 +23,7 @@
 use std::{ptr, fmt, convert::TryFrom};
 
 use crate::NCurseswWinError;
-use ncursesw::{menu, menu::ITEM};
-
-pub use ncursesw::menu::ItemOptions;
+use ncursesw::{menu, menu::ITEM, menu::ItemOptions};
 
 /// Menu item.
 pub struct MenuItem {
@@ -48,55 +46,70 @@ impl MenuItem {
 }
 
 impl MenuItem {
+    /// Create a new menu item instance.
     pub fn new(name: &str, description: &str) -> result!(Self) {
         Ok(Self::_from(menu::new_item(name, description)?, true))
     }
 
     #[deprecated(since = "0.4.0", note = "Use MenuItem::new() instead")]
+    /// Create a new menu item instance.
     pub fn new_item(name: &str, description: &str) -> result!(Self) {
         Self::new(name, description)
     }
 
+    /// The menu items description.
     pub fn item_description(&self) -> result!(String) {
         Ok(menu::item_description(self.handle)?)
     }
 
+    /// The menu items index within it's attached menu.
     pub fn item_index(&self) -> result!(usize) {
         Ok(usize::try_from(menu::item_index(self.handle)?)?)
     }
 
+    /// The menu items name.
     pub fn item_name(&self) -> result!(String) {
         Ok(menu::item_name(self.handle)?)
     }
 
+    /// The menu items options.
     pub fn item_opts(&self) -> ItemOptions {
         menu::item_opts(self.handle)
     }
 
+    /// Set the menu items passed options off.
     pub fn item_opts_off(&self, opts: ItemOptions) -> result!(()) {
         Ok(menu::item_opts_off(self.handle, opts)?)
     }
 
+    /// Set the menu items passed options on.
     pub fn item_opts_on(&self, opts: ItemOptions) -> result!(()) {
         Ok(menu::item_opts_on(self.handle, opts)?)
     }
 
+    /// The menu items user client code defined value.
+    // TODO: needs testing!
     pub fn item_userptr<T>(&self) -> Option<Box<T>> {
         menu::item_userptr(self.handle).as_mut().map(|ptr| unsafe { Box::from_raw(*ptr as *mut T) })
     }
 
+    /// In a multi-valued menu indicated that the menu item has been selected.
     pub fn item_value(&self) -> bool {
         menu::item_value(self.handle)
     }
 
+    /// Is the menu item visible with the menu.
     pub fn item_visible(&self) -> bool {
         menu::item_visible(self.handle)
     }
 
+    /// Set the menu items passed options.
     pub fn set_item_opts(&self, opts: ItemOptions) -> result!(()) {
         Ok(menu::set_item_opts(self.handle, opts)?)
     }
 
+    /// Set the menu items user client code defined value.
+    // TODO: needs testing!
     pub fn set_item_userptr<T>(&self, ptr: Option<Box<&T>>) {
         menu::set_item_userptr(self.handle, match ptr {
             Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
@@ -104,6 +117,7 @@ impl MenuItem {
         })
     }
 
+    /// In a multi-valued menu sets the menu item too selected.
     pub fn set_item_value(&self, value: bool) -> result!(()) {
         Ok(menu::set_item_value(self.handle, value)?)
     }

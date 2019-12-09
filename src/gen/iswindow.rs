@@ -23,21 +23,10 @@
 use std::path;
 
 use ncursesw::{ChtypeChar, ComplexChar};
-use crate::{Window, NCurseswWinError, gen::HasHandle};
+use crate::{NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a window.
 pub trait IsWindow: HasHandle {
-    fn dupwin(&self) -> result!(Window) {
-        Ok(Window::_from(ncursesw::dupwin(self._handle())?, true))
-    }
-
-    /// Create a Window instance from a previous saved file.
-    ///
-    /// This uses the file previously generated using the Window.putwin() routine.
-    fn getwin(path: &path::Path) -> result!(Window) {
-        Ok(Window::_from(ncursesw::getwin(path)?, true))
-    }
-
     fn putwin(&self, path: &path::Path) -> result!(()) {
         Ok(ncursesw::putwin(self._handle(), path)?)
     }

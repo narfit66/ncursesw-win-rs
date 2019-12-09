@@ -12,4 +12,4 @@ tarvis CI is reporting the like of
 ```
 Tried to do a [sudo ldconfig](https://travis-ci.com/narfit66/ncursesw-win-rs/builds/136228092) after compile and install of ncurses, this did nor solve the issue.
 
-I don't think i am compiling ncurses correctly on travis as `curses_version()` returns 6.0.2016023 and `ncurses_version()` returns 6.1.20180127, i'm guessing tat 6.0 doesn't have the extended features.
+I don't think i am compiling ncurses correctly on travis as `curses_version()` returns 6.0.2016023 and `ncurses_version()` returns 6.1.20180127, i'm guessing that 6.0 doesn't have the extended features.

@@ -48,7 +48,7 @@ Instead of calling `initscr()` and `endwin()` to initialise and teardown the NCu
 
 To create a window use `Window::new()` which will teardown correctly when going out of scope and provides all NCurses functionality associatiated with a NCurses window. Likewise a pad is created using `Pad::new()` and a panel using `Panel::new()`.
 
-All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either their original ncurses name or where specificlly passed the pointer `_win_st` the 'w' has been removed, for example the ncurses 'C' function `mvwgetn_wstr(*WINDOW)` has become the method `self.mvgetn_wstr()`.
+All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either their original ncurses name or where specificlly passed the pointer `_win_st` the 'w' has been removed, for example the ncurses 'C' function `wget_wch(*WINDOW)` has become the method `self.get_wch()`.
 
 The NCurses ripoff and mouse features are encapsulated, please see example code for how to use these features.
 

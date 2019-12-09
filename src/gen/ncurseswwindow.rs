@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::TryInto;
+use std::{convert::TryInto, path};
 
 use crate::{Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 
@@ -46,6 +46,17 @@ pub trait NCurseswWindow: HasHandle + IsWindow {
         overlay: bool) -> result!(())
     {
         Ok(ncursesw::copywin(self._handle(), dstwin._handle(), smin.try_into()?, dmin.try_into()?, dmax.try_into()?, overlay)?)
+    }
+
+    fn dupwin(&self) -> result!(Window) {
+        Ok(Window::_from(ncursesw::dupwin(self._handle())?, true))
+    }
+
+    /// Create a Window instance from a previous saved file.
+    ///
+    /// This uses the file previously generated using the Window.putwin() routine.
+    fn getwin(path: &path::Path) -> result!(Window) {
+        Ok(Window::_from(ncursesw::getwin(path)?, true))
     }
 
     fn overlay(&self, srcwin: &Window) -> result!(()) {

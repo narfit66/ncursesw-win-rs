@@ -58,10 +58,11 @@ impl Menu {
 
 impl Menu {
     pub fn new(menu_items: &[&MenuItem]) -> result!(Self) {
-        // allocate enougth memory to store all the menu item handles plus
+        // allocate enougth contiguous memory to store all the menu item handles plus
         // a null and set all pointers initially to null.
         let item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
 
+        // check that we we're able to allocate our memory.
         if item_handles.is_null() {
             Err(NCurseswWinError::OutOfMemory { func: "Menu::new".to_string() })
         } else {
@@ -70,8 +71,8 @@ impl Menu {
                 unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), menu_item_handle) };
             }
 
-            // don't unallocate item_handles so it can be assigned to self.item_handles
-            // when we create Self.
+            // don't unallocate item_handles when it goes out of scope, we'll do it
+            // ourselves as self.item_handles will point to our contiguous memory.
             mem::forget(item_handles);
 
             // call the ncursesw shims new_menu() function with our allocated memory.
@@ -95,10 +96,12 @@ impl Menu {
         Ok(usize::try_from(menu::item_count(self.handle)?)?)
     }
 
+    // see comments for set_item_init().
     pub fn item_init(&self) -> result!(Menu_Hook) {
         Ok(menu::item_init(self.handle)?)
     }
 
+    // see comments for set_item_term().
     pub fn item_term(&self) -> result!(Menu_Hook) {
         Ok(menu::item_term(self.handle)?)
     }
@@ -119,6 +122,7 @@ impl Menu {
         menu::menu_grey(self.handle)
     }
 
+    // see comments for set_menu_init().
     pub fn menu_init(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_init(self.handle)?)
     }
@@ -161,10 +165,12 @@ impl Menu {
         Ok(Window::_from(menu::menu_sub(self.handle)?, false))
     }
 
+    // see comments for set_menu_term().
     pub fn menu_term(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_term(self.handle)?)
     }
 
+    // TODO: needs testing!
     pub fn menu_userptr<T>(&self) -> Option<Box<T>> {
         menu::menu_userptr(self.handle).as_mut().map(|ptr| unsafe { Box::from_raw(*ptr as *mut T) })
     }
@@ -185,10 +191,12 @@ impl Menu {
         Ok(menu::set_current_item(self.handle, menu_item._handle())?)
     }
 
+    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
     pub fn set_item_init(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_item_init(self.handle, hook)?)
     }
 
+    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
     pub fn set_item_term(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_item_term(self.handle, hook)?)
     }
@@ -209,6 +217,7 @@ impl Menu {
         Ok(menu::set_menu_grey(self.handle, attr)?)
     }
 
+    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
     pub fn set_menu_init(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_menu_init(self.handle, hook)?)
     }
@@ -269,10 +278,12 @@ impl Menu {
         })?)
     }
 
+    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
     pub fn set_menu_term(&self, hook: Menu_Hook) -> result!(()) {
         Ok(menu::set_menu_term(self.handle, hook)?)
     }
 
+    // TODO: needs testing!
     pub fn set_menu_userptr<T>(&self, ptr: Option<Box<&T>>) {
         menu::set_menu_userptr(self.handle, match ptr {
             Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
