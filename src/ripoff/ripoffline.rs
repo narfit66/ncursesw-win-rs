@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
+use std::{fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
 
 use ncursesw::{WINDOW, Orientation};
 use crate::{RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
@@ -115,3 +115,9 @@ impl RipoffLine {
 
 unsafe impl Send for RipoffLine { } // too make thread safe
 unsafe impl Sync for RipoffLine { } // too make thread safe
+
+impl fmt::Debug for RipoffLine {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "RipoffLine {{ number: {} }}", self.number)
+    }
+}

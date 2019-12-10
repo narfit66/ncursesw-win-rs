@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{ptr, fmt};
+use std::{ptr, fmt, hash::{Hash, Hasher}};
 
 use ncursesw::{stdscr, WINDOW};
 use crate::gen::*;
@@ -80,7 +80,7 @@ impl Drop for Window {
     fn drop(&mut self) {
         if self.free_on_drop {
             if let Err(source) = ncursesw::delwin(self.handle) {
-                panic!("{} @ ({:p})", source, self.handle)
+                panic!("{} @ {:?}", source, self)
             }
         }
     }
@@ -104,8 +104,14 @@ impl PartialEq for Window {
 
 impl Eq for Window { }
 
+impl Hash for Window {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.handle.hash(state);
+    }
+}
+
 impl fmt::Debug for Window {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+        write!(f, "Window {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
     }
 }

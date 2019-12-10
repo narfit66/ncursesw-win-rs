@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{ptr, fmt, convert::TryFrom};
+use std::{ptr, fmt, convert::TryFrom, hash::{Hash, Hasher}};
 
 use crate::NCurseswWinError;
 use ncursesw::{menu, menu::ITEM, menu::ItemOptions};
@@ -127,7 +127,7 @@ impl Drop for MenuItem {
     fn drop(&mut self) {
         if self.free_on_drop {
             if let Err(source) = menu::free_item(self.handle) {
-                panic!("{} @ ({:p})", source, self.handle)
+                panic!("{} @ {:?}", source, self)
             }
         }
     }
@@ -143,6 +143,12 @@ impl PartialEq for MenuItem {
 }
 
 impl Eq for MenuItem { }
+
+impl Hash for MenuItem {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.handle.hash(state);
+    }
+}
 
 impl fmt::Debug for MenuItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

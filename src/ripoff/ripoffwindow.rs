@@ -28,8 +28,8 @@ use crate::{Origin, NCurseswWinError, gen::*};
 /// A ripoff line window canvas.
 ///
 /// All methods are either there original ncurses name or were specificlly passed a pointer
-/// to `_win_st` the 'w' has been removed for example the ncurses function `mvwgetn_wstr()`
-/// has become the method `self.mvgetn_wstr()`.
+/// to `_win_st` the 'w' has been removed for example the ncurses function `wget_wch(*WINDOW)`
+/// has become the method `self.get_wch()`.
 pub struct RipoffWindow {
     handle: WINDOW // pointer to ncurses _win_st internal structure
 }
@@ -75,7 +75,7 @@ impl RipoffWindow {
 impl Drop for RipoffWindow {
     fn drop(&mut self) {
         if let Err(source) = ncursesw::delwin(self.handle) {
-            panic!("{} @ ({:p})", source, self.handle)
+            panic!("{} @ {:?}", source, self)
         }
     }
 }
@@ -85,6 +85,6 @@ unsafe impl Sync for RipoffWindow { } // too make thread safe
 
 impl fmt::Debug for RipoffWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{{ handle: {:p} }}", self.handle)
+        write!(f, "RipoffWindow {{ handle: {:p} }}", self.handle)
     }
 }

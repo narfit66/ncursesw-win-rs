@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{hash::{Hash, Hasher}, convert::TryFrom};
+use std::{fmt, hash::{Hash, Hasher}, convert::TryFrom};
 
 use ncursesw::mouse::{MEVENT, mousemask, getmouse, ungetmouse};
 use crate::{MouseMask, NCurseswWinError, mouse::MouseOrigin, mouse::MouseEvents};
@@ -113,5 +113,11 @@ impl Eq for Mouse { }
 impl Hash for Mouse {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.handle.id.hash(state);
+    }
+}
+
+impl fmt::Debug for Mouse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Mouse {{ handle: {:?}, mask: {:?} }}", self.handle, self.mask)
     }
 }

@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::fmt;
+use std::{fmt, hash::{Hash, Hasher}};
 
 use ncursesw::menu;
 use crate::{NCurseswWinError, gen::NCurseswWindow, menu::{Menu, MenuRequest}};
@@ -85,7 +85,7 @@ impl<'a> Drop for PostedMenu<'a> {
     fn drop(&mut self) {
         if self.posted {
             if let Err(source) = menu::unpost_menu(self.menu._handle()) {
-                panic!("{} @ ({:?})", source, self.menu)
+                panic!("{} @ {:?}", source, self)
             }
         }
     }
@@ -93,6 +93,12 @@ impl<'a> Drop for PostedMenu<'a> {
 
 unsafe impl<'a> Send for PostedMenu<'a> { } // too make thread safe
 unsafe impl<'a> Sync for PostedMenu<'a> { } // too make thread safe
+
+impl<'a> Hash for PostedMenu<'a> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.menu.hash(state);
+    }
+}
 
 impl<'a> fmt::Debug for PostedMenu<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

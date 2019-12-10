@@ -22,7 +22,7 @@
 
 #![allow(clippy::forget_copy)]
 
-use std::{ptr, fmt, mem, convert::{TryFrom, TryInto}};
+use std::{ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
 
 use errno::errno;
 
@@ -311,7 +311,7 @@ impl Drop for Menu {
     fn drop(&mut self) {
         // free the menu.
         if let Err(source) = menu::free_menu(self.handle) {
-            panic!("{} @ ({:p})", source, self.handle)
+            panic!("{} @ {:?}", source, self)
         }
 
         // unallocate the item_handles memory.
@@ -329,6 +329,12 @@ impl PartialEq for Menu {
 }
 
 impl Eq for Menu { }
+
+impl Hash for Menu {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.handle.hash(state);
+    }
+}
 
 impl fmt::Debug for Menu {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

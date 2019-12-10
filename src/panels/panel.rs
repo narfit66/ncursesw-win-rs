@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{ptr, convert::TryInto};
+use std::{ptr, fmt, convert::TryInto, hash::{Hash, Hasher}};
 
 use ncursesw::{panels, panels::PANEL};
 use crate::{Origin, Window, NCurseswWinError, gen::HasHandle, panels::funcs};
@@ -155,3 +155,15 @@ impl PartialEq for Panel {
 }
 
 impl Eq for Panel { }
+
+impl Hash for Panel {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.handle.hash(state);
+    }
+}
+
+impl fmt::Debug for Panel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+    }
+}
