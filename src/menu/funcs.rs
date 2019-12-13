@@ -22,13 +22,13 @@
 
 use std::convert::TryInto;
 
-use crate::{Window, HasHandle, NCurseswWinError, menu::MenuSize};
+use crate::{Window, HasHandle, NCurseswWinError, menu::MenuSize, menu::MenuRequest};
 
 pub fn menu_request_by_name(name: &str) -> result!(bool) {
     Ok(ncursesw::menu::menu_request_by_name(name)?)
 }
 
-pub fn menu_request_name(request: i32) -> result!(String) {
+pub fn menu_request_name(request: MenuRequest) -> result!(String) {
     Ok(ncursesw::menu::menu_request_name(request)?)
 }
 

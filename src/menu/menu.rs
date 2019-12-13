@@ -259,8 +259,8 @@ impl Menu {
         Ok(menu::set_menu_opts(self.handle, opts)?)
     }
 
-    pub fn set_menu_pad(&self, attr: normal::Attributes) -> result!(()) {
-        Ok(menu::set_menu_pad(self.handle, attr)?)
+    pub fn set_menu_pad(&self, pad: char) -> result!(()) {
+        Ok(menu::set_menu_pad(self.handle, pad)?)
     }
 
     pub fn set_menu_pattern(&self, pattern: &str) -> result!(()) {
