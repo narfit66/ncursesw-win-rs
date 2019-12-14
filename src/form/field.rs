@@ -175,11 +175,11 @@ impl Field {
         where T: IsFieldType<'a, A, B, C> + HasHandle<FIELDTYPE>
     {
         match match fieldtype.arguments() {
-            0 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle()) },
-            1 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1()) },
-            2 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1(), fieldtype.arg2()) },
-            3 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1(), fieldtype.arg2(), fieldtype.arg3()) },
-            _ => unimplemented!()
+            0    => unsafe { bindings::set_field_type(self.handle, fieldtype._handle()) },
+            1    => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1()) },
+            2    => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1(), fieldtype.arg2()) },
+            3    => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1(), fieldtype.arg2(), fieldtype.arg3()) },
+            args => return Err(NCurseswWinError::FieldTypeArguments { func: "set_field_type".to_string(), args })
         } {
             E_OK => Ok(()),
             rc   => Err(NCurseswWinError::from(ncursesw_form_error_from_rc("set_field_type", rc)))

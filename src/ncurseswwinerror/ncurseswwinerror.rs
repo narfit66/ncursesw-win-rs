@@ -41,6 +41,7 @@ pub NCurseswWinError
     InternalError = "an internal error has occured",
     Panic { message: String } = "{message}",
     OutOfMemory { func: String } = "{func}() out of memory!!!",
+    FieldTypeArguments { func: String, args: u8 } = "{func}() too many arguments {args}",
 
     NCurseswError { source: NCurseswError } = "{source}",
     PanelsError { source: NCurseswPanelsError } = "{source}",
