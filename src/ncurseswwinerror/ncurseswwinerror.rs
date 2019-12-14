@@ -24,7 +24,7 @@ use std::{num, convert};
 
 use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
-    menu::NCurseswMenuError
+    menu::NCurseswMenuError, form::NCurseswFormError
 };
 use crate::ripoff::MAX_LINES;
 
@@ -46,5 +46,6 @@ pub NCurseswWinError
     PanelsError { source: NCurseswPanelsError } = "{source}",
     MouseError { source: NCurseswMouseError } = "{source}",
     MenuError { source: NCurseswMenuError } = "{source}",
+    FormError { source: NCurseswFormError } = "{source}",
     OutOfMemory { func: String } = "{func}() out of memory!!!"
 }

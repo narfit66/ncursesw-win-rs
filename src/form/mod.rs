@@ -1,5 +1,5 @@
 /*
-    src/menu/funcs.rs
+    src/form/mod.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,33 +20,20 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::TryInto;
+#![allow(clippy::module_inception)]
 
-use ncursesw::menu::MenuRequest;
-use crate::{Window, HasHandle, NCurseswWinError, menu::MenuSize};
+mod field;
+mod fieldparameters;
+mod fieldtype;
+mod fieldinfo;
+mod form;
+mod funcs;
+mod postedform;
 
-pub fn menu_request_by_name(name: &str) -> result!(bool) {
-    Ok(ncursesw::menu::menu_request_by_name(name)?)
-}
-
-pub fn menu_request_name(request: MenuRequest) -> result!(String) {
-    Ok(ncursesw::menu::menu_request_name(request)?)
-}
-
-pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_format(None, menu_size.try_into()?)?)
-}
-
-pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_sub(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
-}
-
-pub fn set_menu_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_win(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
-}
+pub use field::*;
+pub use fieldparameters::*;
+pub use fieldtype::*;
+pub use fieldinfo::*;
+pub use form::*;
+pub use funcs::*;
+pub use postedform::*;

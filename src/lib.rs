@@ -31,6 +31,8 @@ extern crate errno;
 
 mod macros;
 
+/// Form module.
+pub mod form;
 mod funcs;
 mod gen;
 mod graphics;
@@ -78,7 +80,8 @@ pub use ncursesw::{
     AttributesColorPairSet, BaseColor, Changed, CharacterResult,
     CursorType, Justification, KeyBinding, LcCategory, Legacy,
     NCursesColorType, NCurseswError, panels::NCurseswPanelsError,
-    mouse::NCurseswMouseError, menu::NCurseswMenuError, Orientation
+    mouse::NCurseswMouseError, menu::NCurseswMenuError,
+    form::NCurseswFormError, Orientation
 };
 pub use ncursesw::{
     AttributesColorPairType, AttributesGeneric, AttributesType,

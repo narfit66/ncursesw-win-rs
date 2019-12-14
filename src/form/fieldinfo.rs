@@ -1,5 +1,5 @@
 /*
-    src/menu/funcs.rs
+    src/form/fieldinfo.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,33 +20,47 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::TryInto;
+use std::{fmt, convert::{TryFrom, TryInto}};
 
-use ncursesw::menu::MenuRequest;
-use crate::{Window, HasHandle, NCurseswWinError, menu::MenuSize};
+use crate::{Size, NCurseswWinError};
 
-pub fn menu_request_by_name(name: &str) -> result!(bool) {
-    Ok(ncursesw::menu::menu_request_by_name(name)?)
+pub struct FieldInfo {
+    size: Size,
+    max:  u16
 }
 
-pub fn menu_request_name(request: MenuRequest) -> result!(String) {
-    Ok(ncursesw::menu::menu_request_name(request)?)
+impl FieldInfo {
+    pub fn new(size: Size, max: u16) -> Self {
+        Self { size, max }
+    }
+
+    pub fn size(&self) -> Size {
+        self.size
+    }
+
+    pub fn max(&self) -> u16 {
+        self.max
+    }
 }
 
-pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_format(None, menu_size.try_into()?)?)
+impl TryInto<ncursesw::form::FieldInfo> for FieldInfo {
+    type Error = NCurseswWinError;
+
+    fn try_into(self) -> Result<ncursesw::form::FieldInfo, Self::Error> {
+        Ok(ncursesw::form::FieldInfo::new(self.size().try_into()?, u16::try_into(self.max)?))
+    }
 }
 
-pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_sub(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
+impl TryFrom<ncursesw::form::FieldInfo> for FieldInfo {
+    type Error = NCurseswWinError;
+
+    fn try_from(info: ncursesw::form::FieldInfo) -> Result<Self, Self::Error> {
+        Ok(Self { size: info.size().try_into()?, max: u16::try_from(info.max())? })
+    }
 }
 
-pub fn set_menu_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_win(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
+impl fmt::Display for FieldInfo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "(size: {}, max: {})", self.size, self.max)
+    }
 }

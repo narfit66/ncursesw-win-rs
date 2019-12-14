@@ -1,5 +1,5 @@
 /*
-    src/menu/funcs.rs
+    src/form/funcs.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,32 +20,26 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::TryInto;
+use ncursesw::form::FormRequest;
+use crate::{Window, HasHandle, NCurseswWinError};
 
-use ncursesw::menu::MenuRequest;
-use crate::{Window, HasHandle, NCurseswWinError, menu::MenuSize};
-
-pub fn menu_request_by_name(name: &str) -> result!(bool) {
-    Ok(ncursesw::menu::menu_request_by_name(name)?)
+pub fn form_request_by_name(name: &str) -> result!(bool) {
+    Ok(ncursesw::form::form_request_by_name(name)?)
 }
 
-pub fn menu_request_name(request: MenuRequest) -> result!(String) {
-    Ok(ncursesw::menu::menu_request_name(request)?)
+pub fn form_request_name(request: FormRequest) -> result!(String) {
+    Ok(ncursesw::form::form_request_name(request)?)
 }
 
-pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_format(None, menu_size.try_into()?)?)
-}
-
-pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_sub(None, match window {
+pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
+    Ok(ncursesw::form::set_form_sub(None, match window {
         Some(window) => Some(window._handle()),
         None         => None
     })?)
 }
 
-pub fn set_menu_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_win(None, match window {
+pub fn set_form_win(window: Option<&Window>) -> result!(()) {
+    Ok(ncursesw::form::set_form_win(None, match window {
         Some(window) => Some(window._handle()),
         None         => None
     })?)
