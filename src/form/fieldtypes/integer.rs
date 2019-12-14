@@ -20,9 +20,12 @@
     IN THE SOFTWARE.
 */
 
+use std::fmt;
+
 use crate::form::{FieldType, FIELDTYPE_INTEGER, IsFieldType};
 
 /// This field type accepts an integer.
+#[derive(PartialEq, Eq, Hash)]
 pub struct Integer<'a> {
     fieldtype: &'a FieldType,
     arguments: u8,
@@ -56,5 +59,22 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for Integer<'a> {
 
     fn arg3(&self) -> i32 {
         self.maximum
+    }
+}
+
+unsafe impl<'a> Send for Integer<'a> { } // too make thread safe
+unsafe impl<'a> Sync for Integer<'a> { } // too make thread safe
+
+impl<'a> fmt::Debug for Integer<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{{ fieldtype: {:?}, arguments: {}, padding: {}, minimum: {}, maximum: {} }}",
+            self.fieldtype,
+            self.arguments,
+            self.padding,
+            self.minimum,
+            self.maximum
+        )
     }
 }

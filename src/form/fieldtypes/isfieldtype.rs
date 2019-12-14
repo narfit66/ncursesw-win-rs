@@ -22,7 +22,7 @@
 
 use crate::form::FieldType;
 
-pub trait IsFieldType<'a, A, B, C> {
+pub trait IsFieldType<'a, A, B, C>: Send + Sync + std::hash::Hash {
     fn fieldtype(&self) -> &'a FieldType;
     fn arguments(&self) -> u8 { 0 }
     fn arg1(&self) -> A;

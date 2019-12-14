@@ -20,10 +20,13 @@
     IN THE SOFTWARE.
 */
 
+use std::fmt;
+
 use crate::form::{FieldType, FIELDTYPE_ALNUM, IsFieldType};
 
 /// This field type accepts alphabetic data and digits; no blanks, no special
 /// characters (this is checked at character-entry time).
+#[derive(PartialEq, Eq, Hash)]
 pub struct AlphaNumeric<'a> {
     fieldtype: &'a FieldType,
     arguments: u8,
@@ -51,4 +54,13 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for AlphaNumeric<'a> {
 
     fn arg2(&self) -> i32 { 0 }
     fn arg3(&self) -> i32 { 0 }
+}
+
+unsafe impl<'a> Send for AlphaNumeric<'a> { } // too make thread safe
+unsafe impl<'a> Sync for AlphaNumeric<'a> { } // too make thread safe
+
+impl<'a> fmt::Debug for AlphaNumeric<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{ fieldtype: {:?}, arguments: {}, width: {} }}", self.fieldtype, self.arguments, self.width)
+    }
 }

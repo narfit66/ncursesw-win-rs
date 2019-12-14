@@ -20,8 +20,11 @@
     IN THE SOFTWARE.
 */
 
+use std::fmt;
+
 use crate::form::{FieldType, FIELDTYPE_IPV4, IsFieldType};
 
+#[derive(PartialEq, Eq, Hash)]
 pub struct IpV4<'a> {
     fieldtype: &'a FieldType
 }
@@ -40,4 +43,13 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for IpV4<'a> {
     fn arg1(&self) -> i32 { 0 }
     fn arg2(&self) -> i32 { 0 }
     fn arg3(&self) -> i32 { 0 }
+}
+
+unsafe impl<'a> Send for IpV4<'a> { } // too make thread safe
+unsafe impl<'a> Sync for IpV4<'a> { } // too make thread safe
+
+impl<'a> fmt::Debug for IpV4<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{ fieldtype: {:?}, arguments: {} }}", self.fieldtype, self.arguments())
+    }
 }

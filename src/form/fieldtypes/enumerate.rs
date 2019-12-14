@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{mem, ptr, convert::TryFrom};
+use std::{fmt, mem, ptr, convert::TryFrom};
 
 use crate::{NCurseswWinError, cstring::*, form::{FieldType, FIELDTYPE_ENUM, IsFieldType}};
 
@@ -28,6 +28,7 @@ type ENTRY = *const i8;
 
 /// This type allows you to restrict a field's values to be among a specified
 /// set of string values (for example, the two-letter postal codes for U.S. states).
+#[derive(PartialEq, Eq, Hash)]
 pub struct Enumerate<'a> {
     fieldtype:    &'a FieldType,
     arguments:    u8,
@@ -97,5 +98,22 @@ impl<'a> Drop for Enumerate<'a> {
 
             libc::free(self.value_list as *mut libc::c_void);
         }
+    }
+}
+
+unsafe impl<'a> Send for Enumerate<'a> { } // too make thread safe
+unsafe impl<'a> Sync for Enumerate<'a> { } // too make thread safe
+
+impl<'a> fmt::Debug for Enumerate<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{{ fieldtype: {:?}, arguments: {}, value_list: {:p}, check_case: {}, check_unique: {} }}",
+            self.fieldtype,
+            self.arguments,
+            self.value_list,
+            self.check_case,
+            self.check_unique
+        )
     }
 }

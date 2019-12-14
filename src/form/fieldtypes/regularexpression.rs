@@ -20,10 +20,13 @@
     IN THE SOFTWARE.
 */
 
+use std::fmt;
+
 use crate::{NCurseswWinError, form::{FieldType, FIELDTYPE_REGEXP, IsFieldType}};
 use crate::cstring::*;
 
 /// This field type accepts data matching a regular expression.
+#[derive(PartialEq, Eq, Hash)]
 pub struct RegularExpression<'a> {
     fieldtype: &'a FieldType,
     arguments: u8,
@@ -51,4 +54,13 @@ impl<'a> IsFieldType<'a, *const i8, i32, i32> for RegularExpression<'a> {
 
     fn arg2(&self) -> i32 { 0 }
     fn arg3(&self) -> i32 { 0 }
+}
+
+unsafe impl<'a> Send for RegularExpression<'a> { } // too make thread safe
+unsafe impl<'a> Sync for RegularExpression<'a> { } // too make thread safe
+
+impl<'a> fmt::Debug for RegularExpression<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{ fieldtype: {:?}, arguments: {}, regexp: {:?} }}", self.fieldtype, self.arguments, self.regexp)
+    }
 }
