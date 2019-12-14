@@ -34,7 +34,7 @@ pub struct RipoffWindow {
     handle: WINDOW // pointer to ncurses _win_st internal structure
 }
 
-impl HasHandle for RipoffWindow {
+impl HasHandle<WINDOW> for RipoffWindow {
     fn _from(handle: WINDOW, _: bool) -> Self {
         assert!(!handle.is_null(), "RipoffWindow::_from() : handle.is_null()");
 

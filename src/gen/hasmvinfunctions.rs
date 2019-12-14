@@ -24,11 +24,11 @@
 
 use std::convert::{TryInto, TryFrom};
 
-use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
+use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw in origin functions.
-pub trait HasMvInFunctions: HasHandle + HasYXAxis {
+pub trait HasMvInFunctions: HasHandle<WINDOW> + HasYXAxis {
     fn mvinchnstr(&self, origin: Origin, length: u16) -> result!(ChtypeString) {
         assert_origin_hlength!("mvinchnstr", self.size()?, origin, length);
 

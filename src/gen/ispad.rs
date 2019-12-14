@@ -22,11 +22,11 @@
 
 use std::{path, convert::TryInto};
 
-use ncursesw::{ChtypeChar, ComplexChar};
+use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a pad.
-pub trait IsPad: HasHandle {
+pub trait IsPad: HasHandle<WINDOW> {
     /// Create a new instance of a Window that will act as a pad.
     fn new(size: Size) -> result!(Pad) {
         Ok(Pad::_from(ncursesw::newpad(size.try_into()?)?, true))

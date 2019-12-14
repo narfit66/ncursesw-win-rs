@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{num, convert};
+use std::{num, convert, ffi};
 
 use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
@@ -40,12 +40,15 @@ pub NCurseswWinError
     RipoffNotInitialized { number: usize } = "ripoff line {number} has not been initialised",
     InternalError = "an internal error has occured",
     Panic { message: String } = "{message}",
-    TryFromIntError { source: num::TryFromIntError } = "{source}",
-    Infallible { source: convert::Infallible } = "{source}",
+    OutOfMemory { func: String } = "{func}() out of memory!!!",
+
     NCurseswError { source: NCurseswError } = "{source}",
     PanelsError { source: NCurseswPanelsError } = "{source}",
     MouseError { source: NCurseswMouseError } = "{source}",
     MenuError { source: NCurseswMenuError } = "{source}",
     FormError { source: NCurseswFormError } = "{source}",
-    OutOfMemory { func: String } = "{func}() out of memory!!!"
+
+    TryFromIntError { source: num::TryFromIntError } = "{source}",
+    NulError { source: ffi::NulError } = "{source}",
+    Infallible { source: convert::Infallible } = "{source}"
 }

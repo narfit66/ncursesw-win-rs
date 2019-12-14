@@ -22,10 +22,11 @@
 
 use std::{convert::TryInto, path};
 
+use ncursesw::WINDOW;
 use crate::{Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 
 /// Is the window canvas a ncursesw window type.
-pub trait NCurseswWindow: HasHandle + IsWindow {
+pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
     /// Create a new instance of a Window
     fn new(size: Size, origin: Origin) -> result!(Window) {
         Ok(Window::_from(ncursesw::newwin(size.try_into()?, origin.try_into()?)?, true))

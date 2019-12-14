@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/cstring/fromcstr.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,20 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use std::ffi;
+
+pub trait FromCStr {
+    unsafe fn from_c_str(_: *const libc::c_char) -> Self;
+}
+
+impl FromCStr for String {
+    unsafe fn from_c_str(ptr: *const libc::c_char) -> Self {
+        String::from_utf8_unchecked(ffi::CStr::from_ptr(ptr).to_bytes().to_vec())
+    }
+}
+
+impl FromCStr for Option<String> {
+    unsafe fn from_c_str(ptr: *const libc::c_char) -> Self {
+        (ptr as *mut libc::c_char).as_mut().map(|ptr| FromCStr::from_c_str(ptr))
+    }
 }

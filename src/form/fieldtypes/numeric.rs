@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/form/fieldtypes/numeric.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,41 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use crate::form::{FieldType, FIELDTYPE_NUMERIC, IsFieldType};
+
+/// This field type accepts a decimal number.
+pub struct Numeric<'a> {
+    fieldtype: &'a FieldType,
+    arguments: u8,
+    padding:   i32,
+    minimum:   i32,
+    maximum:   i32
+}
+
+impl<'a> Numeric<'a> {
+    pub fn new(padding: i32, minimum: i32, maximum: i32) -> Self {
+        Self { fieldtype: &*FIELDTYPE_NUMERIC, arguments: 3, padding, minimum, maximum }
+    }
+}
+
+impl<'a> IsFieldType<'a, i32, i32, i32> for Numeric<'a> {
+    fn fieldtype(&self) -> &'a FieldType {
+        self.fieldtype
+    }
+
+    fn arguments(&self) -> u8 {
+        self.arguments
+    }
+
+    fn arg1(&self) -> i32 {
+        self.padding
+    }
+
+    fn arg2(&self) -> i32 {
+        self.minimum
+    }
+
+    fn arg3(&self) -> i32 {
+        self.maximum
+    }
 }

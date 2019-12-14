@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/form/fieldtypes/ipv4.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,24 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use crate::form::{FieldType, FIELDTYPE_IPV4, IsFieldType};
+
+pub struct IpV4<'a> {
+    fieldtype: &'a FieldType
+}
+
+impl<'a> IpV4<'a> {
+    pub fn new() -> Self {
+        Self { fieldtype: &*FIELDTYPE_IPV4 }
+    }
+}
+
+impl<'a> IsFieldType<'a, i32, i32, i32> for IpV4<'a> {
+    fn fieldtype(&self) -> &'a FieldType {
+        self.fieldtype
+    }
+
+    fn arg1(&self) -> i32 { 0 }
+    fn arg2(&self) -> i32 { 0 }
+    fn arg3(&self) -> i32 { 0 }
 }

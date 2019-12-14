@@ -23,12 +23,13 @@
 use std::convert::TryFrom;
 
 use ncursesw::{
-    AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType, normal
+    AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType,
+    WINDOW, normal
 };
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw attribute type functions.
-pub trait HasAttributes: HasHandle {
+pub trait HasAttributes: HasHandle<WINDOW> {
     fn attr_get(&self) -> result!(AttributesColorPairSet) {
         Ok(ncursesw::wattr_get(self._handle())?)
     }

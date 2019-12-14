@@ -24,11 +24,11 @@
 
 use std::convert::TryFrom;
 
-use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString};
+use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw in functions.
-pub trait HasInFunctions: HasHandle {
+pub trait HasInFunctions: HasHandle<WINDOW> {
     fn inchnstr(&self, length: u16) -> result!(ChtypeString) {
         Ok(ncursesw::winchnstr(self._handle(), i32::try_from(length)?)?)
     }

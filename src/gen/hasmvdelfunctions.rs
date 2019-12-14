@@ -22,10 +22,11 @@
 
 use std::convert::TryInto;
 
+use ncursesw::WINDOW;
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw delete origin functions.
-pub trait HasMvDelFunctions: HasHandle + HasYXAxis {
+pub trait HasMvDelFunctions: HasHandle<WINDOW> + HasYXAxis {
     fn mvdelch(&self, origin: Origin) -> result!(()) {
         assert_origin!("mvdelch", self.size()?, origin);
 

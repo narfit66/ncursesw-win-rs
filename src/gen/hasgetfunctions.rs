@@ -24,11 +24,11 @@
 
 use std::convert::TryFrom;
 
-use ncursesw::{CharacterResult, WideChar, WideString};
+use ncursesw::{CharacterResult, WideChar, WideString, WINDOW};
 use crate::{NonBlockingResult, Timeout, NCurseswWinError, gen::{HasHandle, HasNonBlocking}};
 
 /// Does the window canvas type have ncursesw get functions.
-pub trait HasGetFunctions: HasHandle + HasNonBlocking {
+pub trait HasGetFunctions: HasHandle<WINDOW> + HasNonBlocking {
     fn getch(&self) -> result!(CharacterResult<char>) {
         Ok(ncursesw::wgetch(self._handle())?)
     }

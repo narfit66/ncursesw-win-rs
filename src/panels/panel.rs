@@ -31,20 +31,20 @@ pub struct Panel {
     free_on_drop: bool
 }
 
-impl Panel {
+impl HasHandle<PANEL> for Panel {
     // make a new instance from the passed panel structure pointer and specify
     // if the handle is to be free'd when the structure is dropped.
     //
     // free_on_drop is false in call's such as panel_above(&self) where we are
     // 'peeking' the Panel but it would be invalid to free the handle when
     // our instance goes out of scope.
-    pub(in crate::panels) fn _from(handle: PANEL, free_on_drop: bool) -> Self {
+    fn _from(handle: PANEL, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Panel::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    pub(in crate::panels) fn _handle(&self) -> PANEL {
+    fn _handle(&self) -> PANEL {
         self.handle
     }
 }

@@ -22,10 +22,11 @@
 
 use std::convert::TryInto;
 
+use ncursesw::WINDOW;
 use crate::{Origin, NCurseswWinError, gen::HasHandle};
 
 /// Is the window canvas type moveable.
-pub trait Moveable: HasHandle {
+pub trait Moveable: HasHandle<WINDOW> {
     fn mvwin(&self, origin: Origin) -> result!(()) {
         Ok(ncursesw::mvwin(self._handle(), origin.try_into()?)?)
     }

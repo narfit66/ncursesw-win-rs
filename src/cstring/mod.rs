@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/cstring/mod.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,8 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
-}
+mod fromcstr;
+mod tocstr;
+
+pub use crate::cstring::fromcstr::*;
+pub use crate::cstring::tocstr::*;

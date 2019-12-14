@@ -22,10 +22,11 @@
 
 use std::convert::TryFrom;
 
+use ncursesw::WINDOW;
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas have an x-axis.
-pub trait HasXAxis: HasHandle {
+pub trait HasXAxis: HasHandle<WINDOW> {
     fn getbegx(&self) -> result!(u16) {
         Ok(u16::try_from(ncursesw::getbegx(self._handle())?)?)
     }

@@ -24,14 +24,14 @@
 
 use std::convert::{TryInto, TryFrom};
 
-use ncursesw::{CharacterResult, WideChar, WideString};
+use ncursesw::{CharacterResult, WideChar, WideString, WINDOW};
 use crate::{
     Origin, NonBlockingResult, Timeout, NCurseswWinError,
     gen::{HasHandle, HasYXAxis, HasNonBlocking}
 };
 
 /// Does the window canvas type have ncursesw get origin functions.
-pub trait HasMvGetFunctions: HasHandle + HasYXAxis + HasNonBlocking {
+pub trait HasMvGetFunctions: HasHandle<WINDOW> + HasYXAxis + HasNonBlocking {
     fn mvgetch(&self, origin: Origin) -> result!(CharacterResult<char>) {
         assert_origin!("mvgetch", self.size()?, origin);
 

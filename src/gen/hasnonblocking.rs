@@ -23,11 +23,11 @@
 use std::time::Duration;
 use std::convert::TryFrom;
 
-use ncursesw::{NCurseswError, shims::ncurses};
+use ncursesw::{NCurseswError, WINDOW, shims::ncurses};
 use crate::{Timeout, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type support non-blocking functions.
-pub trait HasNonBlocking: HasHandle {
+pub trait HasNonBlocking: HasHandle<WINDOW> {
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use get_timeout() instead")]
     fn getdelay(&self) -> result!(Duration) {
         Ok(ncursesw::wgetdelay(self._handle())?)

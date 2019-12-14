@@ -3,6 +3,7 @@
 All breaking changes are marked with [BC] and potentially require API consumer changes after updating to the respective version.
 
 ## [0.4.1] - ????-??-?? [BC]
+- NCurses form module implemented as `ncurseswwin::form`.
 - `menu_request_name()` now takes a `MenuRequest` instead of a `i32` for the request. [BC]
 - `Menu::set_menu_pad()` now takes a `char` instead of a `i32` for the pad character. [BC]
 

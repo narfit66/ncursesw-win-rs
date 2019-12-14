@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/cstring/tocstr.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,14 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use std::ffi;
+
+pub trait ToCStr {
+    fn to_c_str(&self) -> Result<ffi::CString, ffi::NulError>;
+}
+
+impl <'a>ToCStr for &'a str {
+    fn to_c_str(&self) -> Result<ffi::CString, ffi::NulError> {
+        ffi::CString::new(*self)
+    }
 }

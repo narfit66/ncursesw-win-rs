@@ -20,11 +20,11 @@
     IN THE SOFTWARE.
 */
 
-use ncursesw::{ChtypeChar, ComplexChar};
+use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw background functions.
-pub trait HasBackground: HasHandle {
+pub trait HasBackground: HasHandle<WINDOW> {
     fn bkgd(&self, ch: ChtypeChar) -> result!(()) {
         Ok(ncursesw::wbkgd(self._handle(), ch)?)
     }

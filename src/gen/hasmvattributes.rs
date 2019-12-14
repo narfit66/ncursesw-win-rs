@@ -22,11 +22,11 @@
 
 use std::convert::{TryFrom, TryInto};
 
-use ncursesw::{AttributesType, ColorPairType, ColorAttributeTypes};
+use ncursesw::{AttributesType, ColorPairType, ColorAttributeTypes, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw attribute origin functions.
-pub trait HasMvAttributes: HasHandle + HasYXAxis {
+pub trait HasMvAttributes: HasHandle<WINDOW> + HasYXAxis {
     fn mvchgat<A, P, T>(&self, origin: Origin, length: u16, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,

@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/form/fieldtypes/regularexpression.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,35 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use crate::{NCurseswWinError, form::{FieldType, FIELDTYPE_REGEXP, IsFieldType}};
+use crate::cstring::*;
+
+/// This field type accepts data matching a regular expression.
+pub struct RegularExpression<'a> {
+    fieldtype: &'a FieldType,
+    arguments: u8,
+    regexp:    &'a [i8]
+}
+
+impl<'a> RegularExpression<'a> {
+    pub fn new(regexp: &str) -> result!(Self) {
+        Ok(Self { fieldtype: &*FIELDTYPE_REGEXP, arguments: 1, regexp: c_str_with_nul!(regexp) })
+    }
+}
+
+impl<'a> IsFieldType<'a, *const i8, i32, i32> for RegularExpression<'a> {
+    fn fieldtype(&self) -> &'a FieldType {
+        self.fieldtype
+    }
+
+    fn arguments(&self) -> u8 {
+        self.arguments
+    }
+
+    fn arg1(&self) -> *const i8 {
+        self.regexp.as_ptr()
+    }
+
+    fn arg2(&self) -> i32 { 0 }
+    fn arg3(&self) -> i32 { 0 }
 }

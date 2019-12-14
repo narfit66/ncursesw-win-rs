@@ -22,11 +22,11 @@
 
 use std::convert::{TryFrom, TryInto};
 
-use ncursesw::mouse::{wenclose, wmouse_trafo};
+use ncursesw::{WINDOW, mouse::{wenclose, wmouse_trafo}};
 use crate::{Origin, OriginResult, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw mouse functions.
-pub trait Mouseable: HasHandle {
+pub trait Mouseable: HasHandle<WINDOW> {
     fn enclose(&self, origin: Origin) -> result!(bool) {
         Ok(wenclose(self._handle(), origin.try_into()?))
     }

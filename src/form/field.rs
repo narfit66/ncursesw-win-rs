@@ -22,9 +22,15 @@
 
 use std::{ptr, fmt, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
 
-use ncursesw::{normal, form, form::{FieldOptions, FieldJustification, FIELD}};
-use crate::{Origin, NCurseswWinError};
-use crate::form::{FieldType, FieldInfo, FieldParameters};
+use ncursesw::{
+    normal, form,
+    form::{
+        FieldOptions, FieldJustification, FIELD, FIELDTYPE, E_OK, ncursesw_form_error_from_rc
+    },
+    shims::bindings
+};
+use crate::{Origin, HasHandle, NCurseswWinError};
+use crate::form::{FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType};
 
 /// Form field.
 pub struct Field {
@@ -32,15 +38,15 @@ pub struct Field {
     free_on_drop: bool
 }
 
-impl Field {
+impl HasHandle<FIELD> for Field {
     // make a new instance from the passed ncurses pointer.
-    pub(in crate::form) fn _from(handle: FIELD, free_on_drop: bool) -> Self {
+    fn _from(handle: FIELD, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Field::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    pub(in crate::form) fn _handle(&self) -> FIELD {
+    fn _handle(&self) -> FIELD {
         self.handle
     }
 }
@@ -165,7 +171,20 @@ impl Field {
         Ok(form::set_field_status(self.handle, status)?)
     }
 
-    //pub fn set_field_type(&self, fieldtype: FieldType) -> result!(()) {
+    pub fn set_field_type<'a, A, B, C, T>(&self, fieldtype: &'a T) -> result!(())
+        where T: IsFieldType<'a, A, B, C> + HasHandle<FIELDTYPE>
+    {
+        match match fieldtype.arguments() {
+            0 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle()) },
+            1 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1()) },
+            2 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1(), fieldtype.arg2()) },
+            3 => unsafe { bindings::set_field_type(self.handle, fieldtype._handle(), fieldtype.arg1(), fieldtype.arg2(), fieldtype.arg3()) },
+            _ => unimplemented!()
+        } {
+            E_OK => Ok(()),
+            rc   => Err(NCurseswWinError::from(ncursesw_form_error_from_rc("set_field_type", rc)))
+        }
+    }
 
     pub fn set_field_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
         Ok(form::set_field_userptr(self.handle, match userptr {

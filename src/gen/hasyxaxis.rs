@@ -22,14 +22,14 @@
 
 use std::convert::{TryFrom, TryInto};
 
-use ncursesw::Changed;
+use ncursesw::{Changed, WINDOW};
 use crate::{
     Origin, Size, Region, NCurseswWinError,
     gen::{HasHandle, HasYAxis, HasXAxis}
 };
 
 /// Does the window canvas have an x and y axis.
-pub trait HasYXAxis: HasHandle + HasYAxis + HasXAxis {
+pub trait HasYXAxis: HasHandle<WINDOW> + HasYAxis + HasXAxis {
     #[deprecated(since = "0.1.0", note = "ambiguous function name. Use origin() instead")]
     /// get the origin of the window.
     fn getbegyx(&self) -> result!(Origin) {

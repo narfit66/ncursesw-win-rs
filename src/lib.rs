@@ -31,6 +31,7 @@ extern crate errno;
 
 mod macros;
 
+mod cstring;
 /// Form module.
 pub mod form;
 mod funcs;

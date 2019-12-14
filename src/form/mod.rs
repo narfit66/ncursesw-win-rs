@@ -25,6 +25,7 @@
 mod field;
 mod fieldparameters;
 mod fieldtype;
+mod fieldtypes;
 mod fieldinfo;
 mod form;
 mod funcs;
@@ -33,6 +34,7 @@ mod postedform;
 pub use field::*;
 pub use fieldparameters::*;
 pub use fieldtype::*;
+pub use fieldtypes::*;
 pub use fieldinfo::*;
 pub use form::*;
 pub use funcs::*;

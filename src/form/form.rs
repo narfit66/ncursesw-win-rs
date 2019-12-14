@@ -210,8 +210,8 @@ impl Form {
         Ok(form::set_form_opts(self.handle, opts)?)
     }
 
-    pub fn set_form_page(&self, n: i32) -> result!(()) {
-        Ok(form::set_form_page(self.handle, n)?)
+    pub fn set_form_page(&self, n: usize) -> result!(()) {
+        Ok(form::set_form_page(self.handle, i32::try_from(n)?)?)
     }
 
     pub fn set_form_sub(&self, sub: Option<Window>) -> result!(()) {

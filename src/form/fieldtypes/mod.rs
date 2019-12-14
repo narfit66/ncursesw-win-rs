@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/form/fieldtypes/mod.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,20 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
-}
+mod alphabetic;
+mod alphanumeric;
+mod enumerate;
+mod integer;
+mod ipv4;
+mod isfieldtype;
+mod numeric;
+mod regularexpression;
+
+pub use alphabetic::*;
+pub use alphanumeric::*;
+pub use enumerate::*;
+pub use integer::*;
+pub use ipv4::*;
+pub use isfieldtype::*;
+pub use numeric::*;
+pub use regularexpression::*;

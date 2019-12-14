@@ -21,7 +21,7 @@
 */
 
 use ncursesw::panels;
-use crate::{NCurseswWinError, panels::Panel};
+use crate::{NCurseswWinError, HasHandle, panels::Panel};
 
 pub use panels::update_panels;
 

@@ -22,10 +22,11 @@
 
 use std::path;
 
+use ncursesw::WINDOW;
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw add functions.
-pub trait BaseCanvas: HasHandle {
+pub trait BaseCanvas: HasHandle<WINDOW> {
     fn clearok(&self, bf: bool) -> result!(()) {
         Ok(ncursesw::clearok(self._handle(), bf)?)
     }

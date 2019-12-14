@@ -22,10 +22,11 @@
 
 use std::convert::{TryFrom, TryInto};
 
+use ncursesw::WINDOW;
 use crate::{Region, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Is the window canvas type scrollable.
-pub trait Scrollable: HasHandle + HasYXAxis {
+pub trait Scrollable: HasHandle<WINDOW> + HasYXAxis {
     fn scroll(&self) -> result!(()) {
         Ok(ncursesw::scroll(self._handle())?)
     }

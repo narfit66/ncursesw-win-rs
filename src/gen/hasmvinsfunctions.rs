@@ -22,11 +22,11 @@
 
 use std::convert::{TryFrom, TryInto};
 
-use ncursesw::{ChtypeChar, ComplexChar, WideString};
+use ncursesw::{ChtypeChar, ComplexChar, WideString, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw insert origin functions.
-pub trait HasMvInsFunctions: HasHandle + HasYXAxis {
+pub trait HasMvInsFunctions: HasHandle<WINDOW> + HasYXAxis {
     fn mvinsch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
         assert_origin!("mvinsch", self.size()?, origin);
 

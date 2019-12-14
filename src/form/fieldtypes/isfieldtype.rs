@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/form/fieldtypes/isfieldtype.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,12 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use crate::form::FieldType;
+
+pub trait IsFieldType<'a, A, B, C> {
+    fn fieldtype(&self) -> &'a FieldType;
+    fn arguments(&self) -> u8 { 0 }
+    fn arg1(&self) -> A;
+    fn arg2(&self) -> B;
+    fn arg3(&self) -> C;
 }

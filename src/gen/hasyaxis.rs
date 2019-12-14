@@ -22,10 +22,11 @@
 
 use std::convert::TryFrom;
 
+use ncursesw::WINDOW;
 use crate::{Position, NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas have an y-axis.
-pub trait HasYAxis: HasHandle {
+pub trait HasYAxis: HasHandle<WINDOW> {
     fn getbegy(&self) -> result!(u16) {
         Ok(u16::try_from(ncursesw::getbegy(self._handle())?)?)
     }

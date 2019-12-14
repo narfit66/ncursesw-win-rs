@@ -1,5 +1,5 @@
 /*
-    src/gen/hashandle.rs
+    src/form/fieldtypes/alphanumeric.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,7 +20,35 @@
     IN THE SOFTWARE.
 */
 
-pub trait HasHandle<T>: Drop + Sync + Send {
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    fn _handle(&self) -> T;
+use crate::form::{FieldType, FIELDTYPE_ALNUM, IsFieldType};
+
+/// This field type accepts alphabetic data and digits; no blanks, no special
+/// characters (this is checked at character-entry time).
+pub struct AlphaNumeric<'a> {
+    fieldtype: &'a FieldType,
+    arguments: u8,
+    width:     u16
+}
+
+impl<'a> AlphaNumeric<'a> {
+    pub fn new(width: u16) -> Self {
+        Self { fieldtype: &*FIELDTYPE_ALNUM, arguments: 1, width }
+    }
+}
+
+impl<'a> IsFieldType<'a, i32, i32, i32> for AlphaNumeric<'a> {
+    fn fieldtype(&self) -> &'a FieldType {
+        self.fieldtype
+    }
+
+    fn arguments(&self) -> u8 {
+        self.arguments
+    }
+
+    fn arg1(&self) -> i32 {
+        i32::from(self.width)
+    }
+
+    fn arg2(&self) -> i32 { 0 }
+    fn arg3(&self) -> i32 { 0 }
 }

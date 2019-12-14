@@ -22,11 +22,11 @@
 
 use std::path;
 
-use ncursesw::{ChtypeChar, ComplexChar};
+use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a window.
-pub trait IsWindow: HasHandle {
+pub trait IsWindow: HasHandle<WINDOW> {
     fn putwin(&self, path: &path::Path) -> result!(()) {
         Ok(ncursesw::putwin(self._handle(), path)?)
     }

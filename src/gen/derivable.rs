@@ -22,13 +22,14 @@
 
 use std::convert::TryInto;
 
+use ncursesw::WINDOW;
 use crate::{
     Origin, Size, NCurseswWinError,
     window::Window, gen::{HasHandle, NCurseswWindow, HasYXAxis, IsWindow}
 };
 
 /// Is the window canvas type capable of creating a derived window.
-pub trait Derivable: HasHandle + NCurseswWindow + HasYXAxis + IsWindow {
+pub trait Derivable: HasHandle<WINDOW> + NCurseswWindow + HasYXAxis + IsWindow {
     fn derwin(&self, size: Size, origin: Origin) -> result!(Window) {
         Ok(Window::_from(ncursesw::derwin(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }

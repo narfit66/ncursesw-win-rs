@@ -70,6 +70,8 @@ macro_rules! assert_origin_vlength {
     }
 }
 
+macro_rules! c_str_with_nul { ($name: ident) => { unsafe { &*($name.to_c_str()?.as_bytes_with_nul() as *const [u8] as *const [i8]) } } }
+
 macro_rules! nonblocking_get {
     ($fname: ident, $func: ident, $str: expr, $type: ty) => {
         fn $fname(&self, timeout: Timeout) -> result!(NonBlockingResult<$type>) {

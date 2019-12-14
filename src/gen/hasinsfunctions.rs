@@ -22,11 +22,11 @@
 
 use std::convert::TryFrom;
 
-use ncursesw::{ChtypeChar, ComplexChar, WideString};
+use ncursesw::{ChtypeChar, ComplexChar, WideString, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw insert functions.
-pub trait HasInsFunctions: HasHandle {
+pub trait HasInsFunctions: HasHandle<WINDOW> {
     fn insch(&self, ch: ChtypeChar) -> result!(()) {
         Ok(ncursesw::winsch(self._handle(), ch)?)
     }

@@ -22,8 +22,31 @@
 
 use std::{ptr, fmt, hash::{Hash, Hasher}};
 
-use ncursesw::{form, form::FIELD, form::FIELDTYPE, shims::bindings::va_list};
-use crate::NCurseswWinError;
+use ncursesw::{
+    form, form::{FIELD, FIELDTYPE},
+    shims::bindings::{
+        TYPE_ALPHA, TYPE_ALNUM, TYPE_ENUM, TYPE_INTEGER, TYPE_NUMERIC, TYPE_REGEXP, TYPE_IPV4,
+        va_list
+    }
+};
+use crate::{HasHandle, NCurseswWinError};
+
+lazy_static! {
+    /// Alpha field type.
+    pub static ref FIELDTYPE_ALPHA:   FieldType = FieldType::_from(unsafe { TYPE_ALPHA }, false);
+    /// Alphanumeric field type.
+    pub static ref FIELDTYPE_ALNUM:   FieldType = FieldType::_from(unsafe { TYPE_ALNUM }, false);
+    /// Enumerated field type.
+    pub static ref FIELDTYPE_ENUM:    FieldType = FieldType::_from(unsafe { TYPE_ENUM }, false);
+    /// Integer field type.
+    pub static ref FIELDTYPE_INTEGER: FieldType = FieldType::_from(unsafe { TYPE_INTEGER }, false);
+    /// Numeric (decimal) field type.
+    pub static ref FIELDTYPE_NUMERIC: FieldType = FieldType::_from(unsafe { TYPE_NUMERIC }, false);
+    /// Regular expresion field type.
+    pub static ref FIELDTYPE_REGEXP:  FieldType = FieldType::_from(unsafe { TYPE_REGEXP }, false);
+    /// IpV4 field type.
+    pub static ref FIELDTYPE_IPV4:    FieldType = FieldType::_from(unsafe { TYPE_IPV4 }, false);
+}
 
 /// Field type.
 pub struct FieldType {
@@ -31,15 +54,15 @@ pub struct FieldType {
     free_on_drop: bool
 }
 
-impl FieldType {
+impl HasHandle<FIELDTYPE> for FieldType {
     // make a new instance from the passed ncurses menu item pointer.
-    pub(in crate::form) fn _from(handle: FIELDTYPE, free_on_drop: bool) -> Self {
+    fn _from(handle: FIELDTYPE, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "FieldType::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    pub(in crate::form) fn _handle(&self) -> FIELDTYPE {
+    fn _handle(&self) -> FIELDTYPE {
         self.handle
     }
 }

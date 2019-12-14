@@ -22,8 +22,8 @@
 
 use std::{ptr, fmt, convert::TryFrom, hash::{Hash, Hasher}};
 
-use crate::NCurseswWinError;
 use ncursesw::{menu, menu::ITEM, menu::ItemOptions};
+use crate::{HasHandle, NCurseswWinError};
 
 /// Menu item.
 pub struct MenuItem {
@@ -31,16 +31,14 @@ pub struct MenuItem {
     free_on_drop: bool
 }
 
-impl MenuItem {
-    // make a new instance from the passed ncurses menu item pointer.
-    pub(in crate::menu) fn _from(handle: ITEM, free_on_drop: bool) -> Self {
+impl HasHandle<ITEM> for MenuItem {
+    fn _from(handle: ITEM, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "MenuItem::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    // get the ncurses menu item pointer for this Window structure.
-    pub(in crate::menu) fn _handle(&self) -> ITEM {
+    fn _handle(&self) -> ITEM {
         self.handle
     }
 }
