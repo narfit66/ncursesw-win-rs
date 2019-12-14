@@ -24,6 +24,7 @@ use std::{fmt, convert::{TryFrom, TryInto}};
 
 use crate::{Size, NCurseswWinError};
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct FieldInfo {
     size: Size,
     max:  u16

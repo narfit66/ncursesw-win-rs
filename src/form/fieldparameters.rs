@@ -24,6 +24,7 @@ use std::{fmt, convert::{TryFrom, TryInto}};
 
 use crate::{Size, Origin, NCurseswWinError};
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct FieldParameters {
     size:      Size,
     origin:    Origin,

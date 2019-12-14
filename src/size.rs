@@ -24,7 +24,7 @@ use std::{fmt, convert::{TryFrom, TryInto}};
 
 use crate::NCurseswWinError;
 
-/// Origin using y and x axis
+/// Size using lines and columns
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Size {
     /// The number of lines (y-axis)
