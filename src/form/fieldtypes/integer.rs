@@ -30,17 +30,17 @@ pub struct Integer<'a> {
     fieldtype: &'a FieldType,
     arguments: u8,
     padding:   i32,
-    minimum:   i32,
-    maximum:   i32
+    minimum:   libc::c_long,
+    maximum:   libc::c_long
 }
 
 impl<'a> Integer<'a> {
-    pub fn new(padding: i32, minimum: i32, maximum: i32) -> Self {
+    pub fn new(padding: i32, minimum: libc::c_long, maximum: libc::c_long) -> Self {
         Self { fieldtype: &*FIELDTYPE_INTEGER, arguments: 3, padding, minimum, maximum }
     }
 }
 
-impl<'a> IsFieldType<'a, i32, i32, i32> for Integer<'a> {
+impl<'a> IsFieldType<'a, i32, libc::c_long, libc::c_long> for Integer<'a> {
     fn fieldtype(&self) -> &'a FieldType {
         self.fieldtype
     }
@@ -53,11 +53,11 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for Integer<'a> {
         self.padding
     }
 
-    fn arg2(&self) -> i32 {
+    fn arg2(&self) -> libc::c_long {
         self.minimum
     }
 
-    fn arg3(&self) -> i32 {
+    fn arg3(&self) -> libc::c_long {
         self.maximum
     }
 }

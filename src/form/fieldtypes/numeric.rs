@@ -20,27 +20,26 @@
     IN THE SOFTWARE.
 */
 
-use std::fmt;
+use std::{fmt, hash::{Hash, Hasher}};
 
 use crate::form::{FieldType, FIELDTYPE_NUMERIC, IsFieldType};
 
 /// This field type accepts a decimal number.
-#[derive(PartialEq, Eq, Hash)]
 pub struct Numeric<'a> {
     fieldtype: &'a FieldType,
     arguments: u8,
     padding:   i32,
-    minimum:   i32,
-    maximum:   i32
+    minimum:   libc::c_double,
+    maximum:   libc::c_double
 }
 
 impl<'a> Numeric<'a> {
-    pub fn new(padding: i32, minimum: i32, maximum: i32) -> Self {
+    pub fn new(padding: i32, minimum: libc::c_double, maximum: libc::c_double) -> Self {
         Self { fieldtype: &*FIELDTYPE_NUMERIC, arguments: 3, padding, minimum, maximum }
     }
 }
 
-impl<'a> IsFieldType<'a, i32, i32, i32> for Numeric<'a> {
+impl<'a> IsFieldType<'a, i32, libc::c_double, libc::c_double> for Numeric<'a> {
     fn fieldtype(&self) -> &'a FieldType {
         self.fieldtype
     }
@@ -53,17 +52,44 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for Numeric<'a> {
         self.padding
     }
 
-    fn arg2(&self) -> i32 {
+    fn arg2(&self) -> libc::c_double {
         self.minimum
     }
 
-    fn arg3(&self) -> i32 {
+    fn arg3(&self) -> libc::c_double {
         self.maximum
     }
 }
 
 unsafe impl<'a> Send for Numeric<'a> { } // too make thread safe
 unsafe impl<'a> Sync for Numeric<'a> { } // too make thread safe
+
+// have to implement PartialEq and Eq manually otherwise we get the following:
+// 33 |     minimum:   libc::c_double,
+//    |     ^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::cmp::Eq` is not implemented for `f64`
+//    |
+//    = note: required by `std::cmp::AssertParamIsEq`
+impl<'a> PartialEq for Numeric<'a> {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.fieldtype == rhs.fieldtype &&
+        self.arguments == rhs.arguments &&
+        self.padding == rhs.padding &&
+        canonicalize(self.minimum) == canonicalize(rhs.minimum) &&
+        canonicalize(self.maximum) == canonicalize(rhs.maximum)
+    }
+}
+
+impl<'a> Eq for Numeric<'a> { }
+
+impl<'a> Hash for Numeric<'a> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.fieldtype.hash(state);
+        self.arguments.hash(state);
+        self.padding.hash(state);
+        transmute_value(self.minimum).hash(state);
+        transmute_value(self.maximum).hash(state);
+    }
+}
 
 impl<'a> fmt::Debug for Numeric<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -77,4 +103,15 @@ impl<'a> fmt::Debug for Numeric<'a> {
             self.maximum
         )
     }
+}
+
+fn canonicalize(value: libc::c_double) -> libc::c_long {
+    (value * 1024.0 * 1024.0).round() as libc::c_long
+}
+
+// as a f64 does not support hash() transmute to an i64 and
+// hash on this bit pattern instead (this is for 64-bit systems,
+// on a 32-bit system it would be a f32 and i32).
+fn transmute_value(value: libc::c_double) -> libc::c_long {
+    unsafe { std::mem::transmute(value) }
 }

@@ -97,10 +97,12 @@ impl Form {
         Ok(usize::try_from(form::field_count(self.handle)?)?)
     }
 
+    // see comments for set_field_init().
     pub fn field_init(&self) -> result!(Form_Hook) {
         Ok(form::field_init(self.handle)?)
     }
 
+    // see comments for set_field_term().
     pub fn field_term(&self) -> result!(Form_Hook) {
         Ok(form::field_term(self.handle)?)
     }
@@ -111,6 +113,7 @@ impl Form {
         Ok(field_handles.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
+    // see comments for set_form_init().
     pub fn form_init(&self) -> result!(Form_Hook) {
         Ok(form::form_init(self.handle)?)
     }
@@ -135,18 +138,16 @@ impl Form {
         Ok(Window::_from(form::form_sub(self.handle)?, false))
     }
 
+    // see comments for set_form_term().
     pub fn form_term(&self) -> result!(Form_Hook) {
         Ok(form::form_term(self.handle)?)
     }
 
+    // TODO: needs testing!
     pub fn form_userptr<T>(&self) -> result!(Option<Box<T>>) {
         let ptr = form::form_userptr(self.handle)?;
 
-        if !ptr.is_null() {
-            Ok(Some(unsafe { Box::from_raw(ptr as *mut T) }))
-        } else {
-            Ok(None)
-        }
+        Ok(unsafe { ptr.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T))})
     }
 
     pub fn form_win(&self) -> result!(Window) {
@@ -165,10 +166,12 @@ impl Form {
         Ok(form::set_current_field(self.handle, field._handle())?)
     }
 
+    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
     pub fn set_field_init(&self, func: Form_Hook) -> result!(()) {
         Ok(form::set_field_init(self.handle, func)?)
     }
 
+    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
     pub fn set_field_term(&self, func: Form_Hook) -> result!(()) {
         Ok(form::set_field_term(self.handle, func)?)
     }
@@ -202,6 +205,7 @@ impl Form {
         }
     }
 
+    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
     pub fn set_form_init(&self, func: Form_Hook) -> result!(()) {
         Ok(form::set_form_init(self.handle, func)?)
     }
@@ -221,10 +225,12 @@ impl Form {
         })?)
     }
 
+    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
     pub fn set_form_term(&self, func: Form_Hook) -> result!(()) {
         Ok(form::set_form_term(self.handle, func)?)
     }
 
+    // TODO: needs testing!
     pub fn set_form_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
         Ok(form::set_form_userptr(self.handle, match userptr {
             Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),

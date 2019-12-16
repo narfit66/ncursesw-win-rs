@@ -25,6 +25,8 @@ The compiled library will be built in the `target` directory.
 cargo build
 ```
 
+For additional information on how to custom compile please see the `Building`, `Custom Build` and `Features` sections in the crate `ncursesw` [README.md](https://github.com/narfit66/ncursesw-rs/blob/master/README.md).
+
 ## How to Use
 
 ```
@@ -42,6 +44,11 @@ use ncurseswwin::extend::*; // or for 'extended' color pairs and attributes.
 To use menus
 ```
 use ncurseswwin::menu::*;
+```
+
+To use forms
+```
+use ncurseswwin::form::*;
 ```
 
 Instead of calling `initscr()` and `endwin()` to initialise and teardown the NCurses library (these can still be called as the [ncursesw](https://crates.io/crates/ncursesw) crate is public) use the `ncursesw_entry()`. This initialises and tears down NCurses and provided the ability to catch panics in a controlled maner by passing them back to the client code as the error type `NCurseswWinError::Panic { message }`.
@@ -64,4 +71,4 @@ Please use `cargo doc --open` for this crate for the time being!.
 
 ## License
 
-Licensed under the MIT license, see [LICENSE](LICENSE)
+Licensed under the MIT license, see [LICENSE](https://github.com/narfit66/ncursesw-win-rs/blob/master/LICENSE)

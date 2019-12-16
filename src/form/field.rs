@@ -29,8 +29,10 @@ use ncursesw::{
     },
     shims::bindings
 };
-use crate::{Origin, HasHandle, NCurseswWinError};
-use crate::form::{FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType};
+use crate::{
+    Origin, HasHandle, NCurseswWinError,
+    form::{FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType}
+};
 
 /// Form field.
 pub struct Field {
@@ -121,14 +123,11 @@ impl Field {
         Ok(FieldType::_from(form::field_type(self.handle)?, false))
     }
 
+    // TODO: needs testing!
     pub fn field_userptr<T>(&self) -> result!(Option<Box<T>>) {
         let ptr = form::field_userptr(self.handle)?;
 
-        if !ptr.is_null() {
-            Ok(Some(unsafe { Box::from_raw(ptr as *mut T) }))
-        } else {
-            Ok(None)
-        }
+        Ok(unsafe { ptr.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T))})
     }
 
     pub fn link_field(&self, origin: Origin) -> result!(Self) {
@@ -171,7 +170,8 @@ impl Field {
         Ok(form::set_field_status(self.handle, status)?)
     }
 
-    pub fn set_field_type<'a, A, B, C, T>(&self, fieldtype: &'a T) -> result!(())
+    // TODO: needs testing!
+    pub fn set_field_type<'a, A, B, C, T>(&self, fieldtype: &T) -> result!(())
         where T: IsFieldType<'a, A, B, C> + HasHandle<FIELDTYPE>
     {
         match match fieldtype.arguments() {
@@ -186,6 +186,7 @@ impl Field {
         }
     }
 
+    // TODO: needs testing!
     pub fn set_field_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
         Ok(form::set_field_userptr(self.handle, match userptr {
             Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
