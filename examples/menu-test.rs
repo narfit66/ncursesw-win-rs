@@ -20,6 +20,12 @@
     IN THE SOFTWARE.
 */
 
+/*
+    When you run this make sure you redirect stderr to say a file as when a
+    menu item is initialised and/or terminated output is sent to stderr
+    indicating that the action has been performed.
+*/
+
 extern crate ncurseswwin;
 
 use ncurseswwin::{*, menu::*};
@@ -73,6 +79,10 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     menu_opts.set_show_description(true);
 
     my_menu.menu_opts_off(menu_opts)?;
+
+    // set our callbacks for menu item initialisation and termination.
+    my_menu.set_item_init(test_item_init)?;
+    my_menu.set_item_term(test_item_term)?;
 
     let my_menu_win = &Window::new(Size { lines: 9, columns: 18 }, Origin { y: 4, x: 4 })?;
     my_menu_win.keypad(true)?;
@@ -137,4 +147,18 @@ fn menu_test(stdscr: &Window) -> result!(()) {
 
 fn request_denied_error() -> NCurseswWinError {
     NCurseswWinError::from(NCurseswMenuError::RequestDenied { func: "menu_driver".to_string() })
+}
+
+fn test_item_init(menu: &Menu) {
+    let current_item = menu.current_item().unwrap();
+    let item_description = current_item.item_description().unwrap();
+
+    eprintln!("item_init for {:?} using {:?} : {}", menu, current_item, item_description)
+}
+
+fn test_item_term(menu: &Menu) {
+    let current_item = menu.current_item().unwrap();
+    let item_description = current_item.item_description().unwrap();
+
+    eprintln!("item_term for {:?} using {:?} : {}", menu, current_item, item_description)
 }

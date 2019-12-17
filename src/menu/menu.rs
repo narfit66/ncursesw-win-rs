@@ -22,33 +22,88 @@
 
 #![allow(clippy::forget_copy)]
 
-use std::{ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
+use std::{
+    ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher},
+    collections::HashMap, sync::Mutex
+};
 
 use errno::errno;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
-use ncursesw::{normal, menu, menu::MENU, menu::ITEM, menu::E_OK, shims::nmenu};
+use ncursesw::{normal, menu, menu::{MENU, ITEM, E_OK}, shims::nmenu};
 use crate::{
     Window, HasHandle, NCurseswWinError,
-    menu::MenuSize, menu::MenuItem, menu::MenuSpacing, menu::PostedMenu
+    menu::{MenuSize, MenuItem, MenuSpacing, PostedMenu}
 };
 
 pub use ncursesw::menu::{
     Menu_Hook, MenuOptions, MenuRequest
 };
 
+static MODULE_PATH: &str = "ncurseswwin::menu::";
+
+#[derive(EnumIter, PartialEq, Eq, Hash)]
+enum CallbackType {
+    ItemInit,
+    ItemTerm,
+    MenuInit,
+    MenuTerm
+}
+
+#[derive(PartialEq, Eq, Hash)]
+struct MenuKey {
+    menu:          MENU,
+    callback_type: CallbackType
+}
+
+impl MenuKey {
+    fn new(menu: MENU, callback_type: CallbackType) -> Self {
+        Self { menu, callback_type }
+    }
+}
+
+unsafe impl Send for MenuKey { }
+unsafe impl Sync for MenuKey { }
+
+lazy_static! {
+    static ref CALLBACKS: Mutex<HashMap<MenuKey, Option<Box<dyn Fn(&Menu) + Send>>>> = Mutex::new(HashMap::new());
+}
+
+macro_rules! menu_callback {
+    ($f: ident, $cb_t: ident) => {
+        extern fn $f(menu: MENU) {
+            if let Some(ref internal_fn) = *CALLBACKS
+                .lock()
+                .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($f), menu))
+                .get(&MenuKey::new(menu, CallbackType::$cb_t))
+                .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS().get() failed!!!", MODULE_PATH, stringify!($f), menu))
+            {
+                internal_fn(&Menu::_from(menu, unsafe { (*menu).items }, false))
+            }
+        }
+    }
+}
+
+menu_callback!(extern_item_init, ItemInit);
+menu_callback!(extern_item_term, ItemTerm);
+menu_callback!(extern_menu_init, MenuInit);
+menu_callback!(extern_menu_term, MenuTerm);
+
 /// Menu.
 pub struct Menu {
-    handle:       MENU,      // pointer to ncurses menu item internal structure
-    item_handles: *mut ITEM  // double-pointer to allocated memory that the ncurses menu module uses for menu items.
+    handle:       MENU,       // pointer to ncurses menu item internal structure
+    item_handles: *mut ITEM,  // double-pointer to allocated memory that the ncurses menu module uses for menu items.
+    free_on_drop: bool
 }
 
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
-    fn _from(handle: MENU, item_handles: *mut ITEM) -> Self {
+    fn _from(handle: MENU, item_handles: *mut ITEM, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
         assert!(!item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
 
-        Self { handle, item_handles }
+        Self { handle, item_handles, free_on_drop }
     }
 
     pub(in crate::menu) fn _handle(&self) -> MENU {
@@ -77,7 +132,7 @@ impl Menu {
 
             // call the ncursesw shims new_menu() function with our allocated memory.
             match unsafe { nmenu::new_menu(item_handles as *mut ITEM) } {
-                Some(menu) => Ok(Self::_from(menu, item_handles)),
+                Some(menu) => Ok(Self::_from(menu, item_handles, true)),
                 None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new", errno().into()) })
             }
         }
@@ -191,14 +246,26 @@ impl Menu {
         Ok(menu::set_current_item(self.handle, menu_item._handle())?)
     }
 
-    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
-    pub fn set_item_init(&self, hook: Menu_Hook) -> result!(()) {
-        Ok(menu::set_item_init(self.handle, hook)?)
+    pub fn set_item_init<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_item_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(MenuKey::new(self.handle, CallbackType::ItemInit), Some(Box::new(move |menu| func(menu))));
+
+        Ok(menu::set_item_init(self.handle, Some(extern_item_init))?)
     }
 
-    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
-    pub fn set_item_term(&self, hook: Menu_Hook) -> result!(()) {
-        Ok(menu::set_item_term(self.handle, hook)?)
+    pub fn set_item_term<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_item_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(MenuKey::new(self.handle, CallbackType::ItemTerm), Some(Box::new(move |menu| func(menu))));
+
+        Ok(menu::set_item_term(self.handle, Some(extern_item_term))?)
     }
 
     pub fn set_menu_back(&self, attr: normal::Attributes) -> result!(()) {
@@ -217,9 +284,15 @@ impl Menu {
         Ok(menu::set_menu_grey(self.handle, attr)?)
     }
 
-    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
-    pub fn set_menu_init(&self, hook: Menu_Hook) -> result!(()) {
-        Ok(menu::set_menu_init(self.handle, hook)?)
+    pub fn set_menu_init<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_menu_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(MenuKey::new(self.handle, CallbackType::MenuInit), Some(Box::new(move |menu| func(menu))));
+
+        Ok(menu::set_menu_init(self.handle, Some(extern_menu_init))?)
     }
 
     pub fn set_menu_items(&mut self, menu_items: &[&MenuItem]) -> result!(()) {
@@ -278,9 +351,15 @@ impl Menu {
         })?)
     }
 
-    // unsure at the moment how to pass a Fn(&Menu) trait to the underlying functions.
-    pub fn set_menu_term(&self, hook: Menu_Hook) -> result!(()) {
-        Ok(menu::set_menu_term(self.handle, hook)?)
+    pub fn set_menu_term<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_menu_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(MenuKey::new(self.handle, CallbackType::MenuTerm), Some(Box::new(move |menu| func(menu))));
+
+        Ok(menu::set_menu_term(self.handle, Some(extern_menu_term))?)
     }
 
     // TODO: needs testing!
@@ -309,13 +388,24 @@ impl Menu {
 
 impl Drop for Menu {
     fn drop(&mut self) {
-        // free the menu.
-        if let Err(source) = menu::free_menu(self.handle) {
-            panic!("{} @ {:?}", source, self)
-        }
+        if self.free_on_drop {
+            // free the menu.
+            if let Err(source) = menu::free_menu(self.handle) {
+                panic!("{} @ {:?}", source, self)
+            }
 
-        // unallocate the item_handles memory.
-        unsafe { libc::free(self.item_handles as *mut libc::c_void) };
+            // unallocate the item_handles memory.
+            unsafe { libc::free(self.item_handles as *mut libc::c_void) };
+
+            // remove any callbacks created for this instance.
+            let mut callbacks = CALLBACKS
+                .lock()
+                .unwrap_or_else(|_| panic!("Menu::drop() : CALLBACKS.lock() failed!!!"));
+
+            for cb_type in CallbackType::iter() {
+                callbacks.remove(&MenuKey::new(self.handle, cb_type));
+            }
+        }
     }
 }
 

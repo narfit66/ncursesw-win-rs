@@ -20,28 +20,83 @@
     IN THE SOFTWARE.
 */
 
-use std::{ptr, fmt, mem, convert::TryFrom, hash::{Hash, Hasher}};
+use std::{
+    ptr, fmt, mem, convert::TryFrom, hash::{Hash, Hasher},
+    collections::HashMap, sync::Mutex
+};
 
 use errno::errno;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 use ncursesw::{form, form::{FormOptions, E_OK, FORM, FIELD}, shims::nform};
 use crate::{Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}};
 
 pub use ncursesw::form::Form_Hook;
 
+static MODULE_PATH: &str = "ncurseswwin::form::";
+
+#[derive(EnumIter, PartialEq, Eq, Hash)]
+enum CallbackType {
+    FieldInit,
+    FieldTerm,
+    FormInit,
+    FormTerm
+}
+
+#[derive(PartialEq, Eq, Hash)]
+struct FormKey {
+    form:          FORM,
+    callback_type: CallbackType
+}
+
+impl FormKey {
+    fn new(form: FORM, callback_type: CallbackType) -> Self {
+        Self { form, callback_type }
+    }
+}
+
+unsafe impl Send for FormKey { }
+unsafe impl Sync for FormKey { }
+
+lazy_static! {
+    static ref CALLBACKS: Mutex<HashMap<FormKey, Option<Box<dyn Fn(&Form) + Send>>>> = Mutex::new(HashMap::new());
+}
+
+macro_rules! menu_callback {
+    ($f: ident, $cb_t: ident) => {
+        extern fn $f(form: FORM) {
+            if let Some(ref internal_fn) = *CALLBACKS
+                .lock()
+                .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($f), form))
+                .get(&FormKey::new(form, CallbackType::$cb_t))
+                .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS().get() failed!!!", MODULE_PATH, stringify!($f), form))
+            {
+                internal_fn(&Form::_from(form, unsafe { (*form).field }, false))
+            }
+        }
+    }
+}
+
+menu_callback!(extern_field_init, FieldInit);
+menu_callback!(extern_field_term, FieldTerm);
+menu_callback!(extern_form_init, FormInit);
+menu_callback!(extern_form_term, FormTerm);
+
 /// Form.
 pub struct Form {
-    handle:        FORM,       // pointer to ncurses field type internal structure
-    field_handles: *mut FIELD
+    handle:        FORM,        // pointer to ncurses field type internal structure
+    field_handles: *mut FIELD,
+    free_on_drop:  bool
 }
 
 impl Form {
     // make a new instance from the passed ncurses pointers.
-    pub(in crate::form) fn _from(handle: FORM, field_handles: *mut FIELD) -> Self {
+    pub(in crate::form) fn _from(handle: FORM, field_handles: *mut FIELD, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Form::_from() : handle.is_null()");
         assert!(!field_handles.is_null(), "Form::_from() : field_handles.is_null()");
 
-        Self { handle, field_handles }
+        Self { handle, field_handles, free_on_drop }
     }
 
     pub(in crate::form) fn _handle(&self) -> FORM {
@@ -70,7 +125,7 @@ impl Form {
 
             // call the ncursesw shims new_form() function with our allocated memory.
             match unsafe { nform::new_form(field_handles as *mut FIELD) } {
-                Some(form) => Ok(Self::_from(form, field_handles)),
+                Some(form) => Ok(Self::_from(form, field_handles, true)),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new", errno().into()) })
             }
         }
@@ -166,14 +221,26 @@ impl Form {
         Ok(form::set_current_field(self.handle, field._handle())?)
     }
 
-    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
-    pub fn set_field_init(&self, func: Form_Hook) -> result!(()) {
-        Ok(form::set_field_init(self.handle, func)?)
+    pub fn set_field_init<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_field_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(FormKey::new(self.handle, CallbackType::FieldInit), Some(Box::new(move |menu| func(menu))));
+
+        Ok(form::set_field_init(self.handle, Some(extern_field_init))?)
     }
 
-    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
-    pub fn set_field_term(&self, func: Form_Hook) -> result!(()) {
-        Ok(form::set_field_term(self.handle, func)?)
+    pub fn set_field_term<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_field_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(FormKey::new(self.handle, CallbackType::FieldTerm), Some(Box::new(move |menu| func(menu))));
+
+        Ok(form::set_field_term(self.handle, Some(extern_field_term))?)
     }
 
     pub fn set_form_fields(&self, fields: &[&Field]) -> result!(()) {
@@ -205,9 +272,15 @@ impl Form {
         }
     }
 
-    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
-    pub fn set_form_init(&self, func: Form_Hook) -> result!(()) {
-        Ok(form::set_form_init(self.handle, func)?)
+    pub fn set_form_init<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(FormKey::new(self.handle, CallbackType::FormInit), Some(Box::new(move |menu| func(menu))));
+
+        Ok(form::set_form_init(self.handle, Some(extern_form_init))?)
     }
 
     pub fn set_form_opts(&self, opts: FormOptions) -> result!(()) {
@@ -225,9 +298,15 @@ impl Form {
         })?)
     }
 
-    // unsure at the moment how to pass a Fn(&Form) trait to the underlying functions.
-    pub fn set_form_term(&self, func: Form_Hook) -> result!(()) {
-        Ok(form::set_form_term(self.handle, func)?)
+    pub fn set_form_term<F>(&self, func: F) -> result!(())
+        where F: Fn(&Self) + 'static + Send
+    {
+        CALLBACKS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
+            .insert(FormKey::new(self.handle, CallbackType::FormTerm), Some(Box::new(move |menu| func(menu))));
+
+        Ok(form::set_form_term(self.handle, Some(extern_form_term))?)
     }
 
     // TODO: needs testing!
@@ -252,12 +331,23 @@ impl Form {
 
 impl Drop for Form {
     fn drop(&mut self) {
-        if let Err(source) = form::free_form(self.handle) {
-            panic!("{} @ {:?}", source, self)
-        }
+        if self.free_on_drop {
+            if let Err(source) = form::free_form(self.handle) {
+                panic!("{} @ {:?}", source, self)
+            }
 
-        // unallocate the field_handles memory.
-        unsafe { libc::free(self.field_handles as *mut libc::c_void) };
+            // unallocate the field_handles memory.
+            unsafe { libc::free(self.field_handles as *mut libc::c_void) };
+
+            // remove any callbacks created for this instance.
+            let mut callbacks = CALLBACKS
+                .lock()
+                .unwrap_or_else(|_| panic!("Form::drop() : CALLBACKS.lock() failed!!!"));
+
+            for cb_type in CallbackType::iter() {
+                callbacks.remove(&FormKey::new(self.handle, cb_type));
+            }
+        }
     }
 }
 
