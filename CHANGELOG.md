@@ -7,6 +7,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - `menu_request_name()` now takes a `MenuRequest` instead of a `i32` for the request. [BC]
 - `Menu::set_menu_pad()` now takes a `char` instead of a `i32` for the pad character. [BC]
 - `Menu::{set_item_init, set_item_term, set_menu_init, set_menu_term}` now use `Fn(&Menu)` traits. [BC]
+- `Menu::{item_init, item_term, menu_init, menu_term}` have been depreciated. [BC]
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system used within the crate has been changed from using axis basic types of `i32` to `u16`. [BC]

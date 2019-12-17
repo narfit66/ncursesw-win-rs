@@ -37,9 +37,9 @@ use crate::{
     menu::{MenuSize, MenuItem, MenuSpacing, PostedMenu}
 };
 
-pub use ncursesw::menu::{
-    Menu_Hook, MenuOptions, MenuRequest
-};
+#[deprecated(since = "0.4.1")]
+pub use ncursesw::menu::Menu_Hook;
+pub use ncursesw::menu::{MenuOptions, MenuRequest};
 
 static MODULE_PATH: &str = "ncurseswwin::menu::";
 
@@ -80,6 +80,8 @@ macro_rules! menu_callback {
                 .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS().get() failed!!!", MODULE_PATH, stringify!($f), menu))
             {
                 internal_fn(&Menu::_from(menu, unsafe { (*menu).items }, false))
+            } else {
+                panic!("{}{}() : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f))
             }
         }
     }
@@ -151,12 +153,12 @@ impl Menu {
         Ok(usize::try_from(menu::item_count(self.handle)?)?)
     }
 
-    // see comments for set_item_init().
+    #[deprecated(since = "0.4.1")]
     pub fn item_init(&self) -> result!(Menu_Hook) {
         Ok(menu::item_init(self.handle)?)
     }
 
-    // see comments for set_item_term().
+    #[deprecated(since = "0.4.1")]
     pub fn item_term(&self) -> result!(Menu_Hook) {
         Ok(menu::item_term(self.handle)?)
     }
@@ -177,7 +179,7 @@ impl Menu {
         menu::menu_grey(self.handle)
     }
 
-    // see comments for set_menu_init().
+    #[deprecated(since = "0.4.1")]
     pub fn menu_init(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_init(self.handle)?)
     }
@@ -220,7 +222,7 @@ impl Menu {
         Ok(Window::_from(menu::menu_sub(self.handle)?, false))
     }
 
-    // see comments for set_menu_term().
+    #[deprecated(since = "0.4.1")]
     pub fn menu_term(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_term(self.handle)?)
     }

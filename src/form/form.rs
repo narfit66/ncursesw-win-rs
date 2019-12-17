@@ -32,6 +32,7 @@ use strum_macros::EnumIter;
 use ncursesw::{form, form::{FormOptions, E_OK, FORM, FIELD}, shims::nform};
 use crate::{Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}};
 
+#[deprecated(since = "0.4.1")]
 pub use ncursesw::form::Form_Hook;
 
 static MODULE_PATH: &str = "ncurseswwin::form::";
@@ -73,6 +74,8 @@ macro_rules! menu_callback {
                 .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS().get() failed!!!", MODULE_PATH, stringify!($f), form))
             {
                 internal_fn(&Form::_from(form, unsafe { (*form).field }, false))
+            } else {
+                panic!("{}{}() : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f))
             }
         }
     }
@@ -152,12 +155,12 @@ impl Form {
         Ok(usize::try_from(form::field_count(self.handle)?)?)
     }
 
-    // see comments for set_field_init().
+    #[deprecated(since = "0.4.1")]
     pub fn field_init(&self) -> result!(Form_Hook) {
         Ok(form::field_init(self.handle)?)
     }
 
-    // see comments for set_field_term().
+    #[deprecated(since = "0.4.1")]
     pub fn field_term(&self) -> result!(Form_Hook) {
         Ok(form::field_term(self.handle)?)
     }
@@ -168,7 +171,7 @@ impl Form {
         Ok(field_handles.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
-    // see comments for set_form_init().
+    #[deprecated(since = "0.4.1")]
     pub fn form_init(&self) -> result!(Form_Hook) {
         Ok(form::form_init(self.handle)?)
     }
@@ -193,7 +196,7 @@ impl Form {
         Ok(Window::_from(form::form_sub(self.handle)?, false))
     }
 
-    // see comments for set_form_term().
+    #[deprecated(since = "0.4.1")]
     pub fn form_term(&self) -> result!(Form_Hook) {
         Ok(form::form_term(self.handle)?)
     }
