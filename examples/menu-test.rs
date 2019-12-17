@@ -150,15 +150,15 @@ fn request_denied_error() -> NCurseswWinError {
 }
 
 fn test_item_init(menu: &Menu) {
-    let current_item = menu.current_item().unwrap();
-    let item_description = current_item.item_description().unwrap();
+    let current_item = menu.current_item().unwrap_or_else(|source| panic!("test_item_init() : {}", source));
+    let item_description = current_item.item_description().unwrap_or_else(|source| panic!("test_item_init() : {}", source));
 
     eprintln!("item_init for {:?} using {:?} : {}", menu, current_item, item_description)
 }
 
 fn test_item_term(menu: &Menu) {
-    let current_item = menu.current_item().unwrap();
-    let item_description = current_item.item_description().unwrap();
+    let current_item = menu.current_item().unwrap_or_else(|source| panic!("test_item_term() : {}", source));
+    let item_description = current_item.item_description().unwrap_or_else(|source| panic!("test_item_term() : {}", source));
 
     eprintln!("item_term for {:?} using {:?} : {}", menu, current_item, item_description)
 }
