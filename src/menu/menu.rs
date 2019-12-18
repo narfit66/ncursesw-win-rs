@@ -81,7 +81,7 @@ macro_rules! menu_callback {
             {
                 internal_fn(&Menu::_from(menu, unsafe { (*menu).items }, false))
             } else {
-                panic!("{}{}() : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f))
+                panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f), menu)
             }
         }
     }

@@ -75,7 +75,7 @@ macro_rules! menu_callback {
             {
                 internal_fn(&Form::_from(form, unsafe { (*form).field }, false))
             } else {
-                panic!("{}{}() : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f))
+                panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f), form)
             }
         }
     }
