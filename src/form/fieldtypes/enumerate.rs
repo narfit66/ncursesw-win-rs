@@ -20,6 +20,9 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::forget_ref)]
+#![allow(clippy::forget_copy)]
+
 use std::{fmt, mem, ptr, convert::TryFrom};
 
 use crate::{NCurseswWinError, cstring::*, form::{FieldType, FIELDTYPE_ENUM, IsFieldType}};

@@ -20,6 +20,9 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::type_complexity)]
+#![allow(clippy::forget_copy)]
+
 use std::{
     ptr, fmt, mem, convert::TryFrom, hash::{Hash, Hasher},
     collections::HashMap, sync::Mutex

@@ -51,7 +51,7 @@ impl<'a> PostedForm<'a> {
 
     /// Command processing of `Form` events (wide character mode).
     pub fn form_driver_w(&self, request: FormRequest, wch: WideChar) -> result!(Option<i32>) {
-        Ok(form::form_driver_w(self.form._handle(), request, wch.into())?)
+        Ok(form::form_driver_w(self.form._handle(), request, wch)?)
     }
 
     /// Repost (make visible) this instance, will error if the instance is already posted.

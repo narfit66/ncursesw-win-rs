@@ -35,11 +35,11 @@ impl FieldInfo {
         Self { size, max }
     }
 
-    pub fn size(&self) -> Size {
+    pub fn size(self) -> Size {
         self.size
     }
 
-    pub fn max(&self) -> u16 {
+    pub fn max(self) -> u16 {
         self.max
     }
 }

@@ -21,6 +21,7 @@
 */
 
 #![allow(clippy::forget_copy)]
+#![allow(clippy::type_complexity)]
 
 use std::{
     ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher},

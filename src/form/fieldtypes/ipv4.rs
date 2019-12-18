@@ -20,6 +20,8 @@
     IN THE SOFTWARE.
 */
 
+#![allow(clippy::new_without_default)]
+
 use std::fmt;
 
 use crate::form::{FieldType, FIELDTYPE_IPV4, IsFieldType};
