@@ -53,36 +53,36 @@ enum CallbackType {
 }
 
 #[derive(PartialEq, Eq, Hash)]
-struct MenuKey {
+struct CallbackKey {
     menu:          MENU,
     callback_type: CallbackType
 }
 
-impl MenuKey {
+impl CallbackKey {
     fn new(menu: MENU, callback_type: CallbackType) -> Self {
         Self { menu, callback_type }
     }
 }
 
-unsafe impl Send for MenuKey { }
-unsafe impl Sync for MenuKey { }
+unsafe impl Send for CallbackKey { }
+unsafe impl Sync for CallbackKey { }
 
 lazy_static! {
-    static ref CALLBACKS: Mutex<HashMap<MenuKey, Option<Box<dyn Fn(&Menu) + Send>>>> = Mutex::new(HashMap::new());
+    static ref CALLBACKS: Mutex<HashMap<CallbackKey, Option<Box<dyn Fn(&Menu) + Send>>>> = Mutex::new(HashMap::new());
 }
 
 macro_rules! menu_callback {
-    ($f: ident, $cb_t: ident) => {
-        extern fn $f(menu: MENU) {
+    ($func: ident, $cb_t: ident) => {
+        extern fn $func(menu: MENU) {
             if let Some(ref internal_fn) = *CALLBACKS
                 .lock()
-                .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($f), menu))
-                .get(&MenuKey::new(menu, CallbackType::$cb_t))
-                .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS().get() failed!!!", MODULE_PATH, stringify!($f), menu))
+                .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($func), menu))
+                .get(&CallbackKey::new(menu, CallbackType::$cb_t))
+                .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS.lock().get() failed!!!", MODULE_PATH, stringify!($func), menu))
             {
                 internal_fn(&Menu::_from(menu, unsafe { (*menu).items }, false))
             } else {
-                panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f), menu)
+                panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($func), menu)
             }
         }
     }
@@ -186,9 +186,7 @@ impl Menu {
     }
 
     pub fn menu_items(&self) -> result!(Vec<MenuItem>) {
-        let item_handles = menu::menu_items(self.handle)?;
-
-        Ok(item_handles.iter().map(|handle| MenuItem::_from(*handle, false)).collect())
+        Ok(menu::menu_items(self.handle)?.iter().map(|handle| MenuItem::_from(*handle, false)).collect())
     }
 
     pub fn menu_mark(&self) -> result!(String) {
@@ -255,7 +253,7 @@ impl Menu {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_item_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(MenuKey::new(self.handle, CallbackType::ItemInit), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::ItemInit), Some(Box::new(move |menu| func(menu))));
 
         Ok(menu::set_item_init(self.handle, Some(extern_item_init))?)
     }
@@ -266,7 +264,7 @@ impl Menu {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_item_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(MenuKey::new(self.handle, CallbackType::ItemTerm), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::ItemTerm), Some(Box::new(move |menu| func(menu))));
 
         Ok(menu::set_item_term(self.handle, Some(extern_item_term))?)
     }
@@ -293,7 +291,7 @@ impl Menu {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_menu_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(MenuKey::new(self.handle, CallbackType::MenuInit), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::MenuInit), Some(Box::new(move |menu| func(menu))));
 
         Ok(menu::set_menu_init(self.handle, Some(extern_menu_init))?)
     }
@@ -360,7 +358,7 @@ impl Menu {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_menu_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(MenuKey::new(self.handle, CallbackType::MenuTerm), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::MenuTerm), Some(Box::new(move |menu| func(menu))));
 
         Ok(menu::set_menu_term(self.handle, Some(extern_menu_term))?)
     }
@@ -406,8 +404,10 @@ impl Drop for Menu {
                 .unwrap_or_else(|_| panic!("Menu::drop() : CALLBACKS.lock() failed!!!"));
 
             for cb_type in CallbackType::iter() {
-                callbacks.remove(&MenuKey::new(self.handle, cb_type));
+                callbacks.remove(&CallbackKey::new(self.handle, cb_type));
             }
+
+            callbacks.shrink_to_fit();
         }
     }
 }

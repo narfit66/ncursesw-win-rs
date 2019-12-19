@@ -49,36 +49,36 @@ enum CallbackType {
 }
 
 #[derive(PartialEq, Eq, Hash)]
-struct FormKey {
+struct CallbackKey {
     form:          FORM,
     callback_type: CallbackType
 }
 
-impl FormKey {
+impl CallbackKey {
     fn new(form: FORM, callback_type: CallbackType) -> Self {
         Self { form, callback_type }
     }
 }
 
-unsafe impl Send for FormKey { }
-unsafe impl Sync for FormKey { }
+unsafe impl Send for CallbackKey { }
+unsafe impl Sync for CallbackKey { }
 
 lazy_static! {
-    static ref CALLBACKS: Mutex<HashMap<FormKey, Option<Box<dyn Fn(&Form) + Send>>>> = Mutex::new(HashMap::new());
+    static ref CALLBACKS: Mutex<HashMap<CallbackKey, Option<Box<dyn Fn(&Form) + Send>>>> = Mutex::new(HashMap::new());
 }
 
 macro_rules! menu_callback {
-    ($f: ident, $cb_t: ident) => {
-        extern fn $f(form: FORM) {
+    ($func: ident, $cb_t: ident) => {
+        extern fn $func(form: FORM) {
             if let Some(ref internal_fn) = *CALLBACKS
                 .lock()
-                .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($f), form))
-                .get(&FormKey::new(form, CallbackType::$cb_t))
-                .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS().get() failed!!!", MODULE_PATH, stringify!($f), form))
+                .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($func), form))
+                .get(&CallbackKey::new(form, CallbackType::$cb_t))
+                .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS.lock().get() failed!!!", MODULE_PATH, stringify!($func), form))
             {
                 internal_fn(&Form::_from(form, unsafe { (*form).field }, false))
             } else {
-                panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($f), form)
+                panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($func), form)
             }
         }
     }
@@ -169,9 +169,7 @@ impl Form {
     }
 
     pub fn form_fields(&self) -> result!(Vec<Field>) {
-        let field_handles = form::form_fields(self.handle)?;
-
-        Ok(field_handles.iter().map(|handle| Field::_from(*handle, false)).collect())
+        Ok(form::form_fields(self.handle)?.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
     #[deprecated(since = "0.4.1")]
@@ -206,9 +204,7 @@ impl Form {
 
     // TODO: needs testing!
     pub fn form_userptr<T>(&self) -> result!(Option<Box<T>>) {
-        let ptr = form::form_userptr(self.handle)?;
-
-        Ok(unsafe { ptr.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T))})
+        Ok(unsafe { form::form_userptr(self.handle)?.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T)) })
     }
 
     pub fn form_win(&self) -> result!(Window) {
@@ -233,7 +229,7 @@ impl Form {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_field_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(FormKey::new(self.handle, CallbackType::FieldInit), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::FieldInit), Some(Box::new(move |menu| func(menu))));
 
         Ok(form::set_field_init(self.handle, Some(extern_field_init))?)
     }
@@ -244,7 +240,7 @@ impl Form {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_field_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(FormKey::new(self.handle, CallbackType::FieldTerm), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::FieldTerm), Some(Box::new(move |menu| func(menu))));
 
         Ok(form::set_field_term(self.handle, Some(extern_field_term))?)
     }
@@ -284,7 +280,7 @@ impl Form {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(FormKey::new(self.handle, CallbackType::FormInit), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::FormInit), Some(Box::new(move |menu| func(menu))));
 
         Ok(form::set_form_init(self.handle, Some(extern_form_init))?)
     }
@@ -310,7 +306,7 @@ impl Form {
         CALLBACKS
             .lock()
             .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(FormKey::new(self.handle, CallbackType::FormTerm), Some(Box::new(move |menu| func(menu))));
+            .insert(CallbackKey::new(self.handle, CallbackType::FormTerm), Some(Box::new(move |menu| func(menu))));
 
         Ok(form::set_form_term(self.handle, Some(extern_form_term))?)
     }
@@ -351,8 +347,10 @@ impl Drop for Form {
                 .unwrap_or_else(|_| panic!("Form::drop() : CALLBACKS.lock() failed!!!"));
 
             for cb_type in CallbackType::iter() {
-                callbacks.remove(&FormKey::new(self.handle, cb_type));
+                callbacks.remove(&CallbackKey::new(self.handle, cb_type));
             }
+
+            callbacks.shrink_to_fit();
         }
     }
 }

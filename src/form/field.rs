@@ -125,9 +125,7 @@ impl Field {
 
     // TODO: needs testing!
     pub fn field_userptr<T>(&self) -> result!(Option<Box<T>>) {
-        let ptr = form::field_userptr(self.handle)?;
-
-        Ok(unsafe { ptr.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T))})
+        Ok(unsafe { form::field_userptr(self.handle)?.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T)) })
     }
 
     pub fn link_field(&self, origin: Origin) -> result!(Self) {
