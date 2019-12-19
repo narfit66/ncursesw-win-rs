@@ -31,7 +31,7 @@ use ncursesw::{
 };
 use crate::{
     Origin, HasHandle, NCurseswWinError,
-    form::{FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType}
+    form::{FieldBuffer, FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType}
 };
 
 /// Form field.
@@ -79,8 +79,8 @@ impl Field {
         form::field_back(self.handle)
     }
 
-    pub fn field_buffer(&self, buffer_number: u8) -> result!(Vec<i8>) {
-        Ok(form::field_buffer(self.handle, i32::from(buffer_number))?)
+    pub fn field_buffer(&self, field_buffer: FieldBuffer) -> result!(Vec<i8>) {
+        Ok(form::field_buffer(self.handle, field_buffer._number())?)
     }
 
     pub fn field_fore(&self) -> normal::Attributes {
@@ -144,8 +144,8 @@ impl Field {
         Ok(form::set_field_back(self.handle, attr)?)
     }
 
-    pub fn set_field_buffer(&self, buffer_number: u8, buffer: &[i8]) -> result!(()) {
-        Ok(form::set_field_buffer(self.handle, i32::from(buffer_number), buffer)?)
+    pub fn set_field_buffer(&self, field_buffer: FieldBuffer, buffer: &[i8]) -> result!(()) {
+        Ok(form::set_field_buffer(self.handle, field_buffer._number(), buffer)?)
     }
 
     pub fn set_field_fore(&self, attr: normal::Attributes) -> result!(()) {

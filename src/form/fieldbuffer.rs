@@ -1,5 +1,5 @@
 /*
-    src/form/mod.rs
+    src/form/fieldbuffer.rs
 
     Copyright (c) 2019 Stephen Whittle  All rights reserved.
 
@@ -20,24 +20,24 @@
     IN THE SOFTWARE.
 */
 
-#![allow(clippy::module_inception)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[repr(u8)]
+pub enum FieldBuffer {
+    Display,
+    Buffer(u8)
+}
 
-mod field;
-mod fieldbuffer;
-mod fieldparameters;
-mod fieldtype;
-mod fieldtypes;
-mod fieldinfo;
-mod form;
-mod funcs;
-mod postedform;
+impl FieldBuffer {
+    pub(in crate::form) fn _number(self) -> i32 {
+        match self {
+            FieldBuffer::Display        => 0,
+            FieldBuffer::Buffer(number) => i32::from(number)
+        }
+    }
+}
 
-pub use field::*;
-pub use fieldbuffer::*;
-pub use fieldparameters::*;
-pub use fieldtype::*;
-pub use fieldtypes::*;
-pub use fieldinfo::*;
-pub use form::*;
-pub use funcs::*;
-pub use postedform::*;
+impl Default for FieldBuffer {
+    fn default() -> Self {
+        FieldBuffer::Display
+    }
+}
