@@ -20,7 +20,6 @@
     IN THE SOFTWARE.
 */
 
-#![allow(clippy::type_complexity)]
 #![allow(clippy::forget_copy)]
 
 use std::{
@@ -63,20 +62,22 @@ impl CallbackKey {
 unsafe impl Send for CallbackKey { }
 unsafe impl Sync for CallbackKey { }
 
+type CALLBACK = Option<Box<dyn Fn(&Form) + Send>>;
+
 lazy_static! {
-    static ref CALLBACKS: Mutex<HashMap<CallbackKey, Option<Box<dyn Fn(&Form) + Send>>>> = Mutex::new(HashMap::new());
+    static ref CALLBACKS: Mutex<HashMap<CallbackKey, CALLBACK>> = Mutex::new(HashMap::new());
 }
 
-macro_rules! menu_callback {
+macro_rules! form_callback {
     ($func: ident, $cb_t: ident) => {
         extern fn $func(form: FORM) {
-            if let Some(ref internal_fn) = *CALLBACKS
+            if let Some(ref callback) = *CALLBACKS
                 .lock()
                 .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($func), form))
                 .get(&CallbackKey::new(form, CallbackType::$cb_t))
                 .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS.lock().get() failed!!!", MODULE_PATH, stringify!($func), form))
             {
-                internal_fn(&Form::_from(form, unsafe { (*form).field }, false))
+                callback(&Form::_from(form, unsafe { (*form).field }, false))
             } else {
                 panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($func), form)
             }
@@ -84,20 +85,20 @@ macro_rules! menu_callback {
     }
 }
 
-menu_callback!(extern_field_init, FieldInit);
-menu_callback!(extern_field_term, FieldTerm);
-menu_callback!(extern_form_init, FormInit);
-menu_callback!(extern_form_term, FormTerm);
+form_callback!(extern_field_init, FieldInit);
+form_callback!(extern_field_term, FieldTerm);
+form_callback!(extern_form_init, FormInit);
+form_callback!(extern_form_term, FormTerm);
 
 /// Form.
 pub struct Form {
-    handle:        FORM,        // pointer to ncurses field type internal structure
-    field_handles: *mut FIELD,
-    free_on_drop:  bool
+    handle:        FORM,        // pointer to ncurses form type internal structure
+    field_handles: *mut FIELD,  // pointer to list of field pointers (null terminated).
+    free_on_drop:  bool         // call `free_form()` when instance goes out of scope.
 }
 
 impl Form {
-    // make a new instance from the passed ncurses pointers.
+    // privatly to the crate make a new instance from the passed ncurses pointers.
     pub(in crate::form) fn _from(handle: FORM, field_handles: *mut FIELD, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Form::_from() : handle.is_null()");
         assert!(!field_handles.is_null(), "Form::_from() : field_handles.is_null()");
@@ -105,21 +106,21 @@ impl Form {
         Self { handle, field_handles, free_on_drop }
     }
 
+    // privatly to the crate obtain this instances form pointer.
     pub(in crate::form) fn _handle(&self) -> FORM {
         self.handle
     }
 }
 
 impl Form {
+    /// create a new instance.
     pub fn new(fields: &[&Field]) -> result!(Self) {
         // allocate enougth contiguous memory to store all the field handles plus
         // a null and set all pointers initially to null.
         let field_handles = unsafe { libc::calloc(fields.len() + 1, mem::size_of::<FIELD>()) as *mut FIELD };
 
         // check that we we're able to allocate our memory.
-        if field_handles.is_null() {
-            Err(NCurseswWinError::OutOfMemory { func: "Form::new".to_string() })
-        } else {
+        if !field_handles.is_null() {
             // get all the field handles and write them to memory.
             for (offset, field_handle) in fields.iter().map(|field| field._handle()).enumerate() {
                 unsafe { ptr::write(field_handles.offset(isize::try_from(offset)?), field_handle) };
@@ -134,14 +135,18 @@ impl Form {
                 Some(form) => Ok(Self::_from(form, field_handles, true)),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new", errno().into()) })
             }
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: "Form::new".to_string() })
         }
     }
 
     #[deprecated(since = "0.4.1", note = "Use Form::new() instead")]
+    /// create a new instance.
     pub fn new_form(fields: &[&Field]) -> result!(Self) {
         Self::new(fields)
     }
 
+    /// return the current field of the form.
     pub fn current_field(&self) -> result!(Field) {
         Ok(Field::_from(form::current_field(self.handle)?, false))
     }
@@ -154,25 +159,30 @@ impl Form {
         form::data_behind(self.handle)
     }
 
+    /// return the number of fields on the form.
     pub fn field_count(&self) -> result!(usize) {
         Ok(usize::try_from(form::field_count(self.handle)?)?)
     }
 
     #[deprecated(since = "0.4.1")]
+    /// return the field initialisation callback function.
     pub fn field_init(&self) -> result!(Form_Hook) {
         Ok(form::field_init(self.handle)?)
     }
 
     #[deprecated(since = "0.4.1")]
+    /// return the field terminate callback function.
     pub fn field_term(&self) -> result!(Form_Hook) {
         Ok(form::field_term(self.handle)?)
     }
 
+    /// return a vector of all the fields on the form.
     pub fn form_fields(&self) -> result!(Vec<Field>) {
         Ok(form::form_fields(self.handle)?.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
     #[deprecated(since = "0.4.1")]
+    /// return the form initialisation callback function.
     pub fn form_init(&self) -> result!(Form_Hook) {
         Ok(form::form_init(self.handle)?)
     }
@@ -193,11 +203,13 @@ impl Form {
         Ok(usize::try_from(form::form_page(self.handle)?)?)
     }
 
+    /// return the forms sub window.
     pub fn form_sub(&self) -> result!(Window) {
         Ok(Window::_from(form::form_sub(self.handle)?, false))
     }
 
     #[deprecated(since = "0.4.1")]
+    /// return the form termination callback function.
     pub fn form_term(&self) -> result!(Form_Hook) {
         Ok(form::form_term(self.handle)?)
     }
@@ -207,10 +219,12 @@ impl Form {
         Ok(unsafe { form::form_userptr(self.handle)?.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T)) })
     }
 
+    /// return the forms main window.
     pub fn form_win(&self) -> result!(Window) {
         Ok(Window::_from(form::form_win(self.handle)?, false))
     }
 
+    /// post (make visible) the form and refresh if required.
     pub fn post_form(&self, refresh: bool) -> result!(PostedForm) {
         PostedForm::new(self, refresh)
     }
@@ -219,10 +233,12 @@ impl Form {
         Ok(Size::try_from(form::scale_form(self.handle)?)?)
     }
 
+    /// set the current field of the form.
     pub fn set_current_field(&self, field: Field) -> result!(()) {
         Ok(form::set_current_field(self.handle, field._handle())?)
     }
 
+    /// set the field initialisation callback function.
     pub fn set_field_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -234,6 +250,7 @@ impl Form {
         Ok(form::set_field_init(self.handle, Some(extern_field_init))?)
     }
 
+    /// set the field termination callback function.
     pub fn set_field_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -245,6 +262,7 @@ impl Form {
         Ok(form::set_field_term(self.handle, Some(extern_field_term))?)
     }
 
+    /// clear the list of current fields and replace them with a new list.
     pub fn set_form_fields(&self, fields: &[&Field]) -> result!(()) {
         // unallocate the field_handles memory.
         unsafe { libc::free(self.field_handles as *mut libc::c_void) };
@@ -254,9 +272,7 @@ impl Form {
         let field_handles = unsafe { libc::calloc(fields.len() + 1, mem::size_of::<FIELD>()) as *mut FIELD };
 
         // check that we we're able to allocate our memory.
-        if field_handles.is_null() {
-            Err(NCurseswWinError::OutOfMemory { func: "set_form_fields".to_string() })
-        } else {
+        if !field_handles.is_null() {
             // get all the field handles and write them to memory.
             for (offset, field_handle) in fields.iter().map(|field| field._handle()).enumerate() {
                 unsafe { ptr::write(field_handles.offset(isize::try_from(offset)?), field_handle) };
@@ -271,9 +287,12 @@ impl Form {
                 E_OK => Ok(()),
                 rc   => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("set_form_fields", rc) })
             }
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: "set_form_fields".to_string() })
         }
     }
 
+    /// set the form initialisation callback function.
     pub fn set_form_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -293,6 +312,7 @@ impl Form {
         Ok(form::set_form_page(self.handle, i32::try_from(n)?)?)
     }
 
+    /// set the forms sub window.
     pub fn set_form_sub(&self, sub: Option<Window>) -> result!(()) {
         Ok(form::set_form_sub(Some(self.handle), match sub {
             Some(window) => Some(window._handle()),
@@ -300,6 +320,7 @@ impl Form {
         })?)
     }
 
+    /// set the form termination callback function.
     pub fn set_form_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -319,6 +340,7 @@ impl Form {
         })?)
     }
 
+    /// set the forms main window.
     pub fn set_form_win(&self, win: Option<Window>) -> result!(()) {
         Ok(form::set_form_win(Some(self.handle), match win {
             Some(window) => Some(window._handle()),
@@ -334,6 +356,7 @@ impl Form {
 impl Drop for Form {
     fn drop(&mut self) {
         if self.free_on_drop {
+            // free the ncurses internal structure.
             if let Err(source) = form::free_form(self.handle) {
                 panic!("{} @ {:?}", source, self)
             }
@@ -346,11 +369,18 @@ impl Drop for Form {
                 .lock()
                 .unwrap_or_else(|_| panic!("Form::drop() : CALLBACKS.lock() failed!!!"));
 
+            // remove any callbacks set against the form and free memory if required.
+            let mut shrink_to_fit = false;
+
             for cb_type in CallbackType::iter() {
-                callbacks.remove(&CallbackKey::new(self.handle, cb_type));
+                if callbacks.remove(&CallbackKey::new(self.handle, cb_type)).is_some() {
+                    shrink_to_fit = true;
+                }
             }
 
-            callbacks.shrink_to_fit();
+            if shrink_to_fit {
+                callbacks.shrink_to_fit();
+            }
         }
     }
 }
@@ -374,6 +404,6 @@ impl Hash for Form {
 
 impl fmt::Debug for Form {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Form {{ handle: {:p}, field_handles: {:p} }}", self.handle, self.field_handles)
+        write!(f, "Form {{ handle: {:p}, field_handles: {:p}, free_on_drop: {} }}", self.handle, self.field_handles, self.free_on_drop)
     }
 }

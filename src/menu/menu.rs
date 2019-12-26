@@ -21,7 +21,6 @@
 */
 
 #![allow(clippy::forget_copy)]
-#![allow(clippy::type_complexity)]
 
 use std::{
     ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher},
@@ -67,20 +66,22 @@ impl CallbackKey {
 unsafe impl Send for CallbackKey { }
 unsafe impl Sync for CallbackKey { }
 
+type CALLBACK = Option<Box<dyn Fn(&Menu) + Send>>;
+
 lazy_static! {
-    static ref CALLBACKS: Mutex<HashMap<CallbackKey, Option<Box<dyn Fn(&Menu) + Send>>>> = Mutex::new(HashMap::new());
+    static ref CALLBACKS: Mutex<HashMap<CallbackKey, CALLBACK>> = Mutex::new(HashMap::new());
 }
 
 macro_rules! menu_callback {
     ($func: ident, $cb_t: ident) => {
         extern fn $func(menu: MENU) {
-            if let Some(ref internal_fn) = *CALLBACKS
+            if let Some(ref callback) = *CALLBACKS
                 .lock()
                 .unwrap_or_else(|_| panic!("{}{}({:p}) : *CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($func), menu))
                 .get(&CallbackKey::new(menu, CallbackType::$cb_t))
                 .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS.lock().get() failed!!!", MODULE_PATH, stringify!($func), menu))
             {
-                internal_fn(&Menu::_from(menu, unsafe { (*menu).items }, false))
+                callback(&Menu::_from(menu, unsafe { (*menu).items }, false))
             } else {
                 panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($func), menu)
             }
@@ -115,18 +116,16 @@ impl Menu {
 }
 
 impl Menu {
-    pub fn new(menu_items: &[&MenuItem]) -> result!(Self) {
+    pub fn new(items: &[&MenuItem]) -> result!(Self) {
         // allocate enougth contiguous memory to store all the menu item handles plus
         // a null and set all pointers initially to null.
-        let item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
+        let item_handles = unsafe { libc::calloc(items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
 
         // check that we we're able to allocate our memory.
-        if item_handles.is_null() {
-            Err(NCurseswWinError::OutOfMemory { func: "Menu::new".to_string() })
-        } else {
+        if !item_handles.is_null() {
             // get all the menu item handles and write them to memory.
-            for (offset, menu_item_handle) in menu_items.iter().map(|menu_item| menu_item._handle()).enumerate() {
-                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), menu_item_handle) };
+            for (offset, item_handle) in items.iter().map(|item| item._handle()).enumerate() {
+                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), item_handle) };
             }
 
             // don't unallocate item_handles when it goes out of scope, we'll do it
@@ -138,12 +137,14 @@ impl Menu {
                 Some(menu) => Ok(Self::_from(menu, item_handles, true)),
                 None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new", errno().into()) })
             }
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: "Menu::new".to_string() })
         }
     }
 
     #[deprecated(since = "0.4.0", note = "Use Menu::new() instead")]
-    pub fn new_menu(menu_items: &[&MenuItem]) -> result!(Self) {
-        Self::new(menu_items)
+    pub fn new_menu(items: &[&MenuItem]) -> result!(Self) {
+        Self::new(items)
     }
 
     pub fn current_item(&self) -> result!(MenuItem) {
@@ -243,8 +244,8 @@ impl Menu {
         Ok(MenuSize::try_from(menu::scale_menu(self.handle)?)?)
     }
 
-    pub fn set_current_item(&self, menu_item: &MenuItem) -> result!(()) {
-        Ok(menu::set_current_item(self.handle, menu_item._handle())?)
+    pub fn set_current_item(&self, item: &MenuItem) -> result!(()) {
+        Ok(menu::set_current_item(self.handle, item._handle())?)
     }
 
     pub fn set_item_init<F>(&self, func: F) -> result!(())
@@ -296,20 +297,18 @@ impl Menu {
         Ok(menu::set_menu_init(self.handle, Some(extern_menu_init))?)
     }
 
-    pub fn set_menu_items(&mut self, menu_items: &[&MenuItem]) -> result!(()) {
+    pub fn set_menu_items(&mut self, items: &[&MenuItem]) -> result!(()) {
         // unallocate the previous item_handles memory.
         unsafe { libc::free(self.item_handles as *mut libc::c_void) };
 
         // allocate enougth memory to store all the menu item handles plus
         // a null and set all pointers initially to null.
-        let item_handles = unsafe { libc::calloc(menu_items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
+        let item_handles = unsafe { libc::calloc(items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
 
-        if item_handles.is_null() {
-            Err(NCurseswWinError::OutOfMemory { func: "Menu::set_menu_items".to_string() })
-        } else {
+        if !item_handles.is_null() {
             // get all the menu item handles and write them to memory.
-            for (offset, menu_item_handle) in menu_items.iter().map(|menu_item| menu_item._handle()).enumerate() {
-                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), menu_item_handle) };
+            for (offset, item_handle) in items.iter().map(|item| item._handle()).enumerate() {
+                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), item_handle) };
             }
 
             // don't unallocate item_handles so it can be assigned to self.item_handles
@@ -322,6 +321,8 @@ impl Menu {
                 E_OK => Ok(()),
                 rc   => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("nmenu::set_menu_items", rc) })
             }
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: "Menu::set_menu_items".to_string() })
         }
     }
 
@@ -403,11 +404,17 @@ impl Drop for Menu {
                 .lock()
                 .unwrap_or_else(|_| panic!("Menu::drop() : CALLBACKS.lock() failed!!!"));
 
+            let mut shrink_to_fit = false;
+
             for cb_type in CallbackType::iter() {
-                callbacks.remove(&CallbackKey::new(self.handle, cb_type));
+                if callbacks.remove(&CallbackKey::new(self.handle, cb_type)).is_some() {
+                    shrink_to_fit = true;
+                }
             }
 
-            callbacks.shrink_to_fit();
+            if shrink_to_fit {
+                callbacks.shrink_to_fit();
+            }
         }
     }
 }
@@ -431,6 +438,6 @@ impl Hash for Menu {
 
 impl fmt::Debug for Menu {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Menu {{ handle: {:p}, item_handles: {:p} }}", self.handle, self.item_handles)
+        write!(f, "Menu {{ handle: {:p}, item_handles: {:p}, free_on_drop: {} }}", self.handle, self.item_handles, self.free_on_drop)
     }
 }

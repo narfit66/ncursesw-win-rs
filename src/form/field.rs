@@ -41,7 +41,6 @@ pub struct Field {
 }
 
 impl HasHandle<FIELD> for Field {
-    // make a new instance from the passed ncurses pointer.
     fn _from(handle: FIELD, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Field::_from() : handle.is_null()");
 

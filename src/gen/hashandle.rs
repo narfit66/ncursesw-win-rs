@@ -21,6 +21,8 @@
 */
 
 pub trait HasHandle<T>: Drop + Sync + Send {
+    /// make a new instance from the passed ncurses pointer.
     fn _from(handle: T, free_on_drop: bool) -> Self;
+    /// return the ncurses pointer.
     fn _handle(&self) -> T;
 }
