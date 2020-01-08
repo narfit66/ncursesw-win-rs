@@ -45,12 +45,12 @@ impl<'a> PostedForm<'a> {
     }
 
     /// Command processing of `Form` events.
-    pub fn form_driver(&self, request: FormRequest) -> result!(Option<i32>) {
+    pub fn form_driver(&self, request: FormRequest) -> result!(Option<FormRequest>) {
         Ok(form::form_driver(self.form._handle(), request)?)
     }
 
     /// Command processing of `Form` events (wide character mode).
-    pub fn form_driver_w(&self, request: FormRequest, wch: WideChar) -> result!(Option<i32>) {
+    pub fn form_driver_w(&self, request: FormRequest, wch: WideChar) -> result!(Option<FormRequest>) {
         Ok(form::form_driver_w(self.form._handle(), request, wch)?)
     }
 

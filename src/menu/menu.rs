@@ -133,7 +133,7 @@ impl Menu {
             mem::forget(item_handles);
 
             // call the ncursesw shims new_menu() function with our allocated memory.
-            match unsafe { nmenu::new_menu(item_handles as *mut ITEM) } {
+            match unsafe { nmenu::new_menu(item_handles) } {
                 Some(menu) => Ok(Self::_from(menu, item_handles, true)),
                 None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new", errno().into()) })
             }

@@ -131,7 +131,7 @@ impl Form {
             mem::forget(field_handles);
 
             // call the ncursesw shims new_form() function with our allocated memory.
-            match unsafe { nform::new_form(field_handles as *mut FIELD) } {
+            match unsafe { nform::new_form(field_handles) } {
                 Some(form) => Ok(Self::_from(form, field_handles, true)),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new", errno().into()) })
             }

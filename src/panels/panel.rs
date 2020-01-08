@@ -58,7 +58,7 @@ impl Panel {
     #[deprecated(since = "0.3.1", note = "Use Panel::new() instead")]
     /// Create a new Panel instance with it's associated Window.
     pub fn new_panel(window: &Window) -> result!(Self) {
-        Panel::new(window)
+        Self::new(window)
     }
 
     /// Puts panel at the bottom of all panels.

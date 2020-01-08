@@ -43,7 +43,7 @@ impl<'a> PostedMenu<'a> {
     }
 
     /// Command processing of `Menu` events.
-    pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<i32>) {
+    pub fn menu_driver(&self, request: MenuRequest) -> result!(Option<MenuRequest>) {
         Ok(menu::menu_driver(self.menu._handle(), request)?)
     }
 
