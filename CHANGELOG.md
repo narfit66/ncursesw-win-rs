@@ -7,8 +7,8 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - `menu::menu_request_name()` now takes a `MenuRequest` instead of a `i32` for the request. [BC]
 - `menu::Menu::set_menu_pad()` now takes a `char` instead of a `i32` for the pad character. [BC]
 - `menu::Menu::{set_item_init, set_item_term, set_menu_init, set_menu_term}` now use `Fn(&Menu)` traits. [BC]
-- `menu::PostedMenu::menu_driver()` now returns a `Result<Option<MenuRequest>, NCurseswMenuError>` instead of `Result<Option<i32>, NCurseswMenuError>`. [BC]
 - `menu::Menu::{item_init, item_term, menu_init, menu_term}` have been depreciated. [BC]
+- `menu::PostedMenu::menu_driver()` now returns a `Result<Option<MenuRequest>, NCurseswMenuError>` instead of `Result<Option<i32>, NCurseswMenuError>`. [BC]
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]
