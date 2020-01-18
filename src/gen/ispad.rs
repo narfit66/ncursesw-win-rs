@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{path, convert::TryInto};
+use std::{convert::TryInto, os::unix::io::AsRawFd, io::{Read, Write}};
 
 use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
@@ -53,12 +53,12 @@ pub trait IsPad: HasHandle<WINDOW> {
     /// Create a Window instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
-    fn getwin(path: &path::Path) -> result!(Pad) {
-        Ok(Pad::_from(ncursesw::getwin(path)?, true))
+    fn getwin<I: AsRawFd + Read>(file: I) -> result!(Pad) {
+        Ok(Pad::_from(ncursesw::getwin(file)?, true))
     }
 
-    fn putwin(&self, path: &path::Path) -> result!(()) {
-        Ok(ncursesw::putwin(self._handle(), path)?)
+    fn putwin<O: AsRawFd + Write>(&self, file: O) -> result!(()) {
+        Ok(ncursesw::putwin(self._handle(), file)?)
     }
 
     fn overlay(&self, srcwin: &Pad) -> result!(()) {

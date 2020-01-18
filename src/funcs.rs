@@ -60,6 +60,14 @@ pub fn curscr() -> result!(Window) {
     }
 }
 
+pub fn newscr() -> result!(Window) {
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        Ok(Window::_from(ncursesw::newscr(), false))
+    }
+}
+
 pub fn stdscr() -> result!(Window) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)

@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::path;
+use std::{os::unix::io::AsRawFd, io::Write};
 
 use ncursesw::WINDOW;
 use crate::{NCurseswWinError, gen::HasHandle};
@@ -135,8 +135,8 @@ pub trait BaseCanvas: HasHandle<WINDOW> {
         Ok(ncursesw::notimeout(self._handle(), bf)?)
     }
 
-    fn putwin(&self, path: &path::Path) -> result!(()) {
-        Ok(ncursesw::putwin(self._handle(), path)?)
+    fn putwin<O: AsRawFd + Write>(&self, file: O) -> result!(()) {
+        Ok(ncursesw::putwin(self._handle(), file)?)
     }
 
     fn redrawwin(&self) -> result!(()) {
