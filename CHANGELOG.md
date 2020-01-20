@@ -9,8 +9,8 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - `menu::Menu::{set_item_init, set_item_term, set_menu_init, set_menu_term}` now use `Fn(&Menu)` traits. [BC]
 - `menu::Menu::{item_init, item_term, menu_init, menu_term}` have been depreciated. [BC]
 - `menu::PostedMenu::menu_driver()` now returns a `Result<Option<MenuRequest>, NCurseswMenuError>` instead of `Result<Option<i32>, NCurseswMenuError>`. [BC]
-- `gen::BaseCanvas::putwin()`, `gen::IsWindow::putwin()` and `gen::IsPad::putwin()` now take `O: std::os::unix::io::AsRawFD + std::io::Write` instead of `&std::path::Path`. [BC]
-- `gen::NCurseswWindow::getwin()` and `gen::IsPad::genwin()` now take `I: std::os::unix::io::AsRawFD + std::io::Read` instead of `&std::path::Path`. [BC]
+- `gen::BaseCanvas::putwin()`, `gen::IsWindow::putwin()` and `gen::IsPad::putwin()` now take `O: std::os::unix::io::AsRawFd + std::io::Write` instead of `&std::path::Path`. [BC]
+- `gen::NCurseswWindow::getwin()` and `gen::IsPad::genwin()` now take `I: std::os::unix::io::AsRawFd + std::io::Read` instead of `&std::path::Path`. [BC]
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]
