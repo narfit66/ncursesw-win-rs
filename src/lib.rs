@@ -1,7 +1,7 @@
 /*
     src/lib.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -50,6 +50,7 @@ mod panels;
 mod position;
 mod region;
 mod ripoff;
+mod screen;
 mod size;
 mod timeout;
 mod window;
@@ -68,6 +69,7 @@ pub use panels::*;
 pub use position::*;
 pub use region::*;
 pub use ripoff::*;
+pub use screen::*;
 pub use size::*;
 pub use timeout::*;
 pub use window::*;
@@ -82,7 +84,7 @@ pub use ncursesw::{
     CursorType, Justification, KeyBinding, LcCategory, Legacy,
     NCursesColorType, NCurseswError, panels::NCurseswPanelsError,
     mouse::NCurseswMouseError, menu::NCurseswMenuError,
-    form::NCurseswFormError, Orientation
+    form::NCurseswFormError, Orientation, SoftLabelType
 };
 pub use ncursesw::{
     AttributesColorPairType, AttributesGeneric, AttributesType,
@@ -91,15 +93,16 @@ pub use ncursesw::{
 };
 pub use ncursesw::{
     COLORS, COLOR_PAIRS, ESCDELAY, TABSIZE, baudrate, beep,
-    can_change_color, def_prog_mode, def_shell_mode, define_key,
-    delay_output, doupdate, flash, get_escdelay, getcchar, halfdelay,
-    has_colors, has_ic, has_il, has_key, is_term_resized, key_defined,
-    key_name, keybound, keyname, keyok, killchar, killwchar, longname,
-    ncurses_colortype, ncurses_colortype_set, ncurses_version,
-    reset_color_pairs, reset_prog_mode, reset_shell_mode, resetty,
-    resize_term, resizeterm, setcchar, use_legacy_coding
+    can_change_color, curses_version, def_prog_mode, def_shell_mode,
+    define_key, delay_output, doupdate, flash, get_escdelay, getcchar,
+    halfdelay, has_colors, has_ic, has_il, has_key, is_term_resized,
+    key_defined, key_name, keybound, keyname, keyok, killchar, killwchar,
+    longname, mcprint, ncurses_colortype, ncurses_colortype_set,
+    ncurses_version, reset_color_pairs, reset_prog_mode, reset_shell_mode,
+    resetty, resize_term, resizeterm, savetty, scr_dump, scr_init,
+    scr_restore, scr_set, scrl, set_escdelay, set_tabsize, setcchar,
+    typeahead, use_legacy_coding
 };
 pub use ncursesw::mouse::{
-    has_mouse, mouseinterval, set_mouseinterval, mouse_version,
-    has_mouse_interface
+    has_mouse, mouseinterval, mouse_version, has_mouse_interface
 };

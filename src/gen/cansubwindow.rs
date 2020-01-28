@@ -1,7 +1,7 @@
 /*
     src/gen/cansubwindow.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -31,14 +31,14 @@ use crate::{
 /// Is the window canvas type capable of creating a sub-window.
 pub trait CanSubWindow: HasHandle<WINDOW> + HasYXAxis + NCurseswWindow + IsWindow {
     fn subwin(&self, size: Size, origin: Origin) -> result!(Window) {
-        Ok(Window::_from(ncursesw::subwin(self._handle(), size.try_into()?, origin.try_into()?)?, true))
+        Ok(Window::_from(self._screen(), ncursesw::subwin(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
     fn getparent(&self) -> Option<Window> {
         match ncursesw::wgetparent(self._handle()) {
             None         => None,
-            Some(handle) => Some(Window::_from(handle, false))
+            Some(handle) => Some(Window::_from(self._screen(), handle, false))
         }
     }
 

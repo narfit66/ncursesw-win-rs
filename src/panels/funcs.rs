@@ -1,7 +1,7 @@
 /*
     src/panels/funcs.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@ pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
         Some(panel) => Some(panel._handle())
     }) {
         Err(source) => Err(NCurseswWinError::PanelsError { source }),
-        Ok(handle)  => Ok(Panel::_from(handle, false))
+        Ok(handle)  => Ok(Panel::_from(None, handle, false))
     }
 }
 
@@ -47,6 +47,6 @@ pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
         Some(panel) => Some(panel._handle())
     }) {
         Err(source) => Err(NCurseswWinError::PanelsError { source }),
-        Ok(handle)  => Ok(Panel::_from(handle, false))
+        Ok(handle)  => Ok(Panel::_from(None, handle, false))
     }
 }

@@ -1,7 +1,7 @@
 /*
     src/form/funcs.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -23,7 +23,7 @@
 use ncursesw::form::FormRequest;
 use crate::{Window, HasHandle, NCurseswWinError};
 
-pub fn form_request_by_name(name: &str) -> result!(bool) {
+pub fn form_request_by_name(name: &str) -> result!(Option<FormRequest>) {
     Ok(ncursesw::form::form_request_by_name(name)?)
 }
 

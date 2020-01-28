@@ -1,7 +1,7 @@
 /*
     src/ncurses/ncurses.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -54,7 +54,7 @@ impl NCurses {
 
     // Returns the initial window(stdscr) after initialisation.
     pub fn initial_window(&self) -> Window {
-        Window::_from(self.handle, true)
+        Window::_from(None, self.handle, true)
     }
 }
 

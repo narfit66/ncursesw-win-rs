@@ -1,7 +1,7 @@
 /*
     src/form/form.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -31,10 +31,10 @@ use errno::errno;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use ncursesw::{form, form::{FormOptions, E_OK, FORM, FIELD}, shims::nform};
-use crate::{Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}};
+use ncursesw::{SCREEN, form, form::{FormOptions, E_OK, FORM, FIELD}, shims::nform};
+use crate::{Screen, Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}};
 
-#[deprecated(since = "0.4.1")]
+#[deprecated(since = "0.5.0")]
 pub use ncursesw::form::Form_Hook;
 
 static MODULE_PATH: &str = "ncurseswwin::form::";
@@ -77,7 +77,7 @@ macro_rules! form_callback {
                 .get(&CallbackKey::new(form, CallbackType::$cb_t))
                 .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS.lock().get() failed!!!", MODULE_PATH, stringify!($func), form))
             {
-                callback(&Form::_from(form, unsafe { (*form).field }, false))
+                callback(&Form::_from(None, form, unsafe { (*form).field }, false))
             } else {
                 panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($func), form)
             }
@@ -92,21 +92,27 @@ form_callback!(extern_form_term, FormTerm);
 
 /// Form.
 pub struct Form {
-    handle:        FORM,        // pointer to ncurses form type internal structure
-    field_handles: *mut FIELD,  // pointer to list of field pointers (null terminated).
-    free_on_drop:  bool         // call `free_form()` when instance goes out of scope.
+    screen:        Option<SCREEN>, // pointer to optional NCurses screen type internal structure.
+    handle:        FORM,           // pointer to ncurses form type internal structure.
+    field_handles: *mut FIELD,     // pointer to list of field pointers (null terminated).
+    free_on_drop:  bool            // call `free_form()` when instance goes out of scope.
 }
 
 impl Form {
-    // privatly to the crate make a new instance from the passed ncurses pointers.
-    pub(in crate::form) fn _from(handle: FORM, field_handles: *mut FIELD, free_on_drop: bool) -> Self {
+    pub(in crate::form) fn _from(screen: Option<SCREEN>, handle: FORM, field_handles: *mut FIELD, free_on_drop: bool) -> Self {
+        if let Some(sp) = screen {
+            assert!(!sp.is_null(), "Form::_from() : screen.is_null()");
+        }
         assert!(!handle.is_null(), "Form::_from() : handle.is_null()");
         assert!(!field_handles.is_null(), "Form::_from() : field_handles.is_null()");
 
-        Self { handle, field_handles, free_on_drop }
+        Self { screen, handle, field_handles, free_on_drop }
     }
 
-    // privatly to the crate obtain this instances form pointer.
+    pub(in crate::form) fn _screen(&self) -> Option<SCREEN> {
+        self.screen
+    }
+
     pub(in crate::form) fn _handle(&self) -> FORM {
         self.handle
     }
@@ -132,7 +138,7 @@ impl Form {
 
             // call the ncursesw shims new_form() function with our allocated memory.
             match unsafe { nform::new_form(field_handles) } {
-                Some(form) => Ok(Self::_from(form, field_handles, true)),
+                Some(form) => Ok(Self::_from(None, form, field_handles, true)),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new", errno().into()) })
             }
         } else {
@@ -140,10 +146,43 @@ impl Form {
         }
     }
 
-    #[deprecated(since = "0.4.1", note = "Use Form::new() instead")]
+    #[deprecated(since = "0.5.0", note = "Use Form::new() instead")]
     /// create a new instance.
     pub fn new_form(fields: &[&Field]) -> result!(Self) {
         Self::new(fields)
+    }
+
+    /// create a new instance.
+    pub fn new_sp(screen: &Screen, fields: &[&Field]) -> result!(Self) {
+        // allocate enougth contiguous memory to store all the field handles plus
+        // a null and set all pointers initially to null.
+        let field_handles = unsafe { libc::calloc(fields.len() + 1, mem::size_of::<FIELD>()) as *mut FIELD };
+
+        // check that we we're able to allocate our memory.
+        if !field_handles.is_null() {
+            // get all the field handles and write them to memory.
+            for (offset, field_handle) in fields.iter().map(|field| field._handle()).enumerate() {
+                unsafe { ptr::write(field_handles.offset(isize::try_from(offset)?), field_handle) };
+            }
+
+            // don't unallocate field_handles when it goes out of scope, we'll do it
+            // ourselves as self.field_handles will point to our contiguous memory.
+            mem::forget(field_handles);
+
+            // call the ncursesw shims new_form() function with our allocated memory.
+            match unsafe { nform::new_form_sp(screen._handle(), field_handles) } {
+                Some(form) => Ok(Self::_from(Some(screen._handle()), form, field_handles, true)),
+                None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new_sp", errno().into()) })
+            }
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: "Form::new_sp".to_string() })
+        }
+    }
+
+    #[deprecated(since = "0.5.0", note = "Use Form::new_sp() instead")]
+    /// create a new instance.
+    pub fn new_form_sp(screen: &Screen, fields: &[&Field]) -> result!(Self) {
+        Self::new_sp(screen, fields)
     }
 
     /// return the current field of the form.
@@ -164,13 +203,13 @@ impl Form {
         Ok(usize::try_from(form::field_count(self.handle)?)?)
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     /// return the field initialisation callback function.
     pub fn field_init(&self) -> result!(Form_Hook) {
         Ok(form::field_init(self.handle)?)
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     /// return the field terminate callback function.
     pub fn field_term(&self) -> result!(Form_Hook) {
         Ok(form::field_term(self.handle)?)
@@ -181,7 +220,7 @@ impl Form {
         Ok(form::form_fields(self.handle)?.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     /// return the form initialisation callback function.
     pub fn form_init(&self) -> result!(Form_Hook) {
         Ok(form::form_init(self.handle)?)
@@ -205,10 +244,10 @@ impl Form {
 
     /// return the forms sub window.
     pub fn form_sub(&self) -> result!(Window) {
-        Ok(Window::_from(form::form_sub(self.handle)?, false))
+        Ok(Window::_from(self.screen, form::form_sub(self.handle)?, false))
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     /// return the form termination callback function.
     pub fn form_term(&self) -> result!(Form_Hook) {
         Ok(form::form_term(self.handle)?)
@@ -221,7 +260,7 @@ impl Form {
 
     /// return the forms main window.
     pub fn form_win(&self) -> result!(Window) {
-        Ok(Window::_from(form::form_win(self.handle)?, false))
+        Ok(Window::_from(self.screen, form::form_win(self.handle)?, false))
     }
 
     /// post (make visible) the form and refresh if required.
@@ -313,7 +352,11 @@ impl Form {
     }
 
     /// set the forms sub window.
-    pub fn set_form_sub(&self, sub: Option<Window>) -> result!(()) {
+    pub fn set_form_sub(&self, sub: Option<&Window>) -> result!(()) {
+        if let Some(window) = sub {
+            assert!(self._screen() == window._screen());
+        }
+
         Ok(form::set_form_sub(Some(self.handle), match sub {
             Some(window) => Some(window._handle()),
             None         => None
@@ -341,7 +384,11 @@ impl Form {
     }
 
     /// set the forms main window.
-    pub fn set_form_win(&self, win: Option<Window>) -> result!(()) {
+    pub fn set_form_win(&self, win: Option<&Window>) -> result!(()) {
+        if let Some(window) = win {
+            assert!(self._screen() == window._screen());
+        }
+
         Ok(form::set_form_win(Some(self.handle), match win {
             Some(window) => Some(window._handle()),
             None         => None
@@ -390,7 +437,7 @@ unsafe impl Sync for Form { } // too make thread safe
 
 impl PartialEq for Form {
     fn eq(&self, rhs: &Self) -> bool {
-        ptr::eq(self.handle, rhs.handle)
+        self.screen == rhs._screen() && ptr::eq(self.handle, rhs.handle)
     }
 }
 
@@ -398,12 +445,13 @@ impl Eq for Form { }
 
 impl Hash for Form {
     fn hash<H: Hasher>(&self, state: &mut H) {
+        self.screen.hash(state);
         self.handle.hash(state);
     }
 }
 
 impl fmt::Debug for Form {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Form {{ handle: {:p}, field_handles: {:p}, free_on_drop: {} }}", self.handle, self.field_handles, self.free_on_drop)
+        write!(f, "Form {{ screen: {:?}, handle: {:p}, field_handles: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.field_handles, self.free_on_drop)
     }
 }

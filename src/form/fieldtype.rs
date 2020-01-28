@@ -1,7 +1,7 @@
 /*
     src/form/fieldtype.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@ use ncursesw::{
         va_list
     }
 };
-use crate::{HasHandle, NCurseswWinError};
+use crate::NCurseswWinError;
 
 lazy_static! {
     /// Alpha field type.
@@ -54,15 +54,15 @@ pub struct FieldType {
     free_on_drop: bool
 }
 
-impl HasHandle<FIELDTYPE> for FieldType {
+impl FieldType {
     // make a new instance from the passed ncurses menu item pointer.
-    fn _from(handle: FIELDTYPE, free_on_drop: bool) -> Self {
+    pub(in crate::form) fn _from(handle: FIELDTYPE, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "FieldType::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    fn _handle(&self) -> FIELDTYPE {
+    pub(in crate::form) fn _handle(&self) -> FIELDTYPE {
         self.handle
     }
 }

@@ -1,7 +1,7 @@
 /*
     src/pad.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,7 +22,7 @@
 
 use std::{ptr, fmt, hash::{Hash, Hasher}};
 
-use ncursesw::WINDOW;
+use ncursesw::{SCREEN, WINDOW};
 use crate::gen::*;
 
 /// A pad canvas.
@@ -31,15 +31,23 @@ use crate::gen::*;
 /// to `_win_st` the 'w' has been removed for example the ncurses function `mvwgetn_wstr()`
 /// has become the method `self.mvgetn_wstr()`.
 pub struct Pad {
-    handle:       WINDOW, // pointer to ncurses _win_st internal structure
-    free_on_drop: bool    // free WINDOW handle on drop of structure
+    screen:       Option<SCREEN>, // pointer to optional NCurses _screen internal structure.
+    handle:       WINDOW,         // pointer to NCurses _win_st internal structure.
+    free_on_drop: bool            // free WINDOW handle on drop of structure.
 }
 
 impl HasHandle<WINDOW> for Pad {
-    fn _from(handle: WINDOW, free_on_drop: bool) -> Self {
+    fn _from(screen: Option<SCREEN>, handle: WINDOW, free_on_drop: bool) -> Self {
+        if let Some(sp) = screen {
+            assert!(!sp.is_null(), "Pad::_from() : screen.is_null()");
+        }
         assert!(!handle.is_null(), "Pad::_from() : handle.is_null()");
 
-        Self { handle, free_on_drop }
+        Self { screen, handle, free_on_drop }
+    }
+
+    fn _screen(&self) -> Option<SCREEN> {
+        self.screen
     }
 
     fn _handle(&self) -> WINDOW {
@@ -87,7 +95,7 @@ unsafe impl Sync for Pad { } // too make thread safe
 
 impl PartialEq for Pad {
     fn eq(&self, rhs: &Self) -> bool {
-        ptr::eq(self.handle, rhs.handle)
+        self.screen == rhs._screen() && ptr::eq(self.handle, rhs.handle)
     }
 }
 
@@ -95,12 +103,13 @@ impl Eq for Pad { }
 
 impl Hash for Pad {
     fn hash<H: Hasher>(&self, state: &mut H) {
+        self.screen.hash(state);
         self.handle.hash(state);
     }
 }
 
 impl fmt::Debug for Pad {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Pad {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+        write!(f, "Pad {{ screen: {:?}, handle: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.free_on_drop)
     }
 }

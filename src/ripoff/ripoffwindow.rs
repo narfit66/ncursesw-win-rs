@@ -1,7 +1,7 @@
 /*
     src/ripoff/ripoffwindow.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,7 +22,7 @@
 
 use std::{fmt, convert::{TryFrom, TryInto}};
 
-use ncursesw::WINDOW;
+use ncursesw::{SCREEN, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::*};
 
 /// A ripoff line window canvas.
@@ -31,14 +31,22 @@ use crate::{Origin, NCurseswWinError, gen::*};
 /// to `_win_st` the 'w' has been removed for example the ncurses function `wget_wch(*WINDOW)`
 /// has become the method `self.get_wch()`.
 pub struct RipoffWindow {
-    handle: WINDOW // pointer to ncurses _win_st internal structure
+    screen: Option<SCREEN>, // pointer to ncurses screen internal structure
+    handle: WINDOW          // pointer to ncurses _win_st internal structure
 }
 
 impl HasHandle<WINDOW> for RipoffWindow {
-    fn _from(handle: WINDOW, _: bool) -> Self {
+    fn _from(screen: Option<SCREEN>, handle: WINDOW, _: bool) -> Self {
+        if let Some(sp) = screen {
+            assert!(!sp.is_null(), "RipoffWindow::_from() : screen.is_null()");
+        }
         assert!(!handle.is_null(), "RipoffWindow::_from() : handle.is_null()");
 
-        Self { handle }
+        Self { screen, handle }
+    }
+
+    fn _screen(&self) -> Option<SCREEN> {
+        self.screen
     }
 
     fn _handle(&self) -> WINDOW {
@@ -85,6 +93,6 @@ unsafe impl Sync for RipoffWindow { } // too make thread safe
 
 impl fmt::Debug for RipoffWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "RipoffWindow {{ handle: {:p} }}", self.handle)
+        write!(f, "RipoffWindow {{ screen: {:?}, handle: {:p} }}", self.screen, self.handle)
     }
 }

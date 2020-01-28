@@ -23,30 +23,41 @@
 use std::{convert::TryInto, os::unix::io::AsRawFd, io::{Read, Write}};
 
 use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
-use crate::{Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
+use crate::{Screen, Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a pad.
 pub trait IsPad: HasHandle<WINDOW> {
     /// Create a new instance of a Window that will act as a pad.
     fn new(size: Size) -> result!(Pad) {
-        Ok(Pad::_from(ncursesw::newpad(size.try_into()?)?, true))
+        Ok(Pad::_from(None, ncursesw::newpad(size.try_into()?)?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Pad::new() instead")]
     /// Create a new instance of a Window that will act as a pad.
     fn newpad(size: Size) -> result!(Pad) {
-        Pad::new(size)
+        Self::new(size)
+    }
+
+    /// Create a new instance of a Window that will act as a pad.
+    fn new_sp(screen: &Screen, size: Size) -> result!(Pad) {
+        Ok(Pad::_from(Some(screen._handle()), ncursesw::newpad_sp(screen._handle(), size.try_into()?)?, true))
+    }
+
+    #[deprecated(since = "0.5.0", note = "Use Pad::new_sp() instead")]
+    /// Create a new instance of a Window that will act as a pad.
+    fn newpad_sp(screen: &Screen, size: Size) -> result!(Pad) {
+        Self::new_sp(screen, size)
     }
 
     fn subpad(&self, size: Size, origin: Origin) -> result!(Pad) {
-        Ok(Pad::_from(ncursesw::subpad(self._handle(), size.try_into()?, origin.try_into()?)?, true))
+        Ok(Pad::_from(self._screen(), ncursesw::subpad(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
     /// returns the parent Window for subwindows, or None if their is no parent.
     fn getparent(&self) -> Option<Pad> {
         match ncursesw::wgetparent(self._handle()) {
             None         => None,
-            Some(handle) => Some(Pad::_from(handle, false))
+            Some(handle) => Some(Pad::_from(self._screen(), handle, false))
         }
     }
 
@@ -54,7 +65,7 @@ pub trait IsPad: HasHandle<WINDOW> {
     ///
     /// This uses the file previously generated using the Pad::putwin() routine.
     fn getwin<I: AsRawFd + Read>(file: I) -> result!(Pad) {
-        Ok(Pad::_from(ncursesw::getwin(file)?, true))
+        Ok(Pad::_from(None, ncursesw::getwin(file)?, true))
     }
 
     fn putwin<O: AsRawFd + Write>(&self, file: O) -> result!(()) {

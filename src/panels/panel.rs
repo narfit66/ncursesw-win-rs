@@ -1,7 +1,7 @@
 /*
     src/panels/panel.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,11 +22,12 @@
 
 use std::{ptr, fmt, convert::TryInto, hash::{Hash, Hasher}};
 
-use ncursesw::{panels, panels::PANEL};
+use ncursesw::{panels, SCREEN, panels::PANEL};
 use crate::{Origin, Window, NCurseswWinError, gen::HasHandle, panels::funcs};
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
+    screen:       Option<SCREEN>,
     handle:       PANEL,
     free_on_drop: bool
 }
@@ -38,10 +39,17 @@ impl HasHandle<PANEL> for Panel {
     // free_on_drop is false in call's such as panel_above(&self) where we are
     // 'peeking' the Panel but it would be invalid to free the handle when
     // our instance goes out of scope.
-    fn _from(handle: PANEL, free_on_drop: bool) -> Self {
+    fn _from(screen: Option<SCREEN>, handle: PANEL, free_on_drop: bool) -> Self {
+        if let Some(sp) = screen {
+            assert!(!sp.is_null(), "Panel::_from() : screen.is_null()");
+        }
         assert!(!handle.is_null(), "Panel::_from() : handle.is_null()");
 
-        Self { handle, free_on_drop }
+        Self { screen, handle, free_on_drop }
+    }
+
+    fn _screen(&self) -> Option<SCREEN> {
+        self.screen
     }
 
     fn _handle(&self) -> PANEL {
@@ -52,7 +60,7 @@ impl HasHandle<PANEL> for Panel {
 impl Panel {
     /// Create a new Panel instance with it's associated Window.
     pub fn new(window: &Window) -> result!(Self) {
-        Ok(Self::_from(panels::new_panel(window._handle())?, true))
+        Ok(Self::_from(window._screen(), panels::new_panel(window._handle())?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Panel::new() instead")]
@@ -85,7 +93,7 @@ impl Panel {
 
     /// Returns the window of the given panel.
     pub fn panel_window(&self) -> result!(Window) {
-        Ok(Window::_from(panels::panel_window(self.handle)?, false))
+        Ok(Window::_from(self.screen, panels::panel_window(self.handle)?, false))
     }
 
     /// Replaces the current window of panel with window.
@@ -93,6 +101,8 @@ impl Panel {
     /// Useful, for example if you want to resize a panel; if you're using ncurses, you can
     /// call replace_panel on the output of wresize(3x)). It does not change the position of the panel in the stack.
     pub fn replace_panel(&self, window: &Window) -> result!(()) {
+        assert!(self.screen == window._screen());
+
         Ok(panels::replace_panel(self.handle, window._handle())?)
     }
 
@@ -150,7 +160,7 @@ unsafe impl Sync for Panel { } // too make thread safe
 
 impl PartialEq for Panel {
     fn eq(&self, rhs: &Self) -> bool {
-        ptr::eq(self.handle, rhs.handle)
+        self.screen == rhs._screen() && ptr::eq(self.handle, rhs.handle)
     }
 }
 
@@ -158,12 +168,13 @@ impl Eq for Panel { }
 
 impl Hash for Panel {
     fn hash<H: Hasher>(&self, state: &mut H) {
+        self.screen.hash(state);
         self.handle.hash(state);
     }
 }
 
 impl fmt::Debug for Panel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
+        write!(f, "Panel {{ screen: {:?}, handle: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.free_on_drop)
     }
 }

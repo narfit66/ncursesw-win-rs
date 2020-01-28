@@ -23,19 +23,29 @@
 use std::{convert::TryInto, os::unix::io::AsRawFd, io::Read};
 
 use ncursesw::WINDOW;
-use crate::{Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
+use crate::{Screen, Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 
 /// Is the window canvas a ncursesw window type.
 pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
     /// Create a new instance of a Window
     fn new(size: Size, origin: Origin) -> result!(Window) {
-        Ok(Window::_from(ncursesw::newwin(size.try_into()?, origin.try_into()?)?, true))
+        Ok(Window::_from(None, ncursesw::newwin(size.try_into()?, origin.try_into()?)?, true))
     }
 
     #[deprecated(since = "0.3.1", note = "Use Window::new() instead")]
     /// Create a new instance of a Window
     fn newwin(size: Size, origin: Origin) -> result!(Window) {
-        Window::new(size, origin)
+        Self::new(size, origin)
+    }
+
+    /// Create a new instance of a Window
+    fn new_sp(screen: &Screen, size: Size, origin: Origin) -> result!(Window) {
+        Ok(Window::_from(Some(screen._handle()), ncursesw::newwin_sp(screen._handle(), size.try_into()?, origin.try_into()?)?, true))
+    }
+
+    #[deprecated(since = "0.5.0", note = "Use Window::new() instead")]
+    fn newwin_sp(screen: &Screen, size: Size, origin: Origin) -> result!(Window) {
+        Self::new_sp(screen, size, origin)
     }
 
     fn copywin(
@@ -50,14 +60,14 @@ pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
     }
 
     fn dupwin(&self) -> result!(Window) {
-        Ok(Window::_from(ncursesw::dupwin(self._handle())?, true))
+        Ok(Window::_from(self._screen(), ncursesw::dupwin(self._handle())?, true))
     }
 
     /// Create a Window instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
     fn getwin<I: AsRawFd + Read>(file: I) -> result!(Window) {
-        Ok(Window::_from(ncursesw::getwin(file)?, true))
+        Ok(Window::_from(None, ncursesw::getwin(file)?, true))
     }
 
     fn overlay(&self, srcwin: &Window) -> result!(()) {

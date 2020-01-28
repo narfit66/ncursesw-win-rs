@@ -1,7 +1,7 @@
 /*
     src/form/field.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -36,18 +36,18 @@ use crate::{
 
 /// Form field.
 pub struct Field {
-    handle:       FIELD, // pointer to ncurses field type internal structure
+    handle:       FIELD, // pointer to NCurses field type internal structure
     free_on_drop: bool
 }
 
-impl HasHandle<FIELD> for Field {
-    fn _from(handle: FIELD, free_on_drop: bool) -> Self {
+impl Field {
+    pub(in crate::form) fn _from(handle: FIELD, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "Field::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    fn _handle(&self) -> FIELD {
+    pub(in crate::form) fn _handle(&self) -> FIELD {
         self.handle
     }
 }

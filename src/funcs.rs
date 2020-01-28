@@ -56,7 +56,7 @@ pub fn curscr() -> result!(Window) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        Ok(Window::_from(ncursesw::curscr(), false))
+        Ok(Window::_from(None, ncursesw::curscr(), false))
     }
 }
 
@@ -64,7 +64,7 @@ pub fn newscr() -> result!(Window) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        Ok(Window::_from(ncursesw::newscr(), false))
+        Ok(Window::_from(None, ncursesw::newscr(), false))
     }
 }
 
@@ -72,7 +72,7 @@ pub fn stdscr() -> result!(Window) {
     if !INITSCR_CALLED.load(Ordering::SeqCst) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
-        Ok(Window::_from(ncursesw::stdscr(), false))
+        Ok(Window::_from(None, ncursesw::stdscr(), false))
     }
 }
 

@@ -1,7 +1,7 @@
 /*
     src/ripoff/ripoffline.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@ macro_rules! ripoff_init_fn {
             RIPOFFLINES
                 .lock()
                 .unwrap_or_else(|_| panic!("ripoff_init{}() : RIPOFFLINES.lock() failed!", $n))
-                .insert($n, (RipoffWindow::_from(win, false), cols));
+                .insert($n, (RipoffWindow::_from(None, win, false), cols));
 
             ncursesw::shims::constants::OK
         }

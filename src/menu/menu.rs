@@ -1,7 +1,7 @@
 /*
     src/menu/menu.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -31,9 +31,9 @@ use errno::errno;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use ncursesw::{normal, menu, menu::{MENU, ITEM, E_OK}, shims::nmenu};
+use ncursesw::{SCREEN, normal, menu, menu::{MENU, ITEM, E_OK}, shims::nmenu};
 use crate::{
-    Window, HasHandle, NCurseswWinError,
+    Screen, Window, HasHandle, NCurseswWinError,
     menu::{MenuSize, MenuItem, MenuSpacing, PostedMenu}
 };
 
@@ -81,7 +81,7 @@ macro_rules! menu_callback {
                 .get(&CallbackKey::new(menu, CallbackType::$cb_t))
                 .unwrap_or_else(|| panic!("{}{}({:p}) : *CALLBACKS.lock().get() failed!!!", MODULE_PATH, stringify!($func), menu))
             {
-                callback(&Menu::_from(menu, unsafe { (*menu).items }, false))
+                callback(&Menu::_from(None, menu, unsafe { (*menu).items }, false))
             } else {
                 panic!("{}{}({:p}) : *CALLBACKS.lock().get() returned None!!!", MODULE_PATH, stringify!($func), menu)
             }
@@ -96,18 +96,26 @@ menu_callback!(extern_menu_term, MenuTerm);
 
 /// Menu.
 pub struct Menu {
-    handle:       MENU,       // pointer to ncurses menu item internal structure
-    item_handles: *mut ITEM,  // double-pointer to allocated memory that the ncurses menu module uses for menu items.
+    screen:       Option<SCREEN>, // pointer to optional NCurses screen internal structure.
+    handle:       MENU,           // pointer to NCurses menu item internal structure.
+    item_handles: *mut ITEM,      // double-pointer to allocated memory that the ncurses menu module uses for menu items.
     free_on_drop: bool
 }
 
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
-    fn _from(handle: MENU, item_handles: *mut ITEM, free_on_drop: bool) -> Self {
+    pub(in crate::menu) fn _from(screen: Option<SCREEN>, handle: MENU, item_handles: *mut ITEM, free_on_drop: bool) -> Self {
+        if let Some(sp) = screen {
+            assert!(!sp.is_null(), "Menu::_from() : screen.is_null()");
+        }
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
         assert!(!item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
 
-        Self { handle, item_handles, free_on_drop }
+        Self { screen, handle, item_handles, free_on_drop }
+    }
+
+    pub(in crate::menu) fn _screen(&self) -> Option<SCREEN> {
+        self.screen
     }
 
     pub(in crate::menu) fn _handle(&self) -> MENU {
@@ -134,7 +142,7 @@ impl Menu {
 
             // call the ncursesw shims new_menu() function with our allocated memory.
             match unsafe { nmenu::new_menu(item_handles) } {
-                Some(menu) => Ok(Self::_from(menu, item_handles, true)),
+                Some(menu) => Ok(Self::_from(None, menu, item_handles, true)),
                 None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new", errno().into()) })
             }
         } else {
@@ -147,6 +155,37 @@ impl Menu {
         Self::new(items)
     }
 
+    pub fn new_sp(screen: &Screen, items: &[&MenuItem]) -> result!(Self) {
+        // allocate enougth contiguous memory to store all the menu item handles plus
+        // a null and set all pointers initially to null.
+        let item_handles = unsafe { libc::calloc(items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
+
+        // check that we we're able to allocate our memory.
+        if !item_handles.is_null() {
+            // get all the menu item handles and write them to memory.
+            for (offset, item_handle) in items.iter().map(|item| item._handle()).enumerate() {
+                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), item_handle) };
+            }
+
+            // don't unallocate item_handles when it goes out of scope, we'll do it
+            // ourselves as self.item_handles will point to our contiguous memory.
+            mem::forget(item_handles);
+
+            // call the ncursesw shims new_menu() function with our allocated memory.
+            match unsafe { nmenu::new_menu_sp(screen._handle(), item_handles) } {
+                Some(menu) => Ok(Self::_from(Some(screen._handle()), menu, item_handles, true)),
+                None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new_sp", errno().into()) })
+            }
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: "Menu::new_sp".to_string() })
+        }
+    }
+
+    #[deprecated(since = "0.5.0", note = "Use Menu::new_sp() instead")]
+    pub fn new_menu_sp(screen: &Screen, items: &[&MenuItem]) -> result!(Self) {
+        Self::new_sp(screen, items)
+    }
+
     pub fn current_item(&self) -> result!(MenuItem) {
         Ok(MenuItem::_from(menu::current_item(self.handle)?, false))
     }
@@ -155,12 +194,12 @@ impl Menu {
         Ok(usize::try_from(menu::item_count(self.handle)?)?)
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     pub fn item_init(&self) -> result!(Menu_Hook) {
         Ok(menu::item_init(self.handle)?)
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     pub fn item_term(&self) -> result!(Menu_Hook) {
         Ok(menu::item_term(self.handle)?)
     }
@@ -181,7 +220,7 @@ impl Menu {
         menu::menu_grey(self.handle)
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     pub fn menu_init(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_init(self.handle)?)
     }
@@ -219,10 +258,10 @@ impl Menu {
     }
 
     pub fn menu_sub(&self) -> result!(Window) {
-        Ok(Window::_from(menu::menu_sub(self.handle)?, false))
+        Ok(Window::_from(self.screen, menu::menu_sub(self.handle)?, false))
     }
 
-    #[deprecated(since = "0.4.1")]
+    #[deprecated(since = "0.5.0")]
     pub fn menu_term(&self) -> result!(Menu_Hook) {
         Ok(menu::menu_term(self.handle)?)
     }
@@ -233,7 +272,7 @@ impl Menu {
     }
 
     pub fn menu_win(&self) -> result!(Window) {
-        Ok(Window::_from(menu::menu_win(self.handle)?, false))
+        Ok(Window::_from(self.screen, menu::menu_win(self.handle)?, false))
     }
 
     pub fn post_menu(&self, refresh: bool) -> result!(PostedMenu) {
@@ -347,6 +386,10 @@ impl Menu {
     }
 
     pub fn set_menu_sub(&self, window: Option<&Window>) -> result!(()) {
+        if let Some(win) = window {
+            assert!(self._screen() == win._screen())
+        }
+
         Ok(menu::set_menu_sub(Some(self.handle), match window {
             Some(window) => Some(window._handle()),
             None         => None
@@ -373,6 +416,10 @@ impl Menu {
     }
 
     pub fn set_menu_win(&self, window: Option<&Window>) -> result!(()) {
+        if let Some(win) = window {
+            assert!(self._screen() == win._screen())
+        }
+
         Ok(menu::set_menu_win(Some(self.handle), match window {
             Some(window) => Some(window._handle()),
             None         => None
@@ -432,6 +479,7 @@ impl Eq for Menu { }
 
 impl Hash for Menu {
     fn hash<H: Hasher>(&self, state: &mut H) {
+        self.screen.hash(state);
         self.handle.hash(state);
     }
 }

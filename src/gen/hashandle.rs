@@ -1,7 +1,7 @@
 /*
     src/gen/hashandle.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,9 +20,13 @@
     IN THE SOFTWARE.
 */
 
+use ncursesw::SCREEN;
+
 pub trait HasHandle<T>: Drop + Sync + Send {
-    /// make a new instance from the passed ncurses pointer.
-    fn _from(handle: T, free_on_drop: bool) -> Self;
-    /// return the ncurses pointer.
+    // make a new instance from the passed ncurses pointer.
+    fn _from(screen: Option<SCREEN>, handle: T, free_on_drop: bool) -> Self;
+    //
+    fn _screen(&self) -> Option<SCREEN>;
+    // return the ncurses pointer.
     fn _handle(&self) -> T;
 }

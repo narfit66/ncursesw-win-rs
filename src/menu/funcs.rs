@@ -1,7 +1,7 @@
 /*
     src/menu/funcs.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -25,7 +25,7 @@ use std::convert::TryInto;
 use ncursesw::menu::MenuRequest;
 use crate::{Window, HasHandle, NCurseswWinError, menu::MenuSize};
 
-pub fn menu_request_by_name(name: &str) -> result!(bool) {
+pub fn menu_request_by_name(name: &str) -> result!(Option<MenuRequest>) {
     Ok(ncursesw::menu::menu_request_by_name(name)?)
 }
 

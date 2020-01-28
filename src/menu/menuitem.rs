@@ -1,7 +1,7 @@
 /*
     src/menu/menuitem.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -23,7 +23,7 @@
 use std::{ptr, fmt, convert::TryFrom, hash::{Hash, Hasher}};
 
 use ncursesw::{menu, menu::ITEM, menu::ItemOptions};
-use crate::{HasHandle, NCurseswWinError};
+use crate::NCurseswWinError;
 
 /// Menu item.
 pub struct MenuItem {
@@ -31,14 +31,14 @@ pub struct MenuItem {
     free_on_drop: bool
 }
 
-impl HasHandle<ITEM> for MenuItem {
-    fn _from(handle: ITEM, free_on_drop: bool) -> Self {
+impl MenuItem {
+    pub(in crate::menu) fn _from(handle: ITEM, free_on_drop: bool) -> Self {
         assert!(!handle.is_null(), "MenuItem::_from() : handle.is_null()");
 
         Self { handle, free_on_drop }
     }
 
-    fn _handle(&self) -> ITEM {
+    pub(in crate::menu) fn _handle(&self) -> ITEM {
         self.handle
     }
 }
