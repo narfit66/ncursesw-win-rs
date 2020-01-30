@@ -107,6 +107,14 @@ pub trait BaseCanvas: HasHandle<WINDOW> {
         ncursesw::is_pad(self._handle())
     }
 
+    fn is_scrollok(&self) -> bool {
+        ncursesw::is_scrollok(self._handle())
+    }
+
+    fn is_subwin(&self) -> bool {
+        ncursesw::is_subwin(self._handle())
+    }
+
     fn is_syncok(&self) -> bool {
         ncursesw::is_syncok(self._handle())
     }

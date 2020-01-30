@@ -25,8 +25,7 @@
 use std::{sync::atomic::Ordering, convert::TryFrom};
 
 use ncursesw::{
-    ColorsType, ColorType, ColorAttributeTypes,
-    CursorType, LcCategory
+    ColorsType, ColorType, ColorAttributeTypes, CursorType
 };
 use crate::{
     InputMode, Origin, Size, Window, NCurseswWinError,
@@ -73,15 +72,6 @@ pub fn stdscr() -> result!(Window) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
         Ok(Window::_from(None, ncursesw::stdscr(), false))
-    }
-}
-
-/// Set the locale to be used, required if using unicode representation.
-pub fn setlocale(lc: LcCategory, locale: &str) -> result!(String) {
-    if INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrAlreadyCalled)
-    } else {
-        Ok(ncursesw::setlocale(lc, locale)?)
     }
 }
 

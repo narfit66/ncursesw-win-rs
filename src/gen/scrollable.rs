@@ -1,7 +1,7 @@
 /*
     src/gen/scrollable.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -37,10 +37,6 @@ pub trait Scrollable: HasHandle<WINDOW> + HasYXAxis {
 
     fn scrollok(&self, bf: bool) -> result!(()) {
         Ok(ncursesw::scrollok(self._handle(), bf)?)
-    }
-
-    fn is_scrollok(&self) -> bool {
-        ncursesw::is_scrollok(self._handle())
     }
 
     fn setscrreg(&self, region: Region) -> result!(()) {

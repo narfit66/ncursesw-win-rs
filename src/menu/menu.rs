@@ -31,7 +31,10 @@ use errno::errno;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use ncursesw::{SCREEN, normal, menu, menu::{MENU, ITEM, E_OK}, shims::nmenu};
+use ncursesw::{
+    SCREEN, normal, menu, menu::{MENU, ITEM},
+    shims::nmenu, shims::constants::E_OK
+};
 use crate::{
     Screen, Window, HasHandle, NCurseswWinError,
     menu::{MenuSize, MenuItem, MenuSpacing, PostedMenu}

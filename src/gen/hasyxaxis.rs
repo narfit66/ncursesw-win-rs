@@ -1,7 +1,7 @@
 /*
     src/gen/hasyxaxis.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -66,10 +66,8 @@ pub trait HasYXAxis: HasHandle<WINDOW> + HasYAxis + HasXAxis {
         Ok(ncursesw::wresize(self._handle(), size.try_into()?)?)
     }
 
-    fn touchline(&self, region: Region) -> result!(()) {
-        assert_region!("touchline", self.size()?, region);
-
-        Ok(ncursesw::touchline(self._handle(), region.try_into()?)?)
+    fn touchline(&self, count: u16, start: u16) -> result!(()) {
+        Ok(ncursesw::touchline(self._handle(), i32::try_from(count)?, i32::try_from(start)?)?)
     }
 
     fn touchln(&self, line: u16, lines: u16, changed: Changed) -> result!(()) {

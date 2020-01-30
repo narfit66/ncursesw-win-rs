@@ -25,9 +25,9 @@ use std::{ptr, fmt, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
 use ncursesw::{
     normal, form,
     form::{
-        FieldOptions, FieldJustification, FIELD, FIELDTYPE, E_OK, ncursesw_form_error_from_rc
+        FieldOptions, FieldJustification, FIELD, FIELDTYPE, ncursesw_form_error_from_rc
     },
-    shims::bindings
+    shims::bindings, shims::constants::E_OK
 };
 use crate::{
     Origin, HasHandle, NCurseswWinError,

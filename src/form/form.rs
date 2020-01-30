@@ -31,8 +31,13 @@ use errno::errno;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use ncursesw::{SCREEN, form, form::{FormOptions, E_OK, FORM, FIELD}, shims::nform};
-use crate::{Screen, Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}};
+use ncursesw::{
+    SCREEN, form, form::{FormOptions, FORM, FIELD},
+    shims::nform, shims::constants::E_OK
+};
+use crate::{
+    Screen, Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}
+};
 
 #[deprecated(since = "0.5.0")]
 pub use ncursesw::form::Form_Hook;

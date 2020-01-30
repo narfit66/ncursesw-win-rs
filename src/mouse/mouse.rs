@@ -1,7 +1,7 @@
 /*
     src/mouse/mouse.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@ pub struct Mouse {
 impl Mouse {
     /// Create a new instance of a mouse pointer.
     pub fn new(id: i16, mask: MouseMask) -> result!(Self) {
-        mousemask(mask.mask()?, None)?;
+        mousemask(mask.mask()?)?;
 
         Ok(Self { handle: MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }, mask })
     }
@@ -46,7 +46,7 @@ impl Mouse {
         let mut handle: [MEVENT; 1] = [self.handle];
 
         // set the mouse mask for the mouse.
-        mousemask(self.mask.mask()?, None)?;
+        mousemask(self.mask.mask()?)?;
 
         // get an event.
         getmouse(handle.as_mut_ptr())?;

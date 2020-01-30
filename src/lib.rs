@@ -81,8 +81,8 @@ pub use ncursesw::{
 };
 pub use ncursesw::{
     AttributesColorPairSet, BaseColor, Changed, CharacterResult,
-    CursorType, Justification, KeyBinding, LcCategory, Legacy,
-    NCursesColorType, NCurseswError, panels::NCurseswPanelsError,
+    CursorType, Justification, KeyBinding, Legacy, NCursesColorType,
+    NCurseswError, panels::NCurseswPanelsError,
     mouse::NCurseswMouseError, menu::NCurseswMenuError,
     form::NCurseswFormError, Orientation, SoftLabelType
 };
@@ -98,10 +98,10 @@ pub use ncursesw::{
     halfdelay, has_colors, has_ic, has_il, has_key, is_term_resized,
     key_defined, key_name, keybound, keyname, keyok, killchar, killwchar,
     longname, mcprint, ncurses_colortype, ncurses_colortype_set,
-    ncurses_version, reset_color_pairs, reset_prog_mode, reset_shell_mode,
-    resetty, resize_term, resizeterm, savetty, scr_dump, scr_init,
-    scr_restore, scr_set, scrl, set_escdelay, set_tabsize, setcchar,
-    typeahead, use_legacy_coding
+    ncurses_version, reset_prog_mode, reset_shell_mode, resetty,
+    resize_term, resizeterm, savetty, scr_dump, scr_init, scr_restore,
+    scr_set, scrl, set_escdelay, set_tabsize, setcchar, typeahead,
+    use_legacy_coding
 };
 pub use ncursesw::mouse::{
     has_mouse, mouseinterval, mouse_version, has_mouse_interface

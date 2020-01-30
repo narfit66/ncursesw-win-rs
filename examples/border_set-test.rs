@@ -1,7 +1,7 @@
 /*
     examples/border_set-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,10 +20,12 @@
     IN THE SOFTWARE.
 */
 
+extern crate gettextrs;
 extern crate ncurseswwin;
 
 use std::time;
 
+use gettextrs::*;
 use ncurseswwin::{*, extend::*};
 
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
@@ -36,7 +38,7 @@ fn main() {
 }
 
 fn main_routine() -> result!(()) {
-    setlocale(LcCategory::All, "")?;
+    setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
     ncursesw_entry(|window| {
