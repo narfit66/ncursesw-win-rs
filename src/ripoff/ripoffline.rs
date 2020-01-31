@@ -22,14 +22,14 @@
 
 use std::{fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
 
-use ncursesw::{WINDOW, Orientation};
+use ncursesw::{SCREEN, WINDOW, Orientation};
 use crate::{RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
 
-pub(in crate) const MAX_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
+pub(in crate) const MAX_RIPOFF_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
 
 lazy_static! {
     static ref RIPOFFCOUNT: AtomicUsize = AtomicUsize::new(0);
-    static ref RIPOFFLINES: Mutex<Vec<(RipoffWindow, i32)>> = Mutex::new(Vec::with_capacity(MAX_LINES));
+    static ref RIPOFFLINES: Mutex<Vec<(RipoffWindow, i32)>> = Mutex::new(Vec::with_capacity(MAX_RIPOFF_LINES));
 }
 
 // the macro for defining the ripoff call backs.
@@ -58,6 +58,7 @@ ripoff_init_fn!(ripoff_init4, 4);
 /// A type of ripoff line.
 #[derive(PartialEq, Eq, Hash)]
 pub struct RipoffLine {
+    screen: Option<SCREEN>,
     number: usize
 }
 
@@ -82,9 +83,37 @@ impl RipoffLine {
                 _ => return Err(NCurseswWinError::MaximumRipoffLines { number })
             }) {
                 Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-                _           => Ok(Self { number })
+                _           => Ok(Self { screen: None, number })
             }
         }
+    }
+
+    pub fn new_sp(screen: SCREEN, orientation: Orientation) -> result!(Self) {
+        // check that initscr() has not been called.
+        if INITSCR_CALLED.load(Ordering::SeqCst) {
+            Err(NCurseswWinError::InitscrAlreadyCalled)
+        } else {
+            // get the ripoff call-back number.
+            let number = RIPOFFCOUNT.fetch_add(1, Ordering::SeqCst);
+
+            // call the ncurses ripoff function with one of our pre-defined call-back function.
+            // ncurses allows for a maximum of 5 ripoff lines.
+            match ncursesw::ripoffline_sp(screen, orientation, match number {
+                0 => ripoff_init0,
+                1 => ripoff_init1,
+                2 => ripoff_init2,
+                3 => ripoff_init3,
+                4 => ripoff_init4,
+                _ => return Err(NCurseswWinError::MaximumRipoffLines { number })
+            }) {
+                Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+                _           => Ok(Self { screen: Some(screen), number })
+            }
+        }
+    }
+
+    pub fn screen(&self) -> Option<SCREEN> {
+        self.screen
     }
 
     /// The number of the ripoff.
@@ -118,6 +147,6 @@ unsafe impl Sync for RipoffLine { } // too make thread safe
 
 impl fmt::Debug for RipoffLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "RipoffLine {{ number: {} }}", self.number)
+        write!(f, "RipoffLine {{ screen: {:?}, number: {} }}", self.screen, self.number)
     }
 }

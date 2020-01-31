@@ -55,6 +55,10 @@ impl HasHandle<WINDOW> for RipoffWindow {
 }
 
 impl RipoffWindow {
+    pub(in crate::ripoff) fn _set_screen(&mut self, screen: Option<SCREEN>) {
+        self.screen = screen
+    }
+
     pub fn screen(&self) -> Option<Screen> {
         if let Some(screen) = self.screen {
             Some(Screen::_from(screen, false))
