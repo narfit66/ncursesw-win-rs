@@ -27,12 +27,12 @@ use std::{
     path::Path, os::unix::io::AsRawFd, io::{Write, Read}
 };
 
-use ncursesw::SCREEN;
+use ncursesw::{SCREEN, panels, mouse};
 use crate::{
-    ColorType, ColorsType, ColorAttributeTypes, AttributesType, ColorPairType,
+    ColorType, ColorsType, ColorAttributeTypes,
     HasHandle, NCurseswWinError,
-    normal, ChtypeChar, WideChar, ComplexChar,
-    CursorType, KeyBinding, Window, Size, Origin, SoftLabelType, Justification, Legacy
+    ChtypeChar, WideChar, ComplexChar, Panel,
+    InputMode, CursorType, KeyBinding, Window, Size, Origin, Legacy
 };
 
 pub struct Screen {
@@ -68,355 +68,329 @@ impl Screen {
         Self::new(term, output, input)
     }
 
+    /// Set the input mode to use within NCurses on this Screen.
+    ///
+    /// The terminal gets input from the user. Then it's sometimes buffered up. At
+    /// some point it's passed into the program's input buffer.
+    ///
+    /// - Character: Input is passed in 1 character at a time, but special
+    ///   characters (such as Ctrl+C and Ctrl+S) are automatically processed for
+    ///   you by the terminal.
+    /// - Cooked: Input is passed in 1 line at a time, with the special character
+    ///   processing mentioned above enabled.
+    /// - RawCharacter: Input is passed in 1 character at a time, and special
+    ///   character sequences are not processed automatically.
+    /// - RawCooked: Input is passed in 1 line at a time, and special
+    ///   character sequences are not processed automatically.
+    ///
+    /// The default mode is inherited from the terminal that started the program
+    /// (usually Cooked), so you should _always_ set the desired mode explicitly
+    /// at the start of your program.
+    pub fn set_input_mode(&self, mode: InputMode) -> result!(()) {
+        match match mode {
+            InputMode::Character    => ncursesw::cbreak_sp(self.handle),
+            InputMode::Cooked       => ncursesw::nocbreak_sp(self.handle),
+            InputMode::RawCharacter => ncursesw::raw_sp(self.handle),
+            InputMode::RawCooked    => ncursesw::noraw_sp(self.handle)
+        } {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(_)       => Ok(())
+        }
+    }
+
+    /// Set echo on or off within NCurses on this Screen.
+    ///
+    /// Enables or disables the automatic echoing of input into the window as
+    /// the user types. Default to on, but you probably want it to be off most
+    /// of the time.
+    pub fn set_echo(&self, echoing: bool) -> result!(()) {
+        match if echoing {
+            ncursesw::echo_sp(self.handle)
+        } else {
+            ncursesw::noecho_sp(self.handle)
+        } {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(_)       => Ok(())
+        }
+    }
+
+    /// Control whether NCurses translates the return key into newline on input on this Screen.
+    ///
+    /// This determines wether ncurses translates newline into return and line-feed on output (in either
+    /// case, the call addch('\n') does the equivalent of return and line feed on the virtual screen).
+    /// Initially, these translations do occur. If you disable then ncurses will be able to make
+    /// better use of the line-feed capability, resulting in faster cursor motion.
+    /// Also, ncurses will then be able to detect the return key.
+    pub fn set_newline(&self, newline: bool) -> result!(()) {
+        match if newline {
+            ncursesw::nl_sp(self.handle)
+        } else {
+            ncursesw::nonl_sp(self.handle)
+        } {
+            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+            Ok(_)       => Ok(())
+        }
+    }
+
+    pub fn set_filter(screen: &Screen, filter: bool) {
+        if filter {
+            ncursesw::filter_sp(screen._handle())
+        } else {
+            ncursesw::nofilter_sp(screen._handle())
+        }
+    }
+
+    pub fn set_qiflush(&self, flush: bool) {
+        if flush {
+            ncursesw::qiflush_sp(self.handle)
+        } else {
+            ncursesw::noqiflush_sp(self.handle)
+        }
+    }
+
     pub fn assume_default_colors<S, C, T>(&self, colors: S) -> result!(())
         where S: ColorsType<C, T>,
               C: ColorType<T>,
               T: ColorAttributeTypes
     {
-        Ok(ncursesw::assume_default_colors_sp(self._handle(), colors)?)
+        Ok(ncursesw::assume_default_colors_sp(self.handle, colors)?)
     }
 
     pub fn baudrate(&self) -> result!(u32) {
-        Ok(u32::try_from(ncursesw::baudrate_sp(self._handle()))?)
+        Ok(u32::try_from(ncursesw::baudrate_sp(self.handle))?)
     }
 
     pub fn beep(&self) -> result!(()) {
-        Ok(ncursesw::beep_sp(self._handle())?)
+        Ok(ncursesw::beep_sp(self.handle)?)
     }
 
     pub fn can_change_color(&self) -> bool {
-        ncursesw::can_change_color_sp(self._handle())
-    }
-
-    pub fn cbreak(&self) -> result!(()) {
-        Ok(ncursesw::cbreak_sp(self._handle())?)
+        ncursesw::can_change_color_sp(self.handle)
     }
 
     pub fn curs_set(&self, cursor: CursorType) -> result!(CursorType) {
-        Ok(ncursesw::curs_set_sp(self._handle(), cursor)?)
+        Ok(ncursesw::curs_set_sp(self.handle, cursor)?)
     }
 
     pub fn define_key(&self, definition: Option<&str>, keycode: KeyBinding) -> result!(()) {
-        Ok(ncursesw::define_key_sp(self._handle(), definition, keycode)?)
+        Ok(ncursesw::define_key_sp(self.handle, definition, keycode)?)
     }
 
     pub fn def_prog_mode(&self) -> result!(()) {
-        Ok(ncursesw::def_prog_mode_sp(self._handle())?)
+        Ok(ncursesw::def_prog_mode_sp(self.handle)?)
     }
 
     pub fn def_shell_mode(&self) -> result!(()) {
-        Ok(ncursesw::def_shell_mode_sp(self._handle())?)
+        Ok(ncursesw::def_shell_mode_sp(self.handle)?)
     }
 
     pub fn delay_output(&self, ms: time::Duration) -> result!(()) {
-        Ok(ncursesw::delay_output_sp(self._handle(), ms)?)
+        Ok(ncursesw::delay_output_sp(self.handle, ms)?)
     }
 
     pub fn doupdate(&self) -> result!(()) {
-        Ok(ncursesw::doupdate_sp(self._handle())?)
-    }
-
-    pub fn echo(&self) -> result!(()) {
-        Ok(ncursesw::echo_sp(self._handle())?)
+        Ok(ncursesw::doupdate_sp(self.handle)?)
     }
 
     pub fn erasechar(&self) -> result!(char) {
-        Ok(ncursesw::erasechar_sp(self._handle())?)
-    }
-
-    pub fn filter(&self) {
-        ncursesw::filter_sp(self._handle())
+        Ok(ncursesw::erasechar_sp(self.handle)?)
     }
 
     pub fn flash(&self) -> result!(()) {
-        Ok(ncursesw::flash_sp(self._handle())?)
+        Ok(ncursesw::flash_sp(self.handle)?)
     }
 
     pub fn flushinp(&self) -> result!(()) {
-        Ok(ncursesw::flushinp_sp(self._handle())?)
+        Ok(ncursesw::flushinp_sp(self.handle)?)
     }
 
     pub fn get_escdelay(&self) -> result!(time::Duration) {
-        Ok(ncursesw::get_escdelay_sp(self._handle())?)
+        Ok(ncursesw::get_escdelay_sp(self.handle)?)
     }
 
     pub fn getwin<I: AsRawFd + Read>(&self, file: I) -> result!(Window) {
-        Ok(Window::_from(Some(self._handle()), ncursesw::getwin_sp(self._handle(), file)?, true))
+        Ok(Window::_from(Some(self.handle), ncursesw::getwin_sp(self.handle, file)?, true))
     }
 
     pub fn halfdelay(&self, tenths: time::Duration) -> result!(()) {
-        Ok(ncursesw::halfdelay_sp(self._handle(), tenths)?)
+        Ok(ncursesw::halfdelay_sp(self.handle, tenths)?)
     }
 
     pub fn has_colors(&self) -> bool {
-        ncursesw::has_colors_sp(self._handle())
+        ncursesw::has_colors_sp(self.handle)
     }
 
     pub fn has_ic(&self) -> bool {
-        ncursesw::has_ic_sp(self._handle())
+        ncursesw::has_ic_sp(self.handle)
     }
 
     pub fn has_il(&self) -> bool {
-        ncursesw::has_il_sp(self._handle())
+        ncursesw::has_il_sp(self.handle)
     }
 
     pub fn has_key(&self, ch: KeyBinding) -> bool {
-        ncursesw::has_key_sp(self._handle(), ch)
+        ncursesw::has_key_sp(self.handle, ch)
     }
 
-    pub fn intrflush(&self, window: &Window, bf: bool) -> result!(()) {
-        Ok(ncursesw::intrflush_sp(self._handle(), window._handle(), bf)?)
+    pub fn has_mouse(&self) -> bool {
+        mouse::has_mouse_sp(self.handle)
+    }
+
+    pub fn intrflush(&self, flag: bool) -> result!(()) {
+        Ok(ncursesw::intrflush_sp(self.handle, ptr::null_mut(), flag)?)
     }
 
     pub fn is_term_resized(&self, size: Size) -> result!(bool) {
-        Ok(ncursesw::is_term_resized_sp(self._handle(), size.try_into()?))
+        Ok(ncursesw::is_term_resized_sp(self.handle, size.try_into()?))
     }
 
     pub fn keybound(&self, keycode: KeyBinding, count: i32) -> result!(String) {
-        Ok(ncursesw::keybound_sp(self._handle(), keycode, count)?)
+        Ok(ncursesw::keybound_sp(self.handle, keycode, count)?)
     }
 
     pub fn key_defined(&self, definition: &str) -> result!(KeyBinding) {
-        Ok(ncursesw::key_defined_sp(self._handle(), definition)?)
+        Ok(ncursesw::key_defined_sp(self.handle, definition)?)
     }
 
     pub fn keyname(&self, c: KeyBinding) -> result!(String) {
-        Ok(ncursesw::keyname_sp(self._handle(), c)?)
+        Ok(ncursesw::keyname_sp(self.handle, c)?)
     }
 
     pub fn keyok(&self, keycode: KeyBinding, enable: bool) -> result!(()) {
-        Ok(ncursesw::keyok_sp(self._handle(), keycode, enable)?)
+        Ok(ncursesw::keyok_sp(self.handle, keycode, enable)?)
     }
 
     pub fn killchar(&self) -> result!(char) {
-        Ok(ncursesw::killchar_sp(self._handle())?)
+        Ok(ncursesw::killchar_sp(self.handle)?)
     }
 
     pub fn longname(&self) -> result!(String) {
-        Ok(ncursesw::longname_sp(self._handle())?)
+        Ok(ncursesw::longname_sp(self.handle)?)
     }
 
     pub fn mcprint(&self, data: &[i8], len: i32) -> result!(i32) {
-        Ok(ncursesw::mcprint_sp(self._handle(), data, len)?)
+        Ok(ncursesw::mcprint_sp(self.handle, data, len)?)
     }
 
     pub fn mvcur(&self, old: Origin, new: Origin) -> result!(()) {
-        Ok(ncursesw::mvcur_sp(self._handle(), old.try_into()?, new.try_into()?)?)
+        Ok(ncursesw::mvcur_sp(self.handle, old.try_into()?, new.try_into()?)?)
     }
 
     #[deprecated(since = "0.5.0", note = "ncurses library call superseeded by native rust call. Use std::thread::sleep(dur: std::time::Duration) instead")]
     pub fn napms(&self, ms: time::Duration) -> result!(()) {
-        Ok(ncursesw::napms_sp(self._handle(), ms)?)
+        Ok(ncursesw::napms_sp(self.handle, ms)?)
     }
 
-    pub fn nl(&self) -> result!(()) {
-        Ok(ncursesw::nl_sp(self._handle())?)
-    }
-
-    pub fn nocbreak(&self) -> result!(()) {
-        Ok(ncursesw::nocbreak_sp(self._handle())?)
-    }
-
-    pub fn noecho(&self) -> result!(()) {
-        Ok(ncursesw::noecho_sp(self._handle())?)
-    }
-
-    pub fn nofilter(&self) {
-        ncursesw::nofilter_sp(self._handle())
-    }
-
-    pub fn nonl(&self) -> result!(()) {
-        Ok(ncursesw::nonl_sp(self._handle())?)
-    }
-
-    pub fn noqiflush(&self) {
-        ncursesw::noqiflush_sp(self._handle())
-    }
-
-    pub fn noraw(&self) -> result!(()) {
-        Ok(ncursesw::noraw_sp(self._handle())?)
-    }
-
-    pub fn qiflush(&self) {
-        ncursesw::qiflush_sp(self._handle())
-    }
-
-    pub fn raw(&self) -> result!(()) {
-        Ok(ncursesw::raw_sp(self._handle())?)
-    }
-
+    #[deprecated(since = "0.5.0", note = "use with caution as this routine will reset all color pairs potentially before they go out of scope and the color pairs will default to terminal default foreground and backgound colors.")]
+    /// Reset all defined color pairs.
     pub fn reset_color_pairs(&self) {
-        ncursesw::reset_color_pairs_sp(self._handle())
+        ncursesw::reset_color_pairs_sp(self.handle)
     }
 
     pub fn reset_prog_mode(&self) -> result!(()) {
-        Ok(ncursesw::reset_prog_mode_sp(self._handle())?)
+        Ok(ncursesw::reset_prog_mode_sp(self.handle)?)
     }
 
     pub fn reset_shell_mode(&self) -> result!(()) {
-        Ok(ncursesw::reset_shell_mode_sp(self._handle())?)
+        Ok(ncursesw::reset_shell_mode_sp(self.handle)?)
     }
 
     pub fn resetty(&self) -> result!(()) {
-        Ok(ncursesw::resetty_sp(self._handle())?)
+        Ok(ncursesw::resetty_sp(self.handle)?)
     }
 
     pub fn resize_term(&self, size: Size) -> result!(()) {
-        Ok(ncursesw::resize_term_sp(self._handle(), size.try_into()?)?)
+        Ok(ncursesw::resize_term_sp(self.handle, size.try_into()?)?)
     }
 
     pub fn resizeterm(&self, size: Size) -> result!(()) {
-        Ok(ncursesw::resizeterm_sp(self._handle(), size.try_into()?)?)
+        Ok(ncursesw::resizeterm_sp(self.handle, size.try_into()?)?)
     }
 
     pub fn savetty(&self) -> result!(()) {
-        Ok(ncursesw::savetty_sp(self._handle())?)
+        Ok(ncursesw::savetty_sp(self.handle)?)
     }
 
     pub fn scr_init(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_init_sp(self._handle(), filename)?)
+        Ok(ncursesw::scr_init_sp(self.handle, filename)?)
     }
 
     pub fn scr_restore(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_restore_sp(self._handle(), filename)?)
+        Ok(ncursesw::scr_restore_sp(self.handle, filename)?)
     }
 
     pub fn scr_set(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_set_sp(self._handle(), filename)?)
+        Ok(ncursesw::scr_set_sp(self.handle, filename)?)
     }
 
     pub fn set_escdelay(&self, ms: time::Duration) -> result!(()) {
-        Ok(ncursesw::set_escdelay_sp(self._handle(), ms)?)
+        Ok(ncursesw::set_escdelay_sp(self.handle, ms)?)
     }
 
     pub fn set_tabsize(&self, size: i32) -> result!(()) {
-        Ok(ncursesw::set_tabsize_sp(self._handle(), size)?)
+        Ok(ncursesw::set_tabsize_sp(self.handle, size)?)
     }
 
-    pub fn slk_attroff(&self, attrs: normal::Attributes) -> result!(()) {
-        Ok(ncursesw::slk_attroff_sp(self._handle(), attrs)?)
-    }
-
-    pub fn slk_attron(&self, attrs: normal::Attributes) -> result!(()) {
-        Ok(ncursesw::slk_attron_sp(self._handle(), attrs)?)
-    }
-
-    pub fn slk_attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(())
-        where A: AttributesType<T>,
-              P: ColorPairType<T>,
-              T: ColorAttributeTypes
-    {
-        Ok(ncursesw::slk_attr_set_sp(self._handle(), attrs, color_pair)?)
-    }
-
-    pub fn slk_attrset(&self, attrs: normal::Attributes) -> result!(()) {
-        Ok(ncursesw::slk_attrset_sp(self._handle(), attrs)?)
-    }
-
-    /*
-    pub fn slk_attr(&self) -> attr_t {
-        ncursesw::slk_attr_sp(self._handle())
-    }
-    */
-
-    pub fn slk_clear(&self) -> result!(()) {
-        Ok(ncursesw::slk_clear_sp(self._handle())?)
-    }
-
-    pub fn slk_color(&self, color_pair: normal::ColorPair) -> result!(()) {
-        Ok(ncursesw::slk_color_sp(self._handle(), color_pair)?)
-    }
-
-    pub fn slk_init(&self, fmt: SoftLabelType) -> result!(()) {
-        Ok(ncursesw::slk_init_sp(self._handle(), fmt)?)
-    }
-
-    pub fn slk_label(&self, number: i32) -> result!(String) {
-        Ok(ncursesw::slk_label_sp(self._handle(), number)?)
-    }
-
-    pub fn slk_noutrefresh(&self) -> result!(()) {
-        Ok(ncursesw::slk_noutrefresh_sp(self._handle())?)
-    }
-
-    pub fn slk_refresh(&self) -> result!(()) {
-        Ok(ncursesw::slk_refresh_sp(self._handle())?)
-    }
-
-    pub fn slk_restore(&self) -> result!(()) {
-        Ok(ncursesw::slk_restore_sp(self._handle())?)
-    }
-
-    pub fn slk_set(&self, label_number: i32, label: &str, fmt: Justification) -> result!(()) {
-        Ok(ncursesw::slk_set_sp(self._handle(), label_number, label, fmt)?)
-    }
-
-    pub fn slk_touch(&self) -> result!(()) {
-        Ok(ncursesw::slk_touch_sp(self._handle())?)
+    pub fn set_term(&self) -> result!(Screen) {
+        Ok(Screen::_from(ncursesw::set_term(self._handle())?, false))
     }
 
     pub fn start_color(&self) -> result!(()) {
-        Ok(ncursesw::start_color_sp(self._handle())?)
+        Ok(ncursesw::start_color_sp(self.handle)?)
     }
-
-    /*
-    pub fn term_attrs(&self) -> attr_t {
-        ncursesw::term_attrs_sp(self._handle())
-    }
-
-    pub fn termattrs(&self) -> chtype {
-        ncursesw::termattrs_sp(self._handle())
-    }
-    */
 
     pub fn termname(&self) -> result!(String) {
-        Ok(ncursesw::termname_sp(self._handle())?)
+        Ok(ncursesw::termname_sp(self.handle)?)
     }
 
     pub fn typeahead<FD: AsRawFd + Read>(&self, file: Option<FD>) -> result!(()) {
-        Ok(ncursesw::typeahead_sp(self._handle(), file)?)
+        Ok(ncursesw::typeahead_sp(self.handle, file)?)
     }
 
     pub fn unctrl(&self, c: ChtypeChar) -> result!(String) {
-        Ok(ncursesw::unctrl_sp(self._handle(), c)?)
+        Ok(ncursesw::unctrl_sp(self.handle, c)?)
     }
 
     pub fn ungetch(&self, ch: char) -> result!(()) {
-        Ok(ncursesw::ungetch_sp(self._handle(), ch)?)
+        Ok(ncursesw::ungetch_sp(self.handle, ch)?)
     }
 
     pub fn unget_wch(&self, ch: WideChar) -> result!(()) {
-        Ok(ncursesw::unget_wch_sp(self._handle(), ch)?)
+        Ok(ncursesw::unget_wch_sp(self.handle, ch)?)
     }
 
     pub fn use_default_colors(&self) -> result!(()) {
-        Ok(ncursesw::use_default_colors_sp(self._handle())?)
+        Ok(ncursesw::use_default_colors_sp(self.handle)?)
     }
 
-    pub fn use_env(&self, f: bool) {
-        ncursesw::use_env_sp(self._handle(), f)
+    pub fn use_env(&self, flag: bool) {
+        ncursesw::use_env_sp(self.handle, flag)
     }
 
-    pub fn use_tioctl(&self, f: bool) {
-        ncursesw::use_tioctl_sp(self._handle(), f)
+    pub fn use_tioctl(&self, flag: bool) {
+        ncursesw::use_tioctl_sp(self.handle, flag)
     }
 
     pub fn use_legacy_coding(&self, level: Legacy) -> result!(Legacy) {
-        Ok(ncursesw::use_legacy_coding_sp(self._handle(), level)?)
+        Ok(ncursesw::use_legacy_coding_sp(self.handle, level)?)
     }
 
-    /*
-    pub fn vid_attr(&self, attrs: attr_t, pair: short_t) -> i32 {
-        ncursesw::vid_attr_sp(self._handle(), attrs, pair)
+    pub fn wunctrl(&self, ch: ComplexChar) -> result!(WideChar) {
+        Ok(ncursesw::wunctrl_sp(self.handle, ch)?)
     }
 
-    pub fn vidattr(&self, attrs: chtype) -> i32 {
-        ncursesw::vidattr_sp(self._handle(), attrs)
+    /// Returns the topmost panel in the given screen.
+    pub fn ceiling_panel(&self) -> result!(Panel) {
+        Ok(Panel::_from(Some(self.handle), panels::ceiling_panel(self.handle)?, false))
     }
-    */
 
-    pub fn wunctrl_sp(&self, ch: ComplexChar) -> result!(WideChar) {
-        Ok(ncursesw::wunctrl_sp(self._handle(), ch)?)
+    /// Returns the lowest panel in the given screen.
+    pub fn ground_panel(&self) -> result!(Panel) {
+        Ok(Panel::_from(Some(self.handle), panels::ground_panel(self.handle)?, false))
+    }
+
+    pub fn update_panels(&self) {
+        panels::update_panels_sp(self.handle)
     }
 }
 
@@ -460,8 +434,4 @@ pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: O, input: I) -
           I: AsRawFd + Read
 {
     Ok(Screen::_from(ncursesw::newterm_sp(screen._handle(), term, output, input)?, true))
-}
-
-pub fn set_term(screen: &Screen) -> result!(Screen) {
-    Ok(Screen::_from(ncursesw::set_term(screen._handle())?, false))
 }

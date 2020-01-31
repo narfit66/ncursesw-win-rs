@@ -23,7 +23,7 @@
 use std::{fmt, convert::{TryFrom, TryInto}};
 
 use ncursesw::{SCREEN, WINDOW};
-use crate::{Origin, NCurseswWinError, gen::*};
+use crate::{Screen, Origin, NCurseswWinError, gen::*};
 
 /// A ripoff line window canvas.
 ///
@@ -51,6 +51,16 @@ impl HasHandle<WINDOW> for RipoffWindow {
 
     fn _handle(&self) -> WINDOW {
         self.handle
+    }
+}
+
+impl RipoffWindow {
+    pub fn screen(&self) -> Option<Screen> {
+        if let Some(screen) = self.screen {
+            Some(Screen::_from(screen, false))
+        } else {
+            None
+        }
     }
 }
 

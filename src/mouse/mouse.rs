@@ -22,21 +22,46 @@
 
 use std::{fmt, hash::{Hash, Hasher}, convert::TryFrom};
 
-use ncursesw::mouse::{MEVENT, mousemask, getmouse, ungetmouse};
-use crate::{MouseMask, NCurseswWinError, mouse::MouseOrigin, mouse::MouseEvents};
+use ncursesw::{
+    SCREEN,
+    mouse::{
+        MEVENT, mousemask, getmouse, ungetmouse,
+        mousemask_sp, getmouse_sp, ungetmouse_sp
+    }
+};
+use crate::{
+    Screen, MouseMask, NCurseswWinError,
+    mouse::MouseOrigin, mouse::MouseEvents
+};
 
 /// A mouse pointer device.
 pub struct Mouse {
-    handle: MEVENT,
-    mask:   MouseMask
+    screen:    Option<SCREEN>,
+    handle:    MEVENT,
+    mask:      MouseMask,
+    reporting: MouseEvents
 }
 
 impl Mouse {
     /// Create a new instance of a mouse pointer.
     pub fn new(id: i16, mask: MouseMask) -> result!(Self) {
-        mousemask(mask.mask()?)?;
+        let reporting = MouseEvents::new(mousemask(mask.mask()?)?);
 
-        Ok(Self { handle: MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }, mask })
+        Ok(Self { screen: None, handle: default_mevent(id), mask, reporting })
+    }
+
+    pub fn new_sp(screen: Screen, id: i16, mask: MouseMask) -> result!(Self) {
+        let reporting = MouseEvents::new(mousemask_sp(screen._handle(), mask.mask()?)?);
+
+        Ok(Self { screen: Some(screen._handle()), handle: default_mevent(id), mask, reporting })
+    }
+
+    pub fn screen(&self) -> Option<Screen> {
+        if let Some(screen) = self.screen {
+            Some(Screen::_from(screen, false))
+        } else {
+            None
+        }
     }
 
     /// Refresh the mouse pointer's events.
@@ -45,28 +70,46 @@ impl Mouse {
     pub fn refresh(&mut self) -> result!(bool) {
         let mut handle: [MEVENT; 1] = [self.handle];
 
-        // set the mouse mask for the mouse.
-        mousemask(self.mask.mask()?)?;
+        let screen = if let Some(screen) = self.screen {
+            mousemask_sp(screen, self.mask.mask()?)?;
+            getmouse_sp(screen, handle.as_mut_ptr())?;
 
-        // get an event.
-        getmouse(handle.as_mut_ptr())?;
+            screen
+        } else {
+            mousemask(self.mask.mask()?)?;
+            getmouse(handle.as_mut_ptr())?;
+
+            std::ptr::null_mut()
+        };
 
         // check if the event is for this mouse, if not then
         // push the event back onto the mouse fifo-queue.
-        Ok(if self.handle.id == handle[0].id {
+        let rc = if self.handle.id == handle[0].id {
             self.handle = handle[0];
 
             true
         } else {
-            ungetmouse(handle.as_mut_ptr())?;
+            if self.screen.is_some() {
+                ungetmouse_sp(screen, handle.as_mut_ptr())?;
+            } else {
+                ungetmouse(handle.as_mut_ptr())?;
+            }
 
             false
-        })
+        };
+
+        Ok(rc)
     }
 
     /// Push the current mouse event back onto the mouse-fifo queue.
     pub fn push(&mut self) -> result!(()) {
-        Ok(ungetmouse(&mut self.handle)?)
+        if let Some(screen) = self.screen {
+            ungetmouse_sp(screen, &mut self.handle)?
+        } else {
+            ungetmouse(&mut self.handle)?
+        }
+
+        Ok(())
     }
 
     /// The id of the mouse.
@@ -77,6 +120,11 @@ impl Mouse {
     /// The last reported mouse origin for this mouse.
     pub fn origin(&self) -> result!(MouseOrigin) {
         Ok(MouseOrigin::new(u16::try_from(self.handle.y)?, u16::try_from(self.handle.x)?, u16::try_from(self.handle.z)?))
+    }
+
+    /// The type of events that the mouse can report on.
+    pub fn reporting(&self) -> MouseEvents {
+        self.reporting
     }
 
     /// The last reported mouse events for this mouse.
@@ -118,6 +166,10 @@ impl Hash for Mouse {
 
 impl fmt::Debug for Mouse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Mouse {{ handle: {:?}, mask: {:?} }}", self.handle, self.mask)
+        write!(f, "Mouse {{ screen: {:?}, handle: {:?}, mask: {:?} }}", self.screen, self.handle, self.mask)
     }
+}
+
+fn default_mevent(id: i16) -> MEVENT {
+    MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }
 }

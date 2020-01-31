@@ -22,7 +22,7 @@
 
 #![allow(non_snake_case)]
 
-use std::{sync::atomic::Ordering, convert::TryFrom};
+use std::{ptr, sync::atomic::Ordering, convert::TryFrom};
 
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes, CursorType
@@ -202,6 +202,14 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
         Err(NCurseswWinError::InitscrNotCalled)
     } else {
         Ok(ncursesw::curs_set(cursor)?)
+    }
+}
+
+pub fn intrflush(flag: bool) -> result!(()) {
+    if !INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrNotCalled)
+    } else {
+        Ok(ncursesw::intrflush(ptr::null_mut(), flag)?)
     }
 }
 

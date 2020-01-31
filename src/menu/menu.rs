@@ -189,6 +189,14 @@ impl Menu {
         Self::new_sp(screen, items)
     }
 
+    pub fn screen(&self) -> Option<Screen> {
+        if let Some(screen) = self.screen {
+            Some(Screen::_from(screen, false))
+        } else {
+            None
+        }
+    }
+
     pub fn current_item(&self) -> result!(MenuItem) {
         Ok(MenuItem::_from(menu::current_item(self.handle)?, false))
     }

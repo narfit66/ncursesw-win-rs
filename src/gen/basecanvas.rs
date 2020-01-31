@@ -67,10 +67,6 @@ pub trait BaseCanvas: HasHandle<WINDOW> {
         Ok(ncursesw::winsertln(self._handle())?)
     }
 
-    fn intrflush(&self, bf: bool) -> result!(()) {
-        Ok(ncursesw::intrflush(self._handle(), bf)?)
-    }
-
     fn is_cleared(&self) -> bool {
         ncursesw::is_cleared(self._handle())
     }

@@ -190,6 +190,14 @@ impl Form {
         Self::new_sp(screen, fields)
     }
 
+    pub fn screen(&self) -> Option<Screen> {
+        if let Some(screen) = self.screen {
+            Some(Screen::_from(screen, false))
+        } else {
+            None
+        }
+    }
+
     /// return the current field of the form.
     pub fn current_field(&self) -> result!(Field) {
         Ok(Field::_from(form::current_field(self.handle)?, false))

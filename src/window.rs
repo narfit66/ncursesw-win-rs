@@ -23,7 +23,7 @@
 use std::{ptr, fmt, hash::{Hash, Hasher}};
 
 use ncursesw::{stdscr, SCREEN, WINDOW};
-use crate::gen::*;
+use crate::{Screen, gen::*};
 
 /// A moveable window canvas.
 ///
@@ -52,6 +52,16 @@ impl HasHandle<WINDOW> for Window {
 
     fn _handle(&self) -> WINDOW {
         self.handle
+    }
+}
+
+impl Window {
+    pub fn screen(&self) -> Option<Screen> {
+        if let Some(screen) = self.screen {
+            Some(Screen::_from(screen, false))
+        } else {
+            None
+        }
     }
 }
 
@@ -106,7 +116,7 @@ unsafe impl Sync for Window { } // too make thread safe
 
 impl PartialEq for Window {
     fn eq(&self, rhs: &Self) -> bool {
-        self.screen == rhs._screen() && ptr::eq(self.handle, rhs.handle)
+        ptr::eq(self.handle, rhs.handle)
     }
 }
 
@@ -114,7 +124,6 @@ impl Eq for Window { }
 
 impl Hash for Window {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.screen.hash(state);
         self.handle.hash(state);
     }
 }
