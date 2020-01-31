@@ -6,7 +6,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - NCurses form module implemented as `form`.
 - Added NCurses screen functionality.
 - Removed `setlocale()` function. [BC]
-- Removed `intrflush()` from `BaseCanvas` trait and made a crate public function.
+- Removed `intrflush()` from `BaseCanvas` trait and made a crate public function. [BC]
 - `menu_request_by_name()` now returns a `Result<Option<menu::MenuRequest>, menu::NCurseswMenuError>` instead of `Result<bool, menu::NCurseswMenuError>`. [BC]
 - `menu::menu_request_name()` now takes a `menu::MenuRequest` instead of a `i32` for the request. [BC]
 - `menu::Menu::set_menu_pad()` now takes a `char` instead of a `i32` for the pad character. [BC]
@@ -16,6 +16,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - `BaseCanvas::putwin()`, `IsWindow::putwin()` and `IsPad::putwin()` now take `O: std::os::unix::io::AsRawFd + std::io::Write` instead of `&std::path::Path`. [BC]
 - `NCurseswWindow::getwin()` and `IsPad::genwin()` now take `I: std::os::unix::io::AsRawFd + std::io::Read` instead of `&std::path::Path`. [BC]
 - Moved `is_subwin()` from `Scrollable` trait to `BaseCanvas` trait. [BC]
+- `Mouse::new()` no longer required an `id` parameter. [BC]
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]

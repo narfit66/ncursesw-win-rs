@@ -219,6 +219,6 @@ pub fn terminal_size() -> result!(Size) {
 }
 
 // The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
-pub(in crate) fn terminal_bottom_right_origin() -> result!(Origin) {
+pub fn terminal_bottom_right_origin() -> result!(Origin) {
     Ok(Origin { y: LINES()? - 1, x: COLS()? - 1 })
 }

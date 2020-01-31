@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{fmt, hash::{Hash, Hasher}, convert::TryFrom};
+use std::{fmt, hash::{Hash, Hasher}, convert::TryFrom, sync::Mutex, collections::HashSet, i16};
 
 use ncursesw::{
     SCREEN,
@@ -34,26 +34,30 @@ use crate::{
     mouse::MouseOrigin, mouse::MouseEvents
 };
 
+lazy_static! {
+    static ref MOUSEIDS: Mutex<HashSet<i16>> = Mutex::new(HashSet::new());
+}
+
 /// A mouse pointer device.
 pub struct Mouse {
-    screen:    Option<SCREEN>,
-    handle:    MEVENT,
-    mask:      MouseMask,
-    reporting: MouseEvents
+    screen:  Option<SCREEN>,
+    mevent:  MEVENT,
+    mask:    MouseMask,
+    returns: MouseEvents
 }
 
 impl Mouse {
     /// Create a new instance of a mouse pointer.
-    pub fn new(id: i16, mask: MouseMask) -> result!(Self) {
-        let reporting = MouseEvents::new(mousemask(mask.mask()?)?);
+    pub fn new(mask: MouseMask) -> result!(Self) {
+        let returns = MouseEvents::new(mousemask(mask.mask()?)?);
 
-        Ok(Self { screen: None, handle: default_mevent(id), mask, reporting })
+        Ok(Self { screen: None, mevent: default_mevent()?, mask, returns })
     }
 
-    pub fn new_sp(screen: Screen, id: i16, mask: MouseMask) -> result!(Self) {
-        let reporting = MouseEvents::new(mousemask_sp(screen._handle(), mask.mask()?)?);
+    pub fn new_sp(screen: Screen, mask: MouseMask) -> result!(Self) {
+        let returns = MouseEvents::new(mousemask_sp(screen._handle(), mask.mask()?)?);
 
-        Ok(Self { screen: Some(screen._handle()), handle: default_mevent(id), mask, reporting })
+        Ok(Self { screen: Some(screen._handle()), mevent: default_mevent()?, mask, returns })
     }
 
     pub fn screen(&self) -> Option<Screen> {
@@ -64,35 +68,35 @@ impl Mouse {
         }
     }
 
-    /// Refresh the mouse pointer's events.
+    /// Refresh the mouse pointer's events, `self.events()`.
     /// Return `true` if the event on the fifo-queue is for this mouse,
     /// if not then a `false` and the event is pushed back onto the mouse fifo-queue.
     pub fn refresh(&mut self) -> result!(bool) {
-        let mut handle: [MEVENT; 1] = [self.handle];
+        let mut mevent: [MEVENT; 1] = [self.mevent];
 
         let screen = if let Some(screen) = self.screen {
             mousemask_sp(screen, self.mask.mask()?)?;
-            getmouse_sp(screen, handle.as_mut_ptr())?;
+            getmouse_sp(screen, mevent.as_mut_ptr())?;
 
             screen
         } else {
             mousemask(self.mask.mask()?)?;
-            getmouse(handle.as_mut_ptr())?;
+            getmouse(mevent.as_mut_ptr())?;
 
             std::ptr::null_mut()
         };
 
         // check if the event is for this mouse, if not then
         // push the event back onto the mouse fifo-queue.
-        let rc = if self.handle.id == handle[0].id {
-            self.handle = handle[0];
+        let rc = if self.mevent.id == mevent[0].id {
+            self.mevent = mevent[0];
 
             true
         } else {
             if self.screen.is_some() {
-                ungetmouse_sp(screen, handle.as_mut_ptr())?;
+                ungetmouse_sp(screen, mevent.as_mut_ptr())?;
             } else {
-                ungetmouse(handle.as_mut_ptr())?;
+                ungetmouse(mevent.as_mut_ptr())?;
             }
 
             false
@@ -104,9 +108,9 @@ impl Mouse {
     /// Push the current mouse event back onto the mouse-fifo queue.
     pub fn push(&mut self) -> result!(()) {
         if let Some(screen) = self.screen {
-            ungetmouse_sp(screen, &mut self.handle)?
+            ungetmouse_sp(screen, &mut self.mevent)?
         } else {
-            ungetmouse(&mut self.handle)?
+            ungetmouse(&mut self.mevent)?
         }
 
         Ok(())
@@ -114,22 +118,22 @@ impl Mouse {
 
     /// The id of the mouse.
     pub fn id(&self) -> i16 {
-        self.handle.id
+        self.mevent.id
     }
 
     /// The last reported mouse origin for this mouse.
     pub fn origin(&self) -> result!(MouseOrigin) {
-        Ok(MouseOrigin::new(u16::try_from(self.handle.y)?, u16::try_from(self.handle.x)?, u16::try_from(self.handle.z)?))
+        Ok(MouseOrigin::new(u16::try_from(self.mevent.y)?, u16::try_from(self.mevent.x)?, u16::try_from(self.mevent.z)?))
     }
 
     /// The type of events that the mouse can report on.
-    pub fn reporting(&self) -> MouseEvents {
-        self.reporting
+    pub fn returns(&self) -> MouseEvents {
+        self.returns
     }
 
     /// The last reported mouse events for this mouse.
     pub fn events(&self) -> MouseEvents {
-        MouseEvents::new(self.handle.bstate)
+        MouseEvents::new(self.mevent.bstate)
     }
 
     /// The mouse mask currently used for this mouse.
@@ -137,7 +141,7 @@ impl Mouse {
         self.mask
     }
 
-    /// Set the mouse mask. Returns the previous mpuse mask.
+    /// Set the mouse mask. Returns the previous mouse mask.
     pub fn set_mask(&mut self, mask: MouseMask) -> MouseMask {
         let old_mask = self.mask;
 
@@ -147,12 +151,24 @@ impl Mouse {
     }
 }
 
+impl Drop for Mouse {
+    fn drop(&mut self) {
+        if !MOUSEIDS
+            .lock()
+            .unwrap_or_else(|_| panic!("Mouse::drop() : MOUSEIDS.lock() failed!!!"))
+            .remove(&self.id())
+        {
+            panic!("Mouse::drop() : MOUSEIDS.lock().remove({}) failed!!!", self.id());
+        }
+    }
+}
+
 unsafe impl Send for Mouse { } // too make thread safe
 unsafe impl Sync for Mouse { } // too make thread safe
 
 impl PartialEq for Mouse {
     fn eq(&self, rhs: &Self) -> bool {
-        self.handle.id == rhs.handle.id
+        self.mevent.id == rhs.mevent.id
     }
 }
 
@@ -160,16 +176,32 @@ impl Eq for Mouse { }
 
 impl Hash for Mouse {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.handle.id.hash(state);
+        self.mevent.id.hash(state);
     }
 }
 
 impl fmt::Debug for Mouse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Mouse {{ screen: {:?}, handle: {:?}, mask: {:?} }}", self.screen, self.handle, self.mask)
+        write!(f, "Mouse {{ screen: {:?}, mevent: {:?}, mask: {:?} }}", self.screen, self.mevent, self.mask)
     }
 }
 
-fn default_mevent(id: i16) -> MEVENT {
-    MEVENT { id, x: 0, y: 0, z: 0, bstate: 0 }
+// Create a default MEVENT.
+fn default_mevent() -> result!(MEVENT) {
+    Ok(MEVENT { id: obtain_mouse_id()?, x: 0, y: 0, z: 0, bstate: 0 })
+}
+
+// Obtain a free mouse id.
+fn obtain_mouse_id() -> result!(i16) {
+    let mut mouse_ids = MOUSEIDS
+        .lock()
+        .unwrap_or_else(|_| panic!("obtain_mouse_id() : MOUSEIDS.lock() failed!!!"));
+
+    for id in 0..i16::MAX {
+        if mouse_ids.insert(id) {
+            return Ok(id);
+        }
+    }
+
+    Err(NCurseswWinError::MouseId)
 }

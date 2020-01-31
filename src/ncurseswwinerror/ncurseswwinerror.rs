@@ -26,7 +26,7 @@ use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
     menu::NCurseswMenuError, form::NCurseswFormError
 };
-use crate::ripoff::MAX_LINES;
+use crate::ripoff::MAX_RIPOFF_LINES;
 
 custom_error::custom_error! {
 /// NCurseswWin Errors.
@@ -36,11 +36,12 @@ pub NCurseswWinError
     InitscrNotCalled = "ncurses has not been initialised",
     StartColorAlreadyCalled = "ncurseswwin::start_color() already called",
     StartColorNotCalled = "ncurseswwin::start_color() not called",
-    MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, MAX_LINES) },
+    MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, MAX_RIPOFF_LINES) },
     RipoffNotInitialized { number: usize } = "ripoff line {number} has not been initialised",
     InternalError = "an internal error has occured",
     Panic { message: String } = "{message}",
     OutOfMemory { func: String } = "{func}() out of memory!!!",
+    MouseId = "unable to obtain a valid mouse id!!!",
     FieldTypeArguments { func: String, args: u8 } = "{func}() too many arguments {args}",
 
     NCurseswError { source: NCurseswError } = "{source}",

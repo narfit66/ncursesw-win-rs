@@ -1,7 +1,7 @@
 /*
     examples/mouse-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -64,7 +64,7 @@ fn mouse_test(stdscr: &Window) -> result!(()) {
         panic!("no mouse interface detected!!!");
     }
 
-    let mouse = &mut Mouse::new(0, MouseMask::AllMouseEvents)?;
+    let mouse = &mut Mouse::new(MouseMask::AllMouseEvents)?;
 
     if !has_mouse() {            // has a mouse pointer been defined.
         panic!("no mouse detected!!!");
@@ -122,7 +122,13 @@ fn mouse_button_event(window: &Window, origin: Origin, button: u8, str: &str, mo
 
     window.mvaddstr(origin, &format!("B{} {} @ {}", button, str, mouse_origin))?;
 
-    window.mvaddch(mouse_origin.origin(), ChtypeChar::new(AsciiChar::Asterisk))?;
+    let asterisk = ChtypeChar::new(AsciiChar::Asterisk);
+
+    if mouse_origin.origin() == terminal_bottom_right_origin()? {
+        window.mvinsch(mouse_origin.origin(), asterisk)?;
+    } else {
+        window.mvaddch(mouse_origin.origin(), asterisk)?;
+    }
 
     Ok(())
 }
