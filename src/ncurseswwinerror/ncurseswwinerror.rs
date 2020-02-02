@@ -26,7 +26,7 @@ use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
     menu::NCurseswMenuError, form::NCurseswFormError
 };
-use crate::ripoff::MAX_RIPOFF_LINES;
+use crate::{Screen, ripoff::MAX_RIPOFF_LINES};
 
 custom_error::custom_error! {
 /// NCurseswWin Errors.
@@ -43,6 +43,7 @@ pub NCurseswWinError
     OutOfMemory { func: String } = "{func}() out of memory!!!",
     MouseId = "unable to obtain a valid mouse id!!!",
     FieldTypeArguments { func: String, args: u8 } = "{func}() too many arguments {args}",
+    SoftLabelAlreadyDefined { screen: Option<Screen> } = @{ format!("softlabel already defined with screen {:?}", screen) },
 
     NCurseswError { source: NCurseswError } = "{source}",
     PanelsError { source: NCurseswPanelsError } = "{source}",

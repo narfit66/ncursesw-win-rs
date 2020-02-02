@@ -32,6 +32,7 @@ extern crate errno;
 mod macros;
 
 mod cstring;
+pub mod extend;
 /// Form module.
 pub mod form;
 mod funcs;
@@ -44,6 +45,7 @@ mod mouse;
 mod ncurses;
 mod ncurseswwinerror;
 mod nonblockingresult;
+pub mod normal;
 mod origin;
 mod pad;
 mod panels;
@@ -74,7 +76,7 @@ pub use size::*;
 pub use timeout::*;
 pub use window::*;
 
-pub use ncursesw::{normal, extend};
+//pub use ncursesw::{normal, extend};
 pub use ncursesw::{
     ChtypeChar, ChtypeString, ComplexChar, ComplexString,
     WideChar, WideCharAndAttributes, WideString

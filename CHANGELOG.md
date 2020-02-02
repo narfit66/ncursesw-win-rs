@@ -5,6 +5,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 ## [0.5.0] - ????-??-?? [BC]
 - NCurses form module implemented as `form`.
 - Added NCurses screen functionality.
+- Added `{normal,extend}::SoftLabel`.
 - Removed `setlocale()` function. [BC]
 - Removed `intrflush()` from `BaseCanvas` trait and made a crate public function. [BC]
 - `menu_request_by_name()` now returns a `Result<Option<menu::MenuRequest>, menu::NCurseswMenuError>` instead of `Result<bool, menu::NCurseswMenuError>`. [BC]
