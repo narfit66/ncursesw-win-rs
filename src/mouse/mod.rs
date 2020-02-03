@@ -1,7 +1,7 @@
 /*
     src/mouse/mod.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -33,12 +33,7 @@ mod mousemask;
 mod mouseorigin;
 mod originresult;
 
-pub use funcs::*;
-pub use mouse::*;
-pub use mousebutton::*;
-pub use mousebuttonevent::*;
-pub use mousebuttonstate::*;
-pub use mouseevents::*;
-pub use mousemask::*;
-pub use mouseorigin::*;
-pub use originresult::*;
+pub use self::{
+    funcs::*, mouse::*, mousebutton::*, mousebuttonevent::*, mousebuttonstate::*,
+    mouseevents::*, mousemask::*, mouseorigin::*, originresult::*
+};

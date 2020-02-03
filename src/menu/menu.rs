@@ -108,8 +108,8 @@ pub struct Menu {
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
     pub(in crate::menu) fn _from(screen: Option<SCREEN>, handle: MENU, item_handles: *mut ITEM, free_on_drop: bool) -> Self {
-        if let Some(sp) = screen {
-            assert!(!sp.is_null(), "Menu::_from() : screen.is_null()");
+        if let Some(ptr) = screen {
+            assert!(!ptr.is_null(), "Menu::_from() : screen.is_null()");
         }
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
         assert!(!item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
@@ -190,11 +190,7 @@ impl Menu {
     }
 
     pub fn screen(&self) -> Option<Screen> {
-        if let Some(screen) = self.screen {
-            Some(Screen::_from(screen, false))
-        } else {
-            None
-        }
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
     }
 
     pub fn current_item(&self) -> result!(MenuItem) {
@@ -397,14 +393,11 @@ impl Menu {
     }
 
     pub fn set_menu_sub(&self, window: Option<&Window>) -> result!(()) {
-        if let Some(win) = window {
-            assert!(self._screen() == win._screen())
+        if let Some(window) = window {
+            assert!(self._screen() == window._screen())
         }
 
-        Ok(menu::set_menu_sub(Some(self.handle), match window {
-            Some(window) => Some(window._handle()),
-            None         => None
-        })?)
+        Ok(menu::set_menu_sub(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
 
     pub fn set_menu_term<F>(&self, func: F) -> result!(())
@@ -420,21 +413,15 @@ impl Menu {
 
     // TODO: needs testing!
     pub fn set_menu_userptr<T>(&self, ptr: Option<Box<&T>>) {
-        menu::set_menu_userptr(self.handle, match ptr {
-            Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
-            None      => None
-        })
+        menu::set_menu_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))
     }
 
     pub fn set_menu_win(&self, window: Option<&Window>) -> result!(()) {
-        if let Some(win) = window {
-            assert!(self._screen() == win._screen())
+        if let Some(window) = window {
+            assert!(self._screen() == window._screen())
         }
 
-        Ok(menu::set_menu_win(Some(self.handle), match window {
-            Some(window) => Some(window._handle()),
-            None         => None
-        })?)
+        Ok(menu::set_menu_win(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
 
     pub fn set_top_row(&self, row: u16) -> result!(()) {
@@ -490,7 +477,6 @@ impl Eq for Menu { }
 
 impl Hash for Menu {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.screen.hash(state);
         self.handle.hash(state);
     }
 }

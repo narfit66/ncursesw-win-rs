@@ -29,10 +29,7 @@ pub use panels::update_panels;
 ///
 /// If the specified panel argument is None, it returns the bottom panel in the stack.
 pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
-    match panels::panel_above(match panel {
-        None        => None,
-        Some(panel) => Some(panel._handle())
-    }) {
+    match panels::panel_above(panel.map_or_else(|| None, |panel| Some(panel._handle()))) {
         Err(source) => Err(NCurseswWinError::PanelsError { source }),
         Ok(handle)  => Ok(Panel::_from(None, handle, false))
     }
@@ -42,10 +39,7 @@ pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
 ///
 /// If the specified panel argument is None, it returns the top panel in the stack.
 pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
-    match panels::panel_below(match panel {
-        None        => None,
-        Some(panel) => Some(panel._handle())
-    }) {
+    match panels::panel_above(panel.map_or_else(|| None, |panel| Some(panel._handle()))) {
         Err(source) => Err(NCurseswWinError::PanelsError { source }),
         Ok(handle)  => Ok(Panel::_from(None, handle, false))
     }

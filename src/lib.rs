@@ -32,19 +32,40 @@ extern crate errno;
 mod macros;
 
 mod cstring;
+/// Extended color's, color pairs and attributes module.
 pub mod extend;
-/// Form module.
+/// Form module
+///
+/// The form library provides terminal-independent facilities for composing
+/// form screens on character-cell terminals. The library includes: field
+/// routines, which create and modify form fields; and form routines, which
+/// group fields into forms, display forms on the screen, and handle
+/// interaction with the user.
+///
+/// Your program should set up the locale, e.g.,
+/// ```text
+/// use gettextrs;
+///
+/// ncursesw::setlocale(LcCategory::All, "")?;
+/// ```
+/// so that input/output processing will work.
 pub mod form;
 mod funcs;
 mod gen;
 mod graphics;
 mod inputmode;
-/// Menu module.
+/// Menu module
+///
+/// The menu library provides terminal-independent facilities for composing
+/// menu systems on character-cell terminals. The library includes: item routines,
+/// which create and modify menu items; and menu routines, which group items into
+/// menus, display menus on the screen, and handle interaction with the user.
 pub mod menu;
 mod mouse;
 mod ncurses;
 mod ncurseswwinerror;
 mod nonblockingresult;
+/// Normal color's, color pairs and attributes module.
 pub mod normal;
 mod origin;
 mod pad;
@@ -57,24 +78,12 @@ mod size;
 mod timeout;
 mod window;
 
-pub use funcs::*;
-pub use gen::*;
-pub use graphics::*;
-pub use inputmode::*;
-pub use mouse::*;
-pub use ncurses::*;
-pub use ncurseswwinerror::*;
-pub use nonblockingresult::*;
-pub use origin::*;
-pub use pad::*;
-pub use panels::*;
-pub use position::*;
-pub use region::*;
-pub use ripoff::*;
-pub use screen::*;
-pub use size::*;
-pub use timeout::*;
-pub use window::*;
+pub use crate::{
+    funcs::*, gen::*, graphics::*, inputmode::*, mouse::*, ncurses::*,
+    ncurseswwinerror::*, nonblockingresult::*, origin::*, pad::*,
+    panels::*, position::*, region::*, ripoff::*, screen::*, size::*,
+    timeout::*, window::*
+};
 
 //pub use ncursesw::{normal, extend};
 pub use ncursesw::{

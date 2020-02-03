@@ -109,10 +109,7 @@ impl MenuItem {
     /// Set the menu items user client code defined value.
     // TODO: needs testing!
     pub fn set_item_userptr<T>(&self, ptr: Option<Box<&T>>) {
-        menu::set_item_userptr(self.handle, match ptr {
-            Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
-            None      => None
-        })
+        menu::set_item_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))
     }
 
     /// In a multi-valued menu sets the menu item too selected.

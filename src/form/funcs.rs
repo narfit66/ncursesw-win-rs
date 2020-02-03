@@ -32,15 +32,9 @@ pub fn form_request_name(request: FormRequest) -> result!(String) {
 }
 
 pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::form::set_form_sub(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
+    Ok(ncursesw::form::set_form_sub(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }
 
 pub fn set_form_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::form::set_form_win(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
+    Ok(ncursesw::form::set_form_win(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }

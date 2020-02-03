@@ -1,7 +1,7 @@
 /*
     src/gen/mod.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -56,38 +56,13 @@ mod cansubwindow;
 mod ispad;
 mod iswindow;
 
-pub use hasaddfunctions::*;
-pub use hasmvaddfunctions::*;
-pub use hasdelfunctions::*;
-pub use hasmvdelfunctions::*;
-pub(in crate) use graphicstransform::*;
-pub use hasgraphicfunctions::*;
-pub(in crate) use hashandle::*;
-pub use hasinfunctions::*;
-pub use hasmvinfunctions::*;
-pub use hasinsfunctions::*;
-pub use hasmvinsfunctions::*;
-pub use hasyaxis::*;
-pub use hasyxaxis::*;
-pub use hasxaxis::*;
-pub use moveable::*;
-pub use derivable::*;
-pub use scrollable::*;
+pub use self::{
+    hasaddfunctions::*, hasmvaddfunctions::*, hasdelfunctions::*, hasmvdelfunctions::*,
+    hasgraphicfunctions::*, hasinfunctions::*, hasmvinfunctions::*, hasinsfunctions::*,
+    hasmvinsfunctions::*, hasyaxis::*, hasyxaxis::*, hasxaxis::*, moveable::*, derivable::*,
+    scrollable::*, hasbackground::*, hasattributes::*, hasmvattributes::*, hasnonblocking::*,
+    hasgetfunctions::*, hasmvgetfunctions::*, mouseable::*, basecanvas::*, ncurseswwindow::*,
+    cansubwindow::*, ispad::*, iswindow::*
+};
 
-pub use hasbackground::*;
-
-pub use hasattributes::*;
-pub use hasmvattributes::*;
-
-pub use hasnonblocking::*;
-pub use hasgetfunctions::*;
-pub use hasmvgetfunctions::*;
-
-pub use mouseable::*;
-
-pub use basecanvas::*;
-pub use ncurseswwindow::*;
-pub use cansubwindow::*;
-
-pub use ispad::*;
-pub use iswindow::*;
+pub(in crate) use self::{graphicstransform::*, hashandle::*};

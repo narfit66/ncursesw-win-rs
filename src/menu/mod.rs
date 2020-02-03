@@ -1,7 +1,7 @@
 /*
     src/menu/mod.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -29,9 +29,6 @@ mod menusize;
 mod menuspacing;
 mod postedmenu;
 
-pub use funcs::*;
-pub use menu::*;
-pub use menuitem::*;
-pub use menusize::*;
-pub use menuspacing::*;
-pub use postedmenu::*;
+pub use self::{
+    funcs::*, menu::*, menuitem::*, menusize::*, menuspacing::*, postedmenu::*
+};

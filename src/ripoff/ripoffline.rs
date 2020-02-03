@@ -23,7 +23,7 @@
 use std::{fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
 
 use ncursesw::{SCREEN, WINDOW, Orientation};
-use crate::{RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
+use crate::{Screen, RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
 
 pub(in crate) const MAX_RIPOFF_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
 
@@ -112,8 +112,8 @@ impl RipoffLine {
         }
     }
 
-    pub fn screen(&self) -> Option<SCREEN> {
-        self.screen
+    pub fn screen(&self) -> Option<Screen> {
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
     /// The number of the ripoff.

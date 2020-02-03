@@ -23,7 +23,7 @@
 use std::{ptr, fmt, convert::TryInto, hash::{Hash, Hasher}};
 
 use ncursesw::{panels, SCREEN, panels::PANEL};
-use crate::{Origin, Window, NCurseswWinError, gen::HasHandle, panels::funcs};
+use crate::{Screen, Origin, Window, NCurseswWinError, gen::HasHandle, panels::funcs};
 
 /// A moveable panel that is a container for a `Window`.
 pub struct Panel {
@@ -67,6 +67,10 @@ impl Panel {
     /// Create a new Panel instance with it's associated Window.
     pub fn new_panel(window: &Window) -> result!(Self) {
         Self::new(window)
+    }
+
+    pub fn screen(&self) -> Option<Screen> {
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
     }
 
     /// Puts panel at the bottom of all panels.
@@ -130,18 +134,12 @@ impl Panel {
 
     /// Sets the panel's user pointer to the passed `Panel`.
     pub fn set_panel_userptr<T>(&self, ptr: Option<Box<&T>>) -> result!(()) {
-        Ok(panels::set_panel_userptr(self.handle, match ptr {
-            Some(ptr) => Some(Box::into_raw(ptr) as *const libc::c_void),
-            None      => None
-        })?)
+        Ok(panels::set_panel_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *const libc::c_void)))?)
     }
 
     /// Returns the user pointers `Panel` for the given panel.
     pub fn panel_userptr<T>(&self) -> Option<Box<T>> {
-        match panels::panel_userptr(self.handle) {
-            Some(ptr) => Some(unsafe { Box::from_raw(ptr as *mut T) }),
-            None      => None
-        }
+        panels::panel_userptr(self.handle).map_or_else(|| None, |ptr| Some(unsafe { Box::from_raw(ptr as *mut T) }))
     }
 }
 
@@ -168,7 +166,6 @@ impl Eq for Panel { }
 
 impl Hash for Panel {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.screen.hash(state);
         self.handle.hash(state);
     }
 }

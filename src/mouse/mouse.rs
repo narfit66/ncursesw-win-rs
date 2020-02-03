@@ -20,7 +20,10 @@
     IN THE SOFTWARE.
 */
 
-use std::{fmt, hash::{Hash, Hasher}, convert::TryFrom, sync::Mutex, collections::HashSet, i16};
+use std::{
+    fmt, i16, hash::{Hash, Hasher}, convert::TryFrom,
+    sync::Mutex, collections::HashSet
+};
 
 use ncursesw::{
     SCREEN,
@@ -49,23 +52,25 @@ pub struct Mouse {
 impl Mouse {
     /// Create a new instance of a mouse pointer.
     pub fn new(mask: MouseMask) -> result!(Self) {
-        let returns = MouseEvents::new(mousemask(mask.mask()?)?);
-
-        Ok(Self { screen: None, mevent: default_mevent()?, mask, returns })
+        Ok(Self {
+            screen: None,
+            mevent: default_mevent()?,
+            mask,
+            returns: MouseEvents::new(mousemask(mask.mask()?)?)
+        })
     }
 
-    pub fn new_sp(screen: Screen, mask: MouseMask) -> result!(Self) {
-        let returns = MouseEvents::new(mousemask_sp(screen._handle(), mask.mask()?)?);
-
-        Ok(Self { screen: Some(screen._handle()), mevent: default_mevent()?, mask, returns })
+    pub fn new_sp(screen: &Screen, mask: MouseMask) -> result!(Self) {
+        Ok(Self {
+            screen: Some(screen._handle()),
+            mevent: default_mevent()?,
+            mask,
+            returns: MouseEvents::new(mousemask_sp(screen._handle(), mask.mask()?)?)
+        })
     }
 
     pub fn screen(&self) -> Option<Screen> {
-        if let Some(screen) = self.screen {
-            Some(Screen::_from(screen, false))
-        } else {
-            None
-        }
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
     /// Refresh the mouse pointer's events, `self.events()`.

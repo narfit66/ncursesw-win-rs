@@ -55,10 +55,7 @@ pub trait IsPad: HasHandle<WINDOW> {
 
     /// returns the parent Window for subwindows, or None if their is no parent.
     fn getparent(&self) -> Option<Pad> {
-        match ncursesw::wgetparent(self._handle()) {
-            None         => None,
-            Some(handle) => Some(Pad::_from(self._screen(), handle, false))
-        }
+        ncursesw::wgetparent(self._handle()).map_or_else(|| None, |ptr| Some(Pad::_from(self._screen(), ptr, false)))
     }
 
     /// Create a Pad instance from a previous saved file.

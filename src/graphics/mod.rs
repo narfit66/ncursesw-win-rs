@@ -1,7 +1,7 @@
 /*
     src/graphics/mod.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -29,11 +29,8 @@ mod horizontalgraphic;
 mod matrixkey;
 mod verticalgraphic;
 
-pub use boxdrawing::*;
-pub use boxdrawinggraphic::*;
-pub use boxdrawingtypedetail::*;
-pub use boxdrawingtype::*;
-pub use funcs::*;
-pub use horizontalgraphic::*;
+pub use self::{
+    boxdrawing::*, boxdrawinggraphic::*, boxdrawingtypedetail::*, boxdrawingtype::*,
+    funcs::*, horizontalgraphic::*, verticalgraphic::*
+};
 pub(in crate) use matrixkey::*;
-pub use verticalgraphic::*;

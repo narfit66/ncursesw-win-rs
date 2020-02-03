@@ -29,11 +29,7 @@ mod isfieldtype;
 mod numeric;
 mod regularexpression;
 
-pub use alphabetic::*;
-pub use alphanumeric::*;
-pub use enumerate::*;
-pub use integer::*;
-pub use ipv4::*;
-pub use isfieldtype::*;
-pub use numeric::*;
-pub use regularexpression::*;
+pub use self::{
+    alphabetic::*, alphanumeric::*, enumerate::*, integer::*, ipv4::*,
+    isfieldtype::*, numeric::*, regularexpression::*
+};

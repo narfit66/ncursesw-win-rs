@@ -38,15 +38,9 @@ pub fn set_menu_format(menu_size: MenuSize) -> result!(()) {
 }
 
 pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_sub(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
+    Ok(ncursesw::menu::set_menu_sub(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }
 
 pub fn set_menu_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_win(None, match window {
-        Some(window) => Some(window._handle()),
-        None         => None
-    })?)
+    Ok(ncursesw::menu::set_menu_win(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }

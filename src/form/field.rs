@@ -185,10 +185,7 @@ impl Field {
 
     // TODO: needs testing!
     pub fn set_field_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_field_userptr(self.handle, match userptr {
-            Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
-            None      => None
-        })?)
+        Ok(form::set_field_userptr(self.handle, userptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))?)
     }
 
     pub fn set_max_field(&self, max: usize) -> result!(()) {

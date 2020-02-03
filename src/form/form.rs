@@ -105,8 +105,8 @@ pub struct Form {
 
 impl Form {
     pub(in crate::form) fn _from(screen: Option<SCREEN>, handle: FORM, field_handles: *mut FIELD, free_on_drop: bool) -> Self {
-        if let Some(sp) = screen {
-            assert!(!sp.is_null(), "Form::_from() : screen.is_null()");
+        if let Some(ptr) = screen {
+            assert!(!ptr.is_null(), "Form::_from() : screen.is_null()");
         }
         assert!(!handle.is_null(), "Form::_from() : handle.is_null()");
         assert!(!field_handles.is_null(), "Form::_from() : field_handles.is_null()");
@@ -191,11 +191,7 @@ impl Form {
     }
 
     pub fn screen(&self) -> Option<Screen> {
-        if let Some(screen) = self.screen {
-            Some(Screen::_from(screen, false))
-        } else {
-            None
-        }
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
     }
 
     /// return the current field of the form.
@@ -365,15 +361,12 @@ impl Form {
     }
 
     /// set the forms sub window.
-    pub fn set_form_sub(&self, sub: Option<&Window>) -> result!(()) {
-        if let Some(window) = sub {
+    pub fn set_form_sub(&self, window: Option<&Window>) -> result!(()) {
+        if let Some(window) = window {
             assert!(self._screen() == window._screen());
         }
 
-        Ok(form::set_form_sub(Some(self.handle), match sub {
-            Some(window) => Some(window._handle()),
-            None         => None
-        })?)
+        Ok(form::set_form_sub(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
 
     /// set the form termination callback function.
@@ -390,22 +383,16 @@ impl Form {
 
     // TODO: needs testing!
     pub fn set_form_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_form_userptr(self.handle, match userptr {
-            Some(ptr) => Some(Box::into_raw(ptr) as *mut libc::c_void),
-            None      => None
-        })?)
+        Ok(form::set_form_userptr(self.handle, userptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))?)
     }
 
     /// set the forms main window.
-    pub fn set_form_win(&self, win: Option<&Window>) -> result!(()) {
-        if let Some(window) = win {
+    pub fn set_form_win(&self, window: Option<&Window>) -> result!(()) {
+        if let Some(window) = window {
             assert!(self._screen() == window._screen());
         }
 
-        Ok(form::set_form_win(Some(self.handle), match win {
-            Some(window) => Some(window._handle()),
-            None         => None
-        })?)
+        Ok(form::set_form_win(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
 
     pub fn unfocus_current_field(&self) -> result!(()) {
@@ -458,7 +445,6 @@ impl Eq for Form { }
 
 impl Hash for Form {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.screen.hash(state);
         self.handle.hash(state);
     }
 }

@@ -38,8 +38,8 @@ pub struct Pad {
 
 impl HasHandle<WINDOW> for Pad {
     fn _from(screen: Option<SCREEN>, handle: WINDOW, free_on_drop: bool) -> Self {
-        if let Some(sp) = screen {
-            assert!(!sp.is_null(), "Pad::_from() : screen.is_null()");
+        if let Some(ptr) = screen {
+            assert!(!ptr.is_null(), "Pad::_from() : screen.is_null()");
         }
         assert!(!handle.is_null(), "Pad::_from() : handle.is_null()");
 
@@ -57,11 +57,7 @@ impl HasHandle<WINDOW> for Pad {
 
 impl Pad {
     pub fn screen(&self) -> Option<Screen> {
-        if let Some(screen) = self.screen {
-            Some(Screen::_from(screen, false))
-        } else {
-            None
-        }
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
     }
 }
 

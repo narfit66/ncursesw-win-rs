@@ -37,8 +37,8 @@ pub struct RipoffWindow {
 
 impl HasHandle<WINDOW> for RipoffWindow {
     fn _from(screen: Option<SCREEN>, handle: WINDOW, _: bool) -> Self {
-        if let Some(sp) = screen {
-            assert!(!sp.is_null(), "RipoffWindow::_from() : screen.is_null()");
+        if let Some(ptr) = screen {
+            assert!(!ptr.is_null(), "RipoffWindow::_from() : screen.is_null()");
         }
         assert!(!handle.is_null(), "RipoffWindow::_from() : handle.is_null()");
 
@@ -60,11 +60,7 @@ impl RipoffWindow {
     }
 
     pub fn screen(&self) -> Option<Screen> {
-        if let Some(screen) = self.screen {
-            Some(Screen::_from(screen, false))
-        } else {
-            None
-        }
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
     }
 }
 

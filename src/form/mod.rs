@@ -1,7 +1,7 @@
 /*
     src/form/mod.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -32,12 +32,7 @@ mod form;
 mod funcs;
 mod postedform;
 
-pub use field::*;
-pub use fieldbuffer::*;
-pub use fieldparameters::*;
-pub use fieldtype::*;
-pub use fieldtypes::*;
-pub use fieldinfo::*;
-pub use form::*;
-pub use funcs::*;
-pub use postedform::*;
+pub use self::{
+    field::*, fieldbuffer::*, fieldparameters::*, fieldtype::*, fieldtypes::*,
+    fieldinfo::*, form::*, funcs::*, postedform::*
+};

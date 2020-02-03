@@ -23,7 +23,7 @@
 use std::{fmt, sync::{Mutex, atomic::Ordering}, collections::HashSet};
 
 use ncursesw;
-use ncursesw::{attr_t, extend::ColorPair};
+use ncursesw::{SCREEN, extend::{ColorPair, Attributes}};
 
 use crate::{
     Screen,
@@ -42,160 +42,114 @@ lazy_static! {
 }
 
 pub struct SoftLabels {
-    screen: Option<ncursesw::SCREEN>
+    screen: Option<SCREEN>
 }
 
 impl SoftLabels {
     pub fn new(fmt: SoftLabelType) -> result!(Self) {
-        if INITSCR_CALLED.load(Ordering::SeqCst) {
-            return Err(NCurseswWinError::InitscrAlreadyCalled)
-        }
-
-        if !SOFTLABELS
-            .lock()
-            .unwrap_or_else(|_| panic!("SoftLabel::new() : SOFTLABEL.lock() failed!!!"))
-            .insert(None)
-        {
-            return Err(NCurseswWinError::SoftLabelAlreadyDefined { screen: None })
-        }
+        check_softlabel_init(None)?;
 
         ncursesw::slk_init(fmt)?;
 
         Ok(Self { screen: None })
     }
 
-    pub fn new_sp(screen: &Screen, fmt: SoftLabelType) -> result!(Self) {
-        if INITSCR_CALLED.load(Ordering::SeqCst) {
-            return Err(NCurseswWinError::InitscrAlreadyCalled)
-        }
+    #[deprecated(since = "0.5.0", note = "Use SoftLabels::new() instead")]
+    pub fn slk_init(fmt: SoftLabelType) -> result!(Self) {
+        Self::new(fmt)
+    }
 
-        if !SOFTLABELS
-            .lock()
-            .unwrap_or_else(|_| panic!("SoftLabel::new_sp() : SOFTLABEL.lock() failed!!!"))
-            .insert(None)
-        {
-            return Err(NCurseswWinError::SoftLabelAlreadyDefined { screen: Some(Screen::_from(screen._handle(), false)) })
-        }
+    pub fn new_sp(screen: &Screen, fmt: SoftLabelType) -> result!(Self) {
+        check_softlabel_init(Some(Screen::_from(screen._handle(), false)))?;
 
         ncursesw::slk_init_sp(screen._handle(), fmt)?;
 
         Ok(Self { screen: Some(screen._handle()) })
     }
 
+    #[deprecated(since = "0.5.0", note = "Use SoftLabels::new_sp() instead")]
+    pub fn slk_init_sp(screen: &Screen, fmt: SoftLabelType) -> result!(Self) {
+        Self::new_sp(screen, fmt)
+    }
+
     pub fn screen(&self) -> Option<Screen> {
-        if let Some(screen) = self.screen {
-            Some(Screen::_from(screen, false))
-        } else {
-            None
-        }
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
     }
 
-    pub fn attr(&self) -> attr_t {
-        if let Some(screen) = self.screen {
-            ncursesw::slk_attr_sp(screen)
-        } else {
-            ncursesw::slk_attr()
-        }
+    pub fn slk_attr(&self) -> Attributes {
+        Attributes::from(self.screen.map_or_else(|| ncursesw::slk_attr(), |screen| ncursesw::slk_attr_sp(screen)))
     }
 
-    pub fn attr_off<A, T>(&self, attrs: A) -> result!(())
+    pub fn slk_attr_off<A, T>(&self, attrs: A) -> result!(())
         where A: AttributesType<T>,
               T: ColorAttributeTypes
     {
-        assert!(self.screen.is_some(), "{}attr_off() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(self.screen.is_some(), "{}slk_attr_off() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
 
         Ok(ncursesw::slk_attr_off(attrs)?)
     }
 
-    pub fn attr_on<A, T>(&self, attrs: A) -> result!(())
+    pub fn slk_attr_on<A, T>(&self, attrs: A) -> result!(())
         where A: AttributesType<T>,
               T: ColorAttributeTypes
     {
-        assert!(self.screen.is_some(), "{}attr_on() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(self.screen.is_some(), "{}slk_attr_on() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
 
         Ok(ncursesw::slk_attr_on(attrs)?)
     }
 
-    pub fn attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(())
+    pub fn slk_attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
         Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_attr_set_sp(screen, attrs, color_pair)?
+            ncursesw::slk_attr_set_sp(screen, attrs, color_pair)
         } else {
-            ncursesw::slk_attr_set(attrs, color_pair)?
-        })
+            ncursesw::slk_attr_set(attrs, color_pair)
+        }?)
     }
 
-    pub fn clear(&self) -> result!(()) {
+    pub fn slk_clear(&self) -> result!(()) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_clear(), |screen| ncursesw::slk_clear_sp(screen))?)
+    }
+
+    pub fn slk_color(&self, color_pair: ColorPair) -> result!(()) {
         Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_clear_sp(screen)?
+            ncursesw::extended_slk_color_sp(screen, color_pair)
         } else {
-            ncursesw::slk_clear()?
-        })
+            ncursesw::extended_slk_color(color_pair)
+        }?)
     }
 
-    pub fn color(&self, color_pair: ColorPair) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::extended_slk_color_sp(screen, color_pair)?
-        } else {
-            ncursesw::extended_slk_color(color_pair)?
-        })
+    pub fn slk_label(&self, labnum: u8) -> result!(String) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_label(i32::from(labnum)), |screen| ncursesw::slk_label_sp(screen, i32::from(labnum)))?)
     }
 
-    pub fn label(&self, labnum: i32) -> result!(String) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_label_sp(screen, labnum)?
-        } else {
-            ncursesw::slk_label(labnum)?
-        })
+    pub fn slk_noutrefresh(&self) -> result!(()) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_noutrefresh(), |screen| ncursesw::slk_noutrefresh_sp(screen))?)
     }
 
-    pub fn noutrefresh(&self) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_noutrefresh_sp(screen)?
-        } else {
-            ncursesw::slk_noutrefresh()?
-        })
+    pub fn slk_refresh(&self) -> result!(()) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_refresh(), |screen| ncursesw::slk_refresh_sp(screen))?)
     }
 
-    pub fn refresh(&self) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_refresh_sp(screen)?
-        } else {
-            ncursesw::slk_refresh()?
-        })
+    pub fn slk_restore(&self) -> result!(()) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_restore(), |screen| ncursesw::slk_restore_sp(screen))?)
     }
 
-    pub fn restore(&self) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_restore_sp(screen)?
-        } else {
-            ncursesw::slk_restore()?
-        })
+    pub fn slk_set(&self, labnum: u8, label: &str, fmt: Justification) -> result!(()) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_set(i32::from(labnum), label, fmt), |screen| ncursesw::slk_set_sp(screen, i32::from(labnum), label, fmt))?)
     }
 
-    pub fn set(&self, labnum: i32, label: &str, fmt: Justification) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_set_sp(screen, labnum, label, fmt)?
-        } else {
-            ncursesw::slk_set(labnum, label, fmt)?
-        })
+    pub fn slk_touch(&self) -> result!(()) {
+        Ok(self.screen.map_or_else(|| ncursesw::slk_touch(), |screen| ncursesw::slk_touch_sp(screen))?)
     }
 
-    pub fn touch(&self) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_touch_sp(screen)?
-        } else {
-            ncursesw::slk_touch()?
-        })
-    }
+    pub fn slk_wset(&self, labnum: u8, label: &WideString, fmt: Justification) -> result!(()) {
+        assert!(self.screen.is_some(), "{}slk_wset() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
 
-    pub fn wset(&self, labnum: i32, label: &WideString, fmt: Justification) -> result!(()) {
-        assert!(self.screen.is_some(), "{}wset() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
-
-        Ok(ncursesw::slk_wset(labnum, label, fmt)?)
+        Ok(ncursesw::slk_wset(i32::from(labnum), label, fmt)?)
     }
 }
 
@@ -205,5 +159,19 @@ unsafe impl Sync for SoftLabels { } // too make thread safe
 impl fmt::Debug for SoftLabels {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "SoftLabels {{ screen: {:?} }}", self.screen)
+    }
+}
+
+fn check_softlabel_init(screen: Option<Screen>) -> result!(()) {
+    if screen.is_none() && INITSCR_CALLED.load(Ordering::SeqCst) {
+        Err(NCurseswWinError::InitscrAlreadyCalled)
+    } else if !SOFTLABELS
+        .lock()
+        .unwrap_or_else(|_| panic!("SoftLabel::new() : SOFTLABEL.lock() failed!!!"))
+        .insert(screen)
+    {
+        Err(NCurseswWinError::SoftLabelAlreadyDefined)
+    } else {
+        Ok(())
     }
 }
