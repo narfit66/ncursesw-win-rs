@@ -108,9 +108,7 @@ pub struct Menu {
 impl Menu {
     // make a new instance from the passed ncurses menu item pointer.
     pub(in crate::menu) fn _from(screen: Option<SCREEN>, handle: MENU, item_handles: *mut ITEM, free_on_drop: bool) -> Self {
-        if let Some(ptr) = screen {
-            assert!(!ptr.is_null(), "Menu::_from() : screen.is_null()");
-        }
+        assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "Menu::_from() : screen.is_null()");
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
         assert!(!item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
 
@@ -393,9 +391,7 @@ impl Menu {
     }
 
     pub fn set_menu_sub(&self, window: Option<&Window>) -> result!(()) {
-        if let Some(window) = window {
-            assert!(self._screen() == window._screen())
-        }
+        assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
 
         Ok(menu::set_menu_sub(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
@@ -417,9 +413,7 @@ impl Menu {
     }
 
     pub fn set_menu_win(&self, window: Option<&Window>) -> result!(()) {
-        if let Some(window) = window {
-            assert!(self._screen() == window._screen())
-        }
+        assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
 
         Ok(menu::set_menu_win(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }

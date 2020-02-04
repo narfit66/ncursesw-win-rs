@@ -105,9 +105,7 @@ pub struct Form {
 
 impl Form {
     pub(in crate::form) fn _from(screen: Option<SCREEN>, handle: FORM, field_handles: *mut FIELD, free_on_drop: bool) -> Self {
-        if let Some(ptr) = screen {
-            assert!(!ptr.is_null(), "Form::_from() : screen.is_null()");
-        }
+        assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "Form::_from() : screen.is_null()");
         assert!(!handle.is_null(), "Form::_from() : handle.is_null()");
         assert!(!field_handles.is_null(), "Form::_from() : field_handles.is_null()");
 
@@ -362,9 +360,7 @@ impl Form {
 
     /// set the forms sub window.
     pub fn set_form_sub(&self, window: Option<&Window>) -> result!(()) {
-        if let Some(window) = window {
-            assert!(self._screen() == window._screen());
-        }
+        assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
 
         Ok(form::set_form_sub(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
@@ -388,9 +384,7 @@ impl Form {
 
     /// set the forms main window.
     pub fn set_form_win(&self, window: Option<&Window>) -> result!(()) {
-        if let Some(window) = window {
-            assert!(self._screen() == window._screen());
-        }
+        assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
 
         Ok(form::set_form_win(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }

@@ -40,9 +40,7 @@ impl HasHandle<PANEL> for Panel {
     // 'peeking' the Panel but it would be invalid to free the handle when
     // our instance goes out of scope.
     fn _from(screen: Option<SCREEN>, handle: PANEL, free_on_drop: bool) -> Self {
-        if let Some(sp) = screen {
-            assert!(!sp.is_null(), "Panel::_from() : screen.is_null()");
-        }
+        assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "Panel::_from() : screen.is_null()");
         assert!(!handle.is_null(), "Panel::_from() : handle.is_null()");
 
         Self { screen, handle, free_on_drop }
