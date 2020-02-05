@@ -52,16 +52,6 @@ impl HasHandle<WINDOW> for RipoffWindow {
     }
 }
 
-impl RipoffWindow {
-    pub(in crate::ripoff) fn _set_screen(&mut self, screen: Option<SCREEN>) {
-        self.screen = screen
-    }
-
-    pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
-    }
-}
-
 impl IsWindow for RipoffWindow { }
 impl BaseCanvas for RipoffWindow { }
 impl Mouseable for RipoffWindow { }
@@ -77,12 +67,17 @@ impl HasNonBlocking for RipoffWindow { }
 impl HasGetFunctions for RipoffWindow { }
 
 impl RipoffWindow {
-    /// get the cursor column on the ripoff window.
+    /// The screen the window is attached to.
+    pub fn screen(&self) -> Option<Screen> {
+        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
+    }
+
+    /// Get the cursor column.
     pub fn column(&self) -> result!(u16) {
         Ok(u16::try_from(ncursesw::getcurx(self._handle())?)?)
     }
 
-    /// set the cursor column on the ripoff window.
+    /// Set the cursor column.
     pub fn set_column(&self, column: u16) -> result!(()) {
         Ok(ncursesw::wmove(self._handle(), Origin { y: 0, x: column }.try_into()?)?)
     }
