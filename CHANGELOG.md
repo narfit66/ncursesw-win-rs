@@ -8,6 +8,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - Added `{normal,extend}::SoftLabels`.
 - Removed `setlocale()` function. [BC]
 - Removed `intrflush()` from `BaseCanvas` trait and made a crate public function. [BC]
+- Removed `NCurseswWinError::RipoffNotInitialized`. [BC]
 - `menu_request_by_name()` now returns a `Result<Option<menu::MenuRequest>, menu::NCurseswMenuError>` instead of `Result<bool, menu::NCurseswMenuError>`. [BC]
 - `menu::menu_request_name()` now takes a `menu::MenuRequest` instead of a `i32` for the request. [BC]
 - `menu::Menu::set_menu_pad()` now takes a `char` instead of a `i32` for the pad character. [BC]

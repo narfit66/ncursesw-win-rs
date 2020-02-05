@@ -20,133 +20,162 @@
     IN THE SOFTWARE.
 */
 
-use std::{fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}}};
+use std::{
+    fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}},
+    hash::{Hash, Hasher}
+};
 
-use ncursesw::{SCREEN, WINDOW, Orientation};
-use crate::{Screen, RipoffWindow, NCurseswWinError, gen::*, ncurses::INITSCR_CALLED};
+use ncursesw::{SCREEN, WINDOW, Orientation, shims::constants::OK};
+
+use crate::{
+    Screen, RipoffWindow, NCurseswWinError, HasHandle,
+    ncurses::INITSCR_CALLED
+};
 
 pub(in crate) const MAX_RIPOFF_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
 
 lazy_static! {
-    static ref RIPOFFCOUNT: AtomicUsize = AtomicUsize::new(0);
-    static ref RIPOFFLINES: Mutex<Vec<(RipoffWindow, i32)>> = Mutex::new(Vec::with_capacity(MAX_RIPOFF_LINES));
+    static ref RIPOFFCOUNT:       AtomicUsize = AtomicUsize::new(0);
+    static ref RIPOFFINITCOUNT:   AtomicUsize = AtomicUsize::new(0);
+    static ref RIPOFFLINESCREENS: Mutex<Vec<Option<Screen>>> = Mutex::new(Vec::with_capacity(MAX_RIPOFF_LINES));
+    static ref RIPOFFLINES:       Mutex<Vec<(RipoffWindow, i32)>> = Mutex::new(Vec::with_capacity(MAX_RIPOFF_LINES));
 }
 
-// the macro for defining the ripoff call backs.
-macro_rules! ripoff_init_fn {
-    ($f: ident, $n: expr) => {
-        #[no_mangle]
-        extern fn $f(win: WINDOW, cols: i32) -> i32 {
-            RIPOFFLINES
-                .lock()
-                .unwrap_or_else(|_| panic!("ripoff_init{}() : RIPOFFLINES.lock() failed!", $n))
-                .insert($n, (RipoffWindow::_from(None, win, false), cols));
+#[no_mangle]
+// our ripoff call-back function that will be called via NCurses `initscr()`,
+// a maximum of 5 of these's can be defined and call by `initscr()`, they are
+// called in the order they are defined by `RipoffLine::new()` or `RipoffLine::new_sp()`.
+// With each call that `initscr()` makes to this function a new `WINDOW` is
+// created and passed along with the number of columns that the terminal/screen supports.
+extern fn ripoff_init(window: WINDOW, columns: i32) -> i32 {
+    // get the number of times `initscr()` has called (base 0).
+    let number = RIPOFFINITCOUNT.fetch_add(1, Ordering::SeqCst);
 
-            ncursesw::shims::constants::OK
-        }
-    }
+    // get the screen associated with this ripoff line.
+    let screen = &RIPOFFLINESCREENS
+        .lock()
+        .unwrap_or_else(|_| panic!("ripoff_init() : RIPOFFLINESCREENS.lock()[{}] failed!!!", number))[number];
+
+    // save the window and columns assigned by `initscr()`.
+    RIPOFFLINES
+        .lock()
+        .unwrap_or_else(|_| panic!("ripoff_init() : RIPOFFLINES.lock() failed!!!"))
+        .insert(number, (RipoffWindow::_from(screen.as_ref().map_or_else(|| None, |screen| Some(screen._handle())), window, false), columns));
+
+    OK
 }
 
-// our ripoff call-back functions that will be called via ncurses initscr(), each one with store
-// the window structure that initscr() will assign to it in the static RIPOFFLINES.
-ripoff_init_fn!(ripoff_init0, 0);
-ripoff_init_fn!(ripoff_init1, 1);
-ripoff_init_fn!(ripoff_init2, 2);
-ripoff_init_fn!(ripoff_init3, 3);
-ripoff_init_fn!(ripoff_init4, 4);
-
-/// A type of ripoff line.
-#[derive(PartialEq, Eq, Hash)]
+/// A ripoff line.
 pub struct RipoffLine {
     screen: Option<SCREEN>,
     number: usize
 }
 
 impl RipoffLine {
-    /// Create a new instance of a RipoffLine (ncurses allows for a maximum of 5 ripoff lines.
+    /// Create a new instance of a RipoffLine (NCurses allows for a maximum of 5 ripoff lines).
     pub fn new(orientation: Orientation) -> result!(Self) {
-        // check that initscr() has not been called.
-        if INITSCR_CALLED.load(Ordering::SeqCst) {
-            Err(NCurseswWinError::InitscrAlreadyCalled)
-        } else {
-            // get the ripoff call-back number.
-            let number = RIPOFFCOUNT.fetch_add(1, Ordering::SeqCst);
+        // return the ripoff callback number (base 0).
+        let number = get_ripoff_number()?;
 
-            // call the ncurses ripoff function with one of our pre-defined call-back function.
-            // ncurses allows for a maximum of 5 ripoff lines.
-            match ncursesw::ripoffline(orientation, match number {
-                0 => ripoff_init0,
-                1 => ripoff_init1,
-                2 => ripoff_init2,
-                3 => ripoff_init3,
-                4 => ripoff_init4,
-                _ => return Err(NCurseswWinError::MaximumRipoffLines { number })
-            }) {
-                Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-                _           => Ok(Self { screen: None, number })
-            }
+        // call the NCurses ripoff function with one of our pre-defined call-back function.
+        // NCurses allows for a maximum of 5 ripoff lines.
+        if let Err(source) = ncursesw::ripoffline(orientation, ripoff_init) {
+            return Err(NCurseswWinError::NCurseswError { source })
         }
+
+        // save the screen of the ripoff window so the `ripoff_init` function can initialise
+        // it's `RipoffWindow` correctly. As this function is for non-screen then this is
+        // always a `None`.
+        RIPOFFLINESCREENS
+            .lock()
+            .unwrap_or_else(|_| panic!("RipoffLine::new() : RIPOFFLINESCREENS.lock() failed!!!"))
+            .insert(number, None);
+
+        Ok(Self { screen: None, number })
     }
 
-    pub fn new_sp(screen: SCREEN, orientation: Orientation) -> result!(Self) {
-        // check that initscr() has not been called.
-        if INITSCR_CALLED.load(Ordering::SeqCst) {
-            Err(NCurseswWinError::InitscrAlreadyCalled)
-        } else {
-            // get the ripoff call-back number.
-            let number = RIPOFFCOUNT.fetch_add(1, Ordering::SeqCst);
+    /// Create a new instance of a RipoffLine for a Screen (NCurses allows for a maximum of 5 ripoff lines).
+    pub fn new_sp(screen: &Screen, orientation: Orientation) -> result!(Self) {
+        // return the ripoff callback number (base 0).
+        let number = get_ripoff_number()?;
 
-            // call the ncurses ripoff function with one of our pre-defined call-back function.
-            // ncurses allows for a maximum of 5 ripoff lines.
-            match ncursesw::ripoffline_sp(screen, orientation, match number {
-                0 => ripoff_init0,
-                1 => ripoff_init1,
-                2 => ripoff_init2,
-                3 => ripoff_init3,
-                4 => ripoff_init4,
-                _ => return Err(NCurseswWinError::MaximumRipoffLines { number })
-            }) {
-                Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-                _           => Ok(Self { screen: Some(screen), number })
-            }
+        // call the NCurses ripoff function with one of our pre-defined call-back function.
+        // NCurses allows for a maximum of 5 ripoff lines.
+        if let Err(source) = ncursesw::ripoffline_sp(screen._handle(), orientation, ripoff_init) {
+            return Err(NCurseswWinError::NCurseswError { source })
         }
+
+        // save the screen of the ripoff window so the `ripoff_init` function can initialise
+        // it's `RipoffWindow` correctly.
+        RIPOFFLINESCREENS
+            .lock()
+            .unwrap_or_else(|_| panic!("RipoffLine::new_sp() : RIPOFFLINESCREENS.lock() failed!!!"))
+            .insert(number, Some(Screen::_from(screen._handle(), false)));
+
+        Ok(Self { screen: Some(screen._handle()), number })
     }
 
+    /// The ripoff lines screen.
     pub fn screen(&self) -> Option<Screen> {
         self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
-    /// The number of the ripoff.
+    /// The number of the ripoff line.
     pub fn number(&self) -> usize {
         self.number
     }
 
     /// Update the ripoff line.
-    pub fn update<F: Fn(&RipoffWindow, u16) -> result!(T), T>(&self, user_function: F) -> result!(T) {
-        // check that initscr() has been called.
+    pub fn update<F: Fn(&RipoffWindow, u16) -> result!(T), T>(&self, func: F) -> result!(T) {
+        // check that `initscr()` has been called.
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
-            Err(NCurseswWinError::InitscrNotCalled)
-        } else {
-            // get the ripoff details and assert that we have a valid ripoff!
-            let (ripoff_window, ripoff_columns) = &RIPOFFLINES
-                .lock()
-                .unwrap_or_else(|_| panic!("RipoffLine.update() : RIPOFFLINES.lock() failed!"))[self.number];
-
-            if ripoff_window._handle().is_null() {
-                Err(NCurseswWinError::RipoffNotInitialized { number: self.number })
-            } else {
-                // call the passed closure to process against the ripoff.
-                user_function(&ripoff_window, u16::try_from(*ripoff_columns)?)
-            }
+            return Err(NCurseswWinError::InitscrNotCalled)
         }
+
+        // get the ripoff details and assert that we have a valid ripoff!
+        let (ref ripoff_window, ripoff_columns) = &RIPOFFLINES
+            .lock()
+            .unwrap_or_else(|_| panic!("RipoffLine::update() : RIPOFFLINES.lock()[{}] failed!!!", self.number))[self.number];
+
+        // call the passed closure to process against the ripoff.
+        func(ripoff_window, u16::try_from(*ripoff_columns)?)
     }
 }
 
 unsafe impl Send for RipoffLine { } // too make thread safe
 unsafe impl Sync for RipoffLine { } // too make thread safe
 
+impl PartialEq for RipoffLine {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.number == rhs.number
+    }
+}
+
+impl Eq for RipoffLine { }
+
+impl Hash for RipoffLine {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.number.hash(state);
+    }
+}
+
 impl fmt::Debug for RipoffLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "RipoffLine {{ screen: {:?}, number: {} }}", self.screen, self.number)
+    }
+}
+
+// return the ripoff callback number (base 0).
+fn get_ripoff_number() -> result!(usize) {
+    if INITSCR_CALLED.load(Ordering::SeqCst) {
+        return Err(NCurseswWinError::InitscrAlreadyCalled)
+    }
+
+    let number = RIPOFFCOUNT.fetch_add(1, Ordering::SeqCst);
+
+    if number >= MAX_RIPOFF_LINES {
+        Err(NCurseswWinError::MaximumRipoffLines { number })
+    } else {
+        Ok(number)
     }
 }
