@@ -23,18 +23,23 @@
 use ncursesw::form::FormRequest;
 use crate::{Window, HasHandle, NCurseswWinError};
 
+/// Searches in the name-table for a request with the given name and returns
+/// its request code as a `Some`. Otherwise `None` is returned.
 pub fn form_request_by_name(name: &str) -> result!(Option<FormRequest>) {
     Ok(ncursesw::form::form_request_by_name(name)?)
 }
 
+/// Returns the printable name of a form request code.
 pub fn form_request_name(request: FormRequest) -> result!(String) {
     Ok(ncursesw::form::form_request_name(request)?)
 }
 
+/// Sets the forms sub-window. if `window` is `None` the `stdscr()` is used.
 pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
     Ok(ncursesw::form::set_form_sub(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }
 
+/// Sets the forms main window. if `window` is `None` the `stdscr()` is used.
 pub fn set_form_win(window: Option<&Window>) -> result!(()) {
     Ok(ncursesw::form::set_form_win(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }

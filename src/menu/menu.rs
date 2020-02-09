@@ -187,8 +187,9 @@ impl Menu {
         Self::new_sp(screen, items)
     }
 
+    /// The screen associated with the menu.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
     pub fn current_item(&self) -> result!(MenuItem) {
@@ -250,8 +251,8 @@ impl Menu {
         Ok(menu::menu_opts_on(self.handle, opts)?)
     }
 
-    pub fn menu_pad(&self) -> char {
-        menu::menu_pad(self.handle)
+    pub fn menu_pad(&self) -> result!(char) {
+        Ok(menu::menu_pad(self.handle)?)
     }
 
     pub fn menu_pattern(&self) -> result!(String) {
@@ -273,7 +274,7 @@ impl Menu {
 
     // TODO: needs testing!
     pub fn menu_userptr<T>(&self) -> Option<Box<T>> {
-        menu::menu_userptr(self.handle).as_mut().map(|ptr| unsafe { Box::from_raw(*ptr as *mut T) })
+        menu::menu_userptr(self.handle).as_mut().map(|userptr| unsafe { Box::from_raw(*userptr as *mut T) })
     }
 
     pub fn menu_win(&self) -> result!(Window) {
@@ -408,8 +409,8 @@ impl Menu {
     }
 
     // TODO: needs testing!
-    pub fn set_menu_userptr<T>(&self, ptr: Option<Box<&T>>) {
-        menu::set_menu_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))
+    pub fn set_menu_userptr<T>(&self, userptr: Option<Box<&T>>) {
+        menu::set_menu_userptr(self.handle, userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
     }
 
     pub fn set_menu_win(&self, window: Option<&Window>) -> result!(()) {

@@ -103,8 +103,8 @@ impl Screen {
     /// Enables or disables the automatic echoing of input into the window as
     /// the user types. Default to on, but you probably want it to be off most
     /// of the time.
-    pub fn set_echo(&self, echoing: bool) -> result!(()) {
-        match if echoing {
+    pub fn set_echo(&self, flag: bool) -> result!(()) {
+        match if flag {
             ncursesw::echo_sp(self.handle)
         } else {
             ncursesw::noecho_sp(self.handle)
@@ -121,8 +121,8 @@ impl Screen {
     /// Initially, these translations do occur. If you disable then ncurses will be able to make
     /// better use of the line-feed capability, resulting in faster cursor motion.
     /// Also, ncurses will then be able to detect the return key.
-    pub fn set_newline(&self, newline: bool) -> result!(()) {
-        match if newline {
+    pub fn set_newline(&self, flag: bool) -> result!(()) {
+        match if flag {
             ncursesw::nl_sp(self.handle)
         } else {
             ncursesw::nonl_sp(self.handle)
@@ -132,16 +132,16 @@ impl Screen {
         }
     }
 
-    pub fn set_filter(screen: &Screen, filter: bool) {
-        if filter {
+    pub fn set_filter(screen: &Screen, flag: bool) {
+        if flag {
             ncursesw::filter_sp(screen._handle())
         } else {
             ncursesw::nofilter_sp(screen._handle())
         }
     }
 
-    pub fn set_qiflush(&self, flush: bool) {
-        if flush {
+    pub fn set_qiflush(&self, flag: bool) {
+        if flag {
             ncursesw::qiflush_sp(self.handle)
         } else {
             ncursesw::noqiflush_sp(self.handle)

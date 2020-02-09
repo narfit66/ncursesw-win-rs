@@ -29,6 +29,7 @@ use ncursesw::{
     },
     shims::bindings, shims::constants::E_OK
 };
+
 use crate::{
     Origin, HasHandle, NCurseswWinError,
     form::{FieldBuffer, FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType}
@@ -53,19 +54,33 @@ impl Field {
 }
 
 impl Field {
+    /// Allocates a new field and initializes it from the contents of a `FieldPrameters`
+    /// type given: height, width, row of upper-left corner, column of upper-left corner,
+    /// number off-screen rows, and number of additional working buffers.
     pub fn new(parameters: FieldParameters) -> result!(Self) {
         Ok(Self::_from(form::new_field(parameters.try_into()?)?, true))
     }
 
-    #[deprecated(since = "0.4.1", note = "Use Field::new() instead")]
+    #[deprecated(since = "0.5.0", note = "Use Field::new() instead")]
+    /// Allocates a new field and initializes it from the contents of a `FieldPrameters`
+    /// type given: height, width, row of upper-left corner, column of upper-left corner,
+    /// number off-screen rows, and number of additional working buffers.
     pub fn new_field(parameters: FieldParameters) -> result!(Self) {
         Self::new(parameters)
     }
 
+    /// Duplicates a field at a new location. Most attributes (including current
+    /// contents, size, validation type, buffer count, growth threshold, justification,
+    /// foreground, background, pad character, options, and user pointer) are copied.
+    /// Field status and the field page bit are not copied.
     pub fn dup_field(&self, origin: Origin) -> result!(Self) {
         Ok(Self::_from(form::dup_field(self.handle, origin.try_into()?)?, true))
     }
 
+    /// Returns the actual size of the field, and its maximum possible size.
+    /// If the field has no size limit, the return max will be set to 0.
+    /// A field can be made dynamic by turning off the `FieldOptions::Static`
+    /// option with `self.field_opts_off()`.
     pub fn dynamic_field_info(&self) -> result!(FieldInfo) {
         Ok(FieldInfo::try_from(form::dynamic_field_info(self.handle)?)?)
     }
@@ -74,99 +89,146 @@ impl Field {
         Ok(form::field_arg(self.handle)?)
     }
 
+    /// Returns the background attribute. The default is `normal::Attributes::Normal`.
     pub fn field_back(&self) -> normal::Attributes {
         form::field_back(self.handle)
     }
 
+    /// Returns a vector of the contents of the given `FieldBuffer`:
+    ///
+    /// - The buffer contents always have the same length, and are padded with trailing
+    ///   spaces as needed to ensure this length is the same.
+    /// - The buffer may contain leading spaces, depending on how it was set.
+    /// - The buffer contents are set with `self.set_field_buffer()`, or as a side effect of
+    ///   any editing operations on the corresponding field.
+    /// - Editing operations are based on the window which displays the field, rather
+    ///   than a string. The window contains only printable characters, and is filled
+    ///   with blanks. If you want the raw data, you must write your own routine that
+    ///   copies the value out of the buffer and removes the leading and trailing spaces.
+    /// - Because editing operations change the content of the buffer to correspond to
+    ///   the window, you should not rely on using buffers for long-term storage of form data.
     pub fn field_buffer(&self, field_buffer: FieldBuffer) -> result!(Vec<i8>) {
-        Ok(form::field_buffer(self.handle, field_buffer._number())?)
+        Ok(form::field_buffer(self.handle, field_buffer.number())?)
     }
 
+    /// Returns the foreground attribute. The default is `normal::Attributes::Standout`.
     pub fn field_fore(&self) -> normal::Attributes {
         form::field_fore(self.handle)
     }
 
+    /// Returns the index of the field in the field array of the form it is connected to.
     pub fn field_index(&self) -> result!(usize) {
         Ok(usize::try_from(form::field_index(self.handle)?)?)
     }
 
+    /// Returns the sizes and other attributes passed in to the field at its creation time.
+    /// The attributes are: height, width, row of upper-left corner, column of upper-left
+    /// corner, number off-screen rows, and number of working buffers.
     pub fn field_info(&self) -> result!(FieldParameters) {
         Ok(FieldParameters::try_from(form::field_info(self.handle)?)?)
     }
 
+    /// Returns a field's justification attribute.
     pub fn field_just(&self) -> result!(FieldJustification) {
         Ok(form::field_just(self.handle)?)
     }
 
+    /// Returns the field's current options.
     pub fn field_opts(&self) -> FieldOptions {
         form::field_opts(self.handle)
     }
 
+    /// Turns off the given options, and leaves others alone.
     pub fn field_opts_off(&self, opts: FieldOptions) -> result!(()) {
         Ok(form::field_opts_off(self.handle, opts)?)
     }
 
+    /// Turns on the given options, and leaves others alone.
     pub fn field_opts_on(&self, opts: FieldOptions) -> result!(()) {
         Ok(form::field_opts_on(self.handle, opts)?)
     }
 
-    pub fn field_pad(&self) -> char {
-        form::field_pad(self.handle)
+    /// Returns the given form's pad character. The default is a blank.
+    pub fn field_pad(&self) -> result!(char) {
+        Ok(form::field_pad(self.handle)?)
     }
 
+    /// Gets the current field status value. The status is `true` whenever the field changes.
     pub fn field_status(&self) -> bool {
         form::field_status(self.handle)
     }
 
+    /// Returns the data type validation for fields.
     pub fn field_type(&self) -> result!(FieldType) {
         Ok(FieldType::_from(form::field_type(self.handle)?, false))
     }
 
+    /// Returns the fields user pointer.
     // TODO: needs testing!
     pub fn field_userptr<T>(&self) -> result!(Option<Box<T>>) {
-        Ok(unsafe { form::field_userptr(self.handle)?.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T)) })
+        Ok(unsafe { form::field_userptr(self.handle)?.as_mut().map(|userptr| Box::from_raw(userptr as *mut libc::c_void as *mut T)) })
     }
 
+    /// Acts like `self.dup_field()`, but the new field shares buffers with its parent.
+    /// Attribute data is separate.
     pub fn link_field(&self, origin: Origin) -> result!(Self) {
         Ok(Self::_from(form::link_field(self.handle, origin.try_into()?)?, true))
     }
 
+    /// Moves the given field (which must be disconnected) to a specified location on the screen.
     pub fn move_field(&self, origin: Origin) -> result!(()) {
         Ok(form::move_field(self.handle, origin.try_into()?)?)
     }
 
+    /// The function `new_page()` is a predicate which tests if a given field
+    /// marks a page beginning on its form.
     pub fn new_page(&self) -> bool {
         form::new_page(self.handle)
     }
 
+    /// Sets the background attribute of form. This is the highlight used to
+    /// display the extent fields in the form.
     pub fn set_field_back(&self, attr: normal::Attributes) -> result!(()) {
         Ok(form::set_field_back(self.handle, attr)?)
     }
 
+    /// Sets the buffer of the given field to contain a given string:
+    ///
+    /// - `FieldBuffer::Display` is the displayed value of the field.
+    /// - Other buffers of type `FieldBuffer::Buffer()` may be allocated by
+    ///   applications through but are not manipulated by the forms library.
     pub fn set_field_buffer(&self, field_buffer: FieldBuffer, buffer: &[i8]) -> result!(()) {
-        Ok(form::set_field_buffer(self.handle, field_buffer._number(), buffer)?)
+        Ok(form::set_field_buffer(self.handle, field_buffer.number(), buffer)?)
     }
 
+    /// Sets the foreground attribute of field. This is the highlight used to
+    /// display the field contents.
     pub fn set_field_fore(&self, attr: normal::Attributes) -> result!(()) {
         Ok(form::set_field_fore(self.handle, attr)?)
     }
 
+    /// Sets the justification attribute of a field.
     pub fn set_field_just(&self, justification: FieldJustification) -> result!(()) {
         Ok(form::set_field_just(self.handle, justification)?)
     }
 
+    /// Sets all the given field's options.
     pub fn set_field_opts(&self, opts: FieldOptions) -> result!(()) {
         Ok(form::set_field_opts(self.handle, opts)?)
     }
 
+    /// Sets the character used to fill the field.
     pub fn set_field_pad(&self, pad: char) -> result!(()) {
         Ok(form::set_field_pad(self.handle, pad)?)
     }
 
+    /// Sets the associated status flag of field.
     pub fn set_field_status(&self, status: bool) -> result!(()) {
         Ok(form::set_field_status(self.handle, status)?)
     }
 
+    /// Declares a data type for a given form field.
+    /// This is the type checked by validation functions.
     // TODO: needs testing!
     pub fn set_field_type<'a, A, B, C, T>(&self, fieldtype: &T) -> result!(())
         where T: IsFieldType<'a, A, B, C> + HasHandle<FIELDTYPE>
@@ -183,15 +245,19 @@ impl Field {
         }
     }
 
+    /// Sets the fields user pointer.
     // TODO: needs testing!
     pub fn set_field_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_field_userptr(self.handle, userptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))?)
+        Ok(form::set_field_userptr(self.handle, userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
     }
 
+    /// Sets the maximum size for a dynamic field. An argument of 0 turns off any
+    /// maximum size threshold for that field.
     pub fn set_max_field(&self, max: usize) -> result!(()) {
         Ok(form::set_max_field(self.handle, i32::try_from(max)?)?)
     }
 
+    /// Sets or resets a flag marking the given field as the beginning of a new page on its form.
     pub fn set_new_page(&self, new_page_flag: bool) -> result!(()) {
         Ok(form::set_new_page(self.handle, new_page_flag)?)
     }

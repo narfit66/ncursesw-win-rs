@@ -19,6 +19,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - `NCurseswWindow::getwin()` and `IsPad::genwin()` now take `I: std::os::unix::io::AsRawFd + std::io::Read` instead of `&std::path::Path`. [BC]
 - Moved `is_subwin()` from `Scrollable` trait to `BaseCanvas` trait. [BC]
 - `Mouse::new()` no longer required an `id` parameter. [BC]
+- `curscr()`, `newscr()` and `stdscr()` now return `Window` instead of `Result<Window, NCurseswWinError>`. [BC]
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]

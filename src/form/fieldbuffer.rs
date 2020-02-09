@@ -1,7 +1,7 @@
 /*
     src/form/fieldbuffer.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,15 +20,18 @@
     IN THE SOFTWARE.
 */
 
+/// A field buffer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum FieldBuffer {
+    /// The display buffer.
     Display,
+    /// User defined buffer.
     Buffer(u8)
 }
 
 impl FieldBuffer {
-    pub(in crate::form) fn _number(self) -> i32 {
+    pub(in crate::form) fn number(self) -> i32 {
         match self {
             FieldBuffer::Display        => 0,
             FieldBuffer::Buffer(number) => i32::from(number)

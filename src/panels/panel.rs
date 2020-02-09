@@ -67,8 +67,9 @@ impl Panel {
         Self::new(window)
     }
 
+    /// The screen associated with the panel.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
     /// Puts panel at the bottom of all panels.

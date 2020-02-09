@@ -72,8 +72,9 @@ impl SoftLabels {
         Self::new_sp(screen, fmt)
     }
 
+    /// The screen associated with the soft labels.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
     pub fn slk_attr(&self) -> Attributes {

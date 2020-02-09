@@ -27,55 +27,39 @@ use std::{ptr, sync::atomic::Ordering, convert::TryFrom};
 use ncursesw::{
     ColorsType, ColorType, ColorAttributeTypes, CursorType
 };
+
 use crate::{
     InputMode, Origin, Size, Window, NCurseswWinError,
     gen::HasHandle,
     ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
 
-/// The number of lines the terminal supports.
+/// Return the maximum number of lines.
 pub fn LINES() -> result!(u16) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(u16::try_from(ncursesw::LINES())?)
-    }
+    Ok(u16::try_from(ncursesw::LINES())?)
 }
 
-/// The number of columns the terminal supports.
+/// Return the maximum number of columns.
 pub fn COLS() -> result!(u16) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(u16::try_from(ncursesw::COLS())?)
-    }
+    Ok(u16::try_from(ncursesw::COLS())?)
 }
 
-pub fn curscr() -> result!(Window) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(Window::_from(None, ncursesw::curscr(), false))
-    }
+/// Return the current screen.
+pub fn curscr() -> Window {
+    Window::_from(None, ncursesw::curscr(), false)
 }
 
-pub fn newscr() -> result!(Window) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(Window::_from(None, ncursesw::newscr(), false))
-    }
+/// Return the new screen.
+pub fn newscr() -> Window {
+    Window::_from(None, ncursesw::newscr(), false)
 }
 
-pub fn stdscr() -> result!(Window) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(Window::_from(None, ncursesw::stdscr(), false))
-    }
+/// Return the standard screen.
+pub fn stdscr() -> Window {
+    Window::_from(None, ncursesw::stdscr(), false)
 }
 
-/// Set the input mode to use within ncurses.
+/// Set the input mode to use within NCurses.
 ///
 /// The terminal gets input from the user. Then it's sometimes buffered up. At
 /// some point it's passed into the program's input buffer.
@@ -94,70 +78,64 @@ pub fn stdscr() -> result!(Window) {
 /// (usually Cooked), so you should _always_ set the desired mode explicitly
 /// at the start of your program.
 pub fn set_input_mode(mode: InputMode) -> result!(()) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        match match mode {
-            InputMode::Character    => ncursesw::cbreak(),
-            InputMode::Cooked       => ncursesw::nocbreak(),
-            InputMode::RawCharacter => ncursesw::raw(),
-            InputMode::RawCooked    => ncursesw::noraw()
-        } {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(_)       => Ok(())
-        }
+    check_initscr_called()?;
+
+    match match mode {
+        InputMode::Character    => ncursesw::cbreak(),
+        InputMode::Cooked       => ncursesw::nocbreak(),
+        InputMode::RawCharacter => ncursesw::raw(),
+        InputMode::RawCooked    => ncursesw::noraw()
+    } {
+        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+        Ok(_)       => Ok(())
     }
 }
 
-/// Set echo on or off within ncurses.
+/// Set echo on or off within NCurses.
 ///
 /// Enables or disables the automatic echoing of input into the window as
 /// the user types. Default to on, but you probably want it to be off most
 /// of the time.
-pub fn set_echo(echoing: bool) -> result!(()) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
+pub fn set_echo(flag: bool) -> result!(()) {
+    check_initscr_called()?;
+
+    match if flag {
+        ncursesw::echo()
     } else {
-        match if echoing {
-            ncursesw::echo()
-        } else {
-            ncursesw::noecho()
-        } {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(_)       => Ok(())
-        }
+        ncursesw::noecho()
+    } {
+        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+        Ok(_)       => Ok(())
     }
 }
 
-/// Control whether the ncurses translates the return key into newline on input,
+/// Control whether the NCurses translates the return key into newline on input,
 ///
-/// This determines wether ncurses translates newline into return and line-feed on output (in either
+/// This determines wether NCurses translates newline into return and line-feed on output (in either
 /// case, the call addch('\n') does the equivalent of return and line feed on the virtual screen).
-/// Initially, these translations do occur. If you disable then ncurses will be able to make
+/// Initially, these translations do occur. If you disable then NCurses will be able to make
 /// better use of the line-feed capability, resulting in faster cursor motion.
-/// Also, ncurses will then be able to detect the return key.
-pub fn set_newline(newline: bool) -> result!(()) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
+/// Also, NCurses will then be able to detect the return key.
+pub fn set_newline(flag: bool) -> result!(()) {
+    check_initscr_called()?;
+
+    match if flag {
+        ncursesw::nl()
     } else {
-        match if newline {
-            ncursesw::nl()
-        } else {
-            ncursesw::nonl()
-        } {
-            Err(source) => Err(NCurseswWinError::NCurseswError { source }),
-            Ok(_)       => Ok(())
-        }
+        ncursesw::nonl()
+    } {
+        Err(source) => Err(NCurseswWinError::NCurseswError { source }),
+        Ok(_)       => Ok(())
     }
 }
 
-/// Initialise ncurses internal color system.
+/// Initialise NCurses internal color system.
 ///
-/// This allows ncurses to initialise internal buffers to deal with color pairs etc.
+/// This allows NCurses to initialise internal buffers to deal with color pairs etc.
 pub fn start_color() -> result!(()) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else if COLOR_STARTED.load(Ordering::SeqCst) {
+    check_initscr_called()?;
+
+    if color_started() {
         Err(NCurseswWinError::StartColorAlreadyCalled)
     } else {
         ncursesw::start_color()?;
@@ -172,9 +150,9 @@ pub fn start_color() -> result!(()) {
 ///
 /// This is usually a white foreground on a black background.
 pub fn use_default_colors() -> result!(()) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else if !COLOR_STARTED.load(Ordering::SeqCst) {
+    check_initscr_called()?;
+
+    if !color_started() {
         Err(NCurseswWinError::StartColorNotCalled)
     } else {
         Ok(ncursesw::use_default_colors()?)
@@ -187,9 +165,9 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
           C: ColorType<T>,
           T: ColorAttributeTypes
 {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else if !COLOR_STARTED.load(Ordering::SeqCst) {
+    check_initscr_called()?;
+
+    if !color_started() {
         Err(NCurseswWinError::StartColorNotCalled)
     } else {
         Ok(ncursesw::assume_default_colors(colors)?)
@@ -198,19 +176,15 @@ pub fn assume_default_colors<S, C, T>(colors: S) -> result!(())
 
 /// Set the cursor type to display.
 pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(ncursesw::curs_set(cursor)?)
-    }
+    check_initscr_called()?;
+
+    Ok(ncursesw::curs_set(cursor)?)
 }
 
 pub fn intrflush(flag: bool) -> result!(()) {
-    if !INITSCR_CALLED.load(Ordering::SeqCst) {
-        Err(NCurseswWinError::InitscrNotCalled)
-    } else {
-        Ok(ncursesw::intrflush(ptr::null_mut(), flag)?)
-    }
+    check_initscr_called()?;
+
+    Ok(ncursesw::intrflush(ptr::null_mut(), flag)?)
 }
 
 /// The terminal/screen `Size` i.e. lines and columns using 0,0 as top left.
@@ -221,4 +195,16 @@ pub fn terminal_size() -> result!(Size) {
 // The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
 pub fn terminal_bottom_right_origin() -> result!(Origin) {
     Ok(Origin { y: LINES()? - 1, x: COLS()? - 1 })
+}
+
+fn check_initscr_called() -> result!(()) {
+    if INITSCR_CALLED.load(Ordering::SeqCst) {
+        Ok(())
+    } else {
+        Err(NCurseswWinError::InitscrNotCalled)
+    }
+}
+
+fn color_started() -> bool {
+    COLOR_STARTED.load(Ordering::SeqCst)
 }

@@ -1,7 +1,7 @@
 /*
     src/form/fieldparameters.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -24,6 +24,7 @@ use std::{fmt, convert::{TryFrom, TryInto}};
 
 use crate::{Size, Origin, NCurseswWinError};
 
+/// Field parameters.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct FieldParameters {
     size:      Size,
@@ -37,18 +38,22 @@ impl FieldParameters {
         Self { size, origin, offscreen, nbuffers }
     }
 
+    /// Returns the size of the field.
     pub fn size(&self) -> Size {
         self.size
     }
 
+    /// Returns the origin of the field.
     pub fn origin(&self) -> Origin {
         self.origin
     }
 
+    /// Returns the number of offscreen lines.
     pub fn offscreen(&self) -> u16 {
         self.offscreen
     }
 
+    /// Returns the number of field buffers.
     pub fn nbuffers(&self) -> u8 {
         self.nbuffers
     }

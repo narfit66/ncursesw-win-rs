@@ -88,7 +88,7 @@ impl MenuItem {
     /// The menu items user client code defined value.
     // TODO: needs testing!
     pub fn item_userptr<T>(&self) -> Option<Box<T>> {
-        menu::item_userptr(self.handle).as_mut().map(|ptr| unsafe { Box::from_raw(*ptr as *mut T) })
+        menu::item_userptr(self.handle).as_mut().map(|userptr| unsafe { Box::from_raw(*userptr as *mut T) })
     }
 
     /// In a multi-valued menu indicated that the menu item has been selected.
@@ -108,8 +108,8 @@ impl MenuItem {
 
     /// Set the menu items user client code defined value.
     // TODO: needs testing!
-    pub fn set_item_userptr<T>(&self, ptr: Option<Box<&T>>) {
-        menu::set_item_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))
+    pub fn set_item_userptr<T>(&self, userptr: Option<Box<&T>>) {
+        menu::set_item_userptr(self.handle, userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
     }
 
     /// In a multi-valued menu sets the menu item too selected.

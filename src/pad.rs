@@ -54,8 +54,9 @@ impl HasHandle<WINDOW> for Pad {
 }
 
 impl Pad {
+    /// The screen associated with the pad.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 }
 

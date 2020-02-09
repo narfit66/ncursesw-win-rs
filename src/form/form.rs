@@ -97,7 +97,7 @@ form_callback!(extern_form_term, FormTerm);
 
 /// Form.
 pub struct Form {
-    screen:        Option<SCREEN>, // pointer to optional NCurses screen type internal structure.
+    screen:        Option<SCREEN>, // optional pointer to NCurses screen type internal structure.
     handle:        FORM,           // pointer to ncurses form type internal structure.
     field_handles: *mut FIELD,     // pointer to list of field pointers (null terminated).
     free_on_drop:  bool            // call `free_form()` when instance goes out of scope.
@@ -122,7 +122,7 @@ impl Form {
 }
 
 impl Form {
-    /// create a new instance.
+    /// Creates a new form connected to specified fields.
     pub fn new(fields: &[&Field]) -> result!(Self) {
         // allocate enougth contiguous memory to store all the field handles plus
         // a null and set all pointers initially to null.
@@ -150,12 +150,12 @@ impl Form {
     }
 
     #[deprecated(since = "0.5.0", note = "Use Form::new() instead")]
-    /// create a new instance.
+    /// Creates a new form connected to specified fields.
     pub fn new_form(fields: &[&Field]) -> result!(Self) {
         Self::new(fields)
     }
 
-    /// create a new instance.
+    /// Creates a new form on the specified sceen connected to specified fields.
     pub fn new_sp(screen: &Screen, fields: &[&Field]) -> result!(Self) {
         // allocate enougth contiguous memory to store all the field handles plus
         // a null and set all pointers initially to null.
@@ -183,108 +183,121 @@ impl Form {
     }
 
     #[deprecated(since = "0.5.0", note = "Use Form::new_sp() instead")]
-    /// create a new instance.
+    /// Creates a new form on the specified sceen connected to specified fields.
     pub fn new_form_sp(screen: &Screen, fields: &[&Field]) -> result!(Self) {
         Self::new_sp(screen, fields)
     }
 
+    /// The screen associated with the form.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |ptr| Some(Screen::_from(ptr, false)))
+        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
     }
 
-    /// return the current field of the form.
+    /// Returns the current field of the given form.
     pub fn current_field(&self) -> result!(Field) {
         Ok(Field::_from(form::current_field(self.handle)?, false))
     }
 
+    /// Tests whether there is off-screen data ahead in the given form.
     pub fn data_ahead(&self) -> bool {
         form::data_ahead(self.handle)
     }
 
+    /// Tests whether there is off-screen data behind in the given form.
     pub fn data_behind(&self) -> bool {
         form::data_behind(self.handle)
     }
 
-    /// return the number of fields on the form.
+    /// Returns the count of fields in form.
     pub fn field_count(&self) -> result!(usize) {
         Ok(usize::try_from(form::field_count(self.handle)?)?)
     }
 
     #[deprecated(since = "0.5.0")]
-    /// return the field initialisation callback function.
+    /// Returns the current field init hook.
     pub fn field_init(&self) -> result!(Form_Hook) {
         Ok(form::field_init(self.handle)?)
     }
 
     #[deprecated(since = "0.5.0")]
-    /// return the field terminate callback function.
+    /// Returns the current field term hook.
     pub fn field_term(&self) -> result!(Form_Hook) {
         Ok(form::field_term(self.handle)?)
     }
 
-    /// return a vector of all the fields on the form.
+    /// Returns a vector of the fields of the given form.
     pub fn form_fields(&self) -> result!(Vec<Field>) {
         Ok(form::form_fields(self.handle)?.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
     #[deprecated(since = "0.5.0")]
-    /// return the form initialisation callback function.
+    /// Returns the current form init hook.
     pub fn form_init(&self) -> result!(Form_Hook) {
         Ok(form::form_init(self.handle)?)
     }
 
+    /// Returns the form's current options.
     pub fn form_opts(&self) -> FormOptions {
         form::form_opts(self.handle)
     }
 
+    /// Turns off the given options, and leaves others alone.
     pub fn form_opts_off(&self, opts: FormOptions) -> result!(()) {
         Ok(form::form_opts_off(self.handle, opts)?)
     }
 
+    /// Turns on the given options, and leaves others alone.
     pub fn form_opts_on(&self, opts: FormOptions) -> result!(()) {
         Ok(form::form_opts_on(self.handle, opts)?)
     }
 
+    /// Returns the form's current page number.
     pub fn form_page(&self) -> result!(usize) {
         Ok(usize::try_from(form::form_page(self.handle)?)?)
     }
 
-    /// return the forms sub window.
+    /// Return the forms sub-window.
     pub fn form_sub(&self) -> result!(Window) {
         Ok(Window::_from(self.screen, form::form_sub(self.handle)?, false))
     }
 
     #[deprecated(since = "0.5.0")]
-    /// return the form termination callback function.
+    /// Returns the current form term hook.
     pub fn form_term(&self) -> result!(Form_Hook) {
         Ok(form::form_term(self.handle)?)
     }
 
+    /// Returns the forms user pointer.
     // TODO: needs testing!
     pub fn form_userptr<T>(&self) -> result!(Option<Box<T>>) {
-        Ok(unsafe { form::form_userptr(self.handle)?.as_mut().map(|ptr| Box::from_raw(ptr as *mut libc::c_void as *mut T)) })
+        Ok(unsafe { form::form_userptr(self.handle)?.as_mut().map(|userptr| Box::from_raw(userptr as *mut libc::c_void as *mut T)) })
     }
 
-    /// return the forms main window.
+    /// Return the forms main window.
     pub fn form_win(&self) -> result!(Window) {
         Ok(Window::_from(self.screen, form::form_win(self.handle)?, false))
     }
 
-    /// post (make visible) the form and refresh if required.
+    /// Displays a form to its associated sub-window. To trigger physical display
+    /// of the sub-window, set `refresh` to `true` or call `refresh()` or some
+    /// equivalent NCurses routine (the implicit `doupdate()` triggered by a
+    /// NCurses input request will do).
     pub fn post_form(&self, refresh: bool) -> result!(PostedForm) {
         PostedForm::new(self, refresh)
     }
 
+    /// Returns the minimum size required for the sub-window of form.
     pub fn scale_form(&self) -> result!(Size) {
         Ok(Size::try_from(form::scale_form(self.handle)?)?)
     }
 
-    /// set the current field of the form.
-    pub fn set_current_field(&self, field: Field) -> result!(()) {
+    /// Sets the current field of the given form.
+    pub fn set_current_field(&self, field: &Field) -> result!(()) {
         Ok(form::set_current_field(self.handle, field._handle())?)
     }
 
-    /// set the field initialisation callback function.
+    /// Sets a callback to be called at form-post time and each time
+    /// the selected field changes (after the change).
     pub fn set_field_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -296,7 +309,8 @@ impl Form {
         Ok(form::set_field_init(self.handle, Some(extern_field_init))?)
     }
 
-    /// set the field termination callback function.
+    /// Sets a callback to be called at form-unpost time and each time
+    /// the selected field changes (before the change).
     pub fn set_field_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -308,7 +322,7 @@ impl Form {
         Ok(form::set_field_term(self.handle, Some(extern_field_term))?)
     }
 
-    /// clear the list of current fields and replace them with a new list.
+    /// Clear the list of current fields and replace them with a new list.
     pub fn set_form_fields(&self, fields: &[&Field]) -> result!(()) {
         // unallocate the field_handles memory.
         unsafe { libc::free(self.field_handles as *mut libc::c_void) };
@@ -338,7 +352,8 @@ impl Form {
         }
     }
 
-    /// set the form initialisation callback function.
+    /// Sets a callback to be called at form-post time and just after
+    /// a page change once it is posted.
     pub fn set_form_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -350,22 +365,25 @@ impl Form {
         Ok(form::set_form_init(self.handle, Some(extern_form_init))?)
     }
 
+    /// Sets all the given form's options.
     pub fn set_form_opts(&self, opts: FormOptions) -> result!(()) {
         Ok(form::set_form_opts(self.handle, opts)?)
     }
 
-    pub fn set_form_page(&self, n: usize) -> result!(()) {
-        Ok(form::set_form_page(self.handle, i32::try_from(n)?)?)
+    /// Sets the form's page number (goes to page `number` of the form).
+    pub fn set_form_page(&self, number: usize) -> result!(()) {
+        Ok(form::set_form_page(self.handle, i32::try_from(number)?)?)
     }
 
-    /// set the forms sub window.
+    /// Sets the forms sub-window.
     pub fn set_form_sub(&self, window: Option<&Window>) -> result!(()) {
         assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
 
         Ok(form::set_form_sub(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
 
-    /// set the form termination callback function.
+    /// Sets a callback to be called at form-unpost time and just before
+    /// a page change once it is posted.
     pub fn set_form_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
@@ -377,18 +395,21 @@ impl Form {
         Ok(form::set_form_term(self.handle, Some(extern_form_term))?)
     }
 
+    /// Sets the forms user pointer.
     // TODO: needs testing!
     pub fn set_form_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_form_userptr(self.handle, userptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *mut libc::c_void)))?)
+        Ok(form::set_form_userptr(self.handle, userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
     }
 
-    /// set the forms main window.
+    /// Set the forms main window.
     pub fn set_form_win(&self, window: Option<&Window>) -> result!(()) {
         assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
 
         Ok(form::set_form_win(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
     }
 
+    /// Removes the focus from the current field of the form.
+    /// In such state, inquiries via `self.current_field()` will error.
     pub fn unfocus_current_field(&self) -> result!(()) {
         Ok(form::unfocus_current_field(self.handle)?)
     }
