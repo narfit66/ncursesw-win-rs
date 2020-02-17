@@ -1,7 +1,7 @@
 /*
     src/gen/hasmvattributes.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -33,6 +33,8 @@ pub trait HasMvAttributes: HasHandle<WINDOW> + HasYXAxis {
               T: ColorAttributeTypes
     {
         assert_origin_hlength!("mvchgat", self.size()?, origin, length);
+        assert!(self._screen() == attrs.screen());
+        assert!(self._screen() == color_pair.screen());
 
         Ok(ncursesw::mvwchgat(self._handle(), origin.try_into()?, i32::try_from(length)?, attrs, color_pair)?)
     }

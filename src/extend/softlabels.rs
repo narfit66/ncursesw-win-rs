@@ -46,12 +46,20 @@ pub struct SoftLabels {
 }
 
 impl SoftLabels {
+    pub(in crate) fn _from(screen: Option<SCREEN>) -> Self {
+        assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "SoftLabels::_from() : screen.is_null()");
+
+        Self { screen }
+    }
+}
+
+impl SoftLabels {
     pub fn new(fmt: SoftLabelType) -> result!(Self) {
         check_softlabel_init(None)?;
 
         ncursesw::slk_init(fmt)?;
 
-        Ok(Self { screen: None })
+        Ok(Self::_from(None))
     }
 
     #[deprecated(since = "0.5.0", note = "Use SoftLabels::new() instead")]
@@ -64,7 +72,7 @@ impl SoftLabels {
 
         ncursesw::slk_init_sp(screen._handle(), fmt)?;
 
-        Ok(Self { screen: Some(screen._handle()) })
+        Ok(Self::_from(Some(screen._handle())))
     }
 
     #[deprecated(since = "0.5.0", note = "Use SoftLabels::new_sp() instead")]
@@ -78,7 +86,9 @@ impl SoftLabels {
     }
 
     pub fn slk_attr(&self) -> Attributes {
-        Attributes::from(self.screen.map_or_else(|| ncursesw::slk_attr(), |screen| ncursesw::slk_attr_sp(screen)))
+        let attrs = self.screen.map_or_else(|| ncursesw::slk_attr(), |screen| ncursesw::slk_attr_sp(screen));
+
+        self.screen.map_or_else(|| Attributes::new(attrs), |screen| Attributes::new_sp(screen, attrs))
     }
 
     pub fn slk_attr_off<A, T>(&self, attrs: A) -> result!(())
@@ -86,6 +96,7 @@ impl SoftLabels {
               T: ColorAttributeTypes
     {
         assert!(self.screen.is_some(), "{}slk_attr_off() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(self.screen == attrs.screen());
 
         Ok(ncursesw::slk_attr_off(attrs)?)
     }
@@ -95,6 +106,7 @@ impl SoftLabels {
               T: ColorAttributeTypes
     {
         assert!(self.screen.is_some(), "{}slk_attr_on() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(self.screen == attrs.screen());
 
         Ok(ncursesw::slk_attr_on(attrs)?)
     }
@@ -104,6 +116,9 @@ impl SoftLabels {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
+        assert!(self.screen == attrs.screen());
+        assert!(self.screen == color_pair.screen());
+
         Ok(if let Some(screen) = self.screen {
             ncursesw::slk_attr_set_sp(screen, attrs, color_pair)
         } else {
@@ -116,11 +131,9 @@ impl SoftLabels {
     }
 
     pub fn slk_color(&self, color_pair: ColorPair) -> result!(()) {
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::extended_slk_color_sp(screen, color_pair)
-        } else {
-            ncursesw::extended_slk_color(color_pair)
-        }?)
+        assert!(self.screen == color_pair.screen());
+
+        Ok(self.screen.map_or_else(|| ncursesw::extended_slk_color(color_pair), |screen| ncursesw::extended_slk_color_sp(screen, color_pair))?)
     }
 
     pub fn slk_label(&self, labnum: u8) -> result!(String) {
@@ -168,7 +181,7 @@ fn check_softlabel_init(screen: Option<Screen>) -> result!(()) {
         Err(NCurseswWinError::InitscrAlreadyCalled)
     } else if !SOFTLABELS
         .lock()
-        .unwrap_or_else(|_| panic!("SoftLabel::new() : SOFTLABEL.lock() failed!!!"))
+        .unwrap_or_else(|_| panic!("{}check_softlabel_init() : SOFTLABEL.lock() failed!!!"))
         .insert(screen)
     {
         Err(NCurseswWinError::SoftLabelAlreadyDefined)

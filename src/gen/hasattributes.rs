@@ -1,7 +1,7 @@
 /*
     src/gen/hasattributes.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -31,13 +31,28 @@ use crate::{NCurseswWinError, gen::HasHandle};
 /// Does the window canvas type have ncursesw attribute type functions.
 pub trait HasAttributes: HasHandle<WINDOW> {
     fn attr_get(&self) -> result!(AttributesColorPairSet) {
-        Ok(ncursesw::wattr_get(self._handle())?)
+        Ok(match ncursesw::wattr_get(self._handle())? {
+            AttributesColorPairSet::Normal(attrs_colorpair) => {
+                attrs_colorpair.attributes().set_screen(self._screen());
+                attrs_colorpair.color_pair().set_screen(self._screen());
+
+                AttributesColorPairSet::Normal(attrs_colorpair)
+            },
+            AttributesColorPairSet::Extend(attrs_colorpair) => {
+                attrs_colorpair.attributes().set_screen(self._screen());
+                attrs_colorpair.color_pair().set_screen(self._screen());
+
+                AttributesColorPairSet::Extend(attrs_colorpair)
+            }
+        })
     }
 
     fn attr_off<A, T>(&self, attrs: A) -> result!(())
         where A: AttributesType<T>,
               T: ColorAttributeTypes
     {
+        assert!(self._screen() == attrs.screen());
+
         Ok(ncursesw::wattr_off(self._handle(), attrs)?)
     }
 
@@ -45,6 +60,8 @@ pub trait HasAttributes: HasHandle<WINDOW> {
         where A: AttributesType<T>,
               T: ColorAttributeTypes
     {
+        assert!(self._screen() == attrs.screen());
+
         Ok(ncursesw::wattr_on(self._handle(), attrs)?)
     }
 
@@ -53,18 +70,27 @@ pub trait HasAttributes: HasHandle<WINDOW> {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
+        assert!(self._screen() == attrs.screen());
+        assert!(self._screen() == color_pair.screen());
+
         Ok(ncursesw::wattr_set(self._handle(), attrs, color_pair)?)
     }
 
     fn attroff(&self, attrs: normal::Attributes) -> result!(()) {
+        assert!(self._screen() == attrs.screen());
+
         Ok(ncursesw::wattroff(self._handle(), attrs)?)
     }
 
     fn attron(&self, attrs: normal::Attributes) -> result!(()) {
+        assert!(self._screen() == attrs.screen());
+
         Ok(ncursesw::wattron(self._handle(), attrs)?)
     }
 
     fn attrset(&self, attrs: normal::Attributes) -> result!(()) {
+        assert!(self._screen() == attrs.screen());
+
         Ok(ncursesw::wattrset(self._handle(), attrs)?)
     }
 
@@ -72,6 +98,8 @@ pub trait HasAttributes: HasHandle<WINDOW> {
         where P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
+        assert!(self._screen() == color_pair.screen());
+
         Ok(ncursesw::wcolor_set(self._handle(), color_pair)?)
     }
 
@@ -80,11 +108,18 @@ pub trait HasAttributes: HasHandle<WINDOW> {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
+        assert!(self._screen() == attrs.screen());
+        assert!(self._screen() == color_pair.screen());
+
         Ok(ncursesw::wchgat(self._handle(), i32::try_from(length)?, attrs, color_pair)?)
     }
 
     fn getattrs(&self) -> normal::Attributes {
-        ncursesw::getattrs(self._handle())
+        let mut attrs = ncursesw::getattrs(self._handle());
+
+        attrs.set_screen(self._screen());
+
+        attrs
     }
 
     fn standend(&self) -> result!(()) {

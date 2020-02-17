@@ -32,11 +32,11 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use ncursesw::{
-    SCREEN, normal, menu, menu::{MENU, ITEM},
+    SCREEN, menu, menu::{MENU, ITEM},
     shims::nmenu, shims::constants::E_OK
 };
 use crate::{
-    Screen, Window, HasHandle, NCurseswWinError,
+    normal, Screen, Window, HasHandle, NCurseswWinError, AttributesType,
     menu::{MenuSize, MenuItem, MenuSpacing, PostedMenu}
 };
 
@@ -44,7 +44,7 @@ use crate::{
 pub use ncursesw::menu::Menu_Hook;
 pub use ncursesw::menu::{MenuOptions, MenuRequest};
 
-static MODULE_PATH: &str = "ncurseswwin::menu::";
+static MODULE_PATH: &str = "ncurseswwin::menu::menu::";
 
 #[derive(EnumIter, PartialEq, Eq, Hash)]
 enum CallbackType {
@@ -202,33 +202,33 @@ impl Menu {
 
     #[deprecated(since = "0.5.0")]
     pub fn item_init(&self) -> result!(Menu_Hook) {
-        Ok(menu::item_init(self.handle)?)
+        Ok(menu::item_init(Some(self.handle))?)
     }
 
     #[deprecated(since = "0.5.0")]
     pub fn item_term(&self) -> result!(Menu_Hook) {
-        Ok(menu::item_term(self.handle)?)
+        Ok(menu::item_term(Some(self.handle))?)
     }
 
     pub fn menu_back(&self) -> normal::Attributes {
-        menu::menu_back(self.handle)
+        self.screenify_attributes(menu::menu_back(Some(self.handle)))
     }
 
     pub fn menu_fore(&self) -> normal::Attributes {
-        menu::menu_fore(self.handle)
+        self.screenify_attributes(menu::menu_fore(Some(self.handle)))
     }
 
     pub fn menu_format(&self) -> result!(MenuSize) {
-        Ok(MenuSize::try_from(menu::menu_format(self.handle))?)
+        Ok(MenuSize::try_from(menu::menu_format(Some(self.handle)))?)
     }
 
     pub fn menu_grey(&self) -> normal::Attributes {
-        menu::menu_grey(self.handle)
+        self.screenify_attributes(menu::menu_grey(Some(self.handle)))
     }
 
     #[deprecated(since = "0.5.0")]
     pub fn menu_init(&self) -> result!(Menu_Hook) {
-        Ok(menu::menu_init(self.handle)?)
+        Ok(menu::menu_init(Some(self.handle))?)
     }
 
     pub fn menu_items(&self) -> result!(Vec<MenuItem>) {
@@ -236,23 +236,23 @@ impl Menu {
     }
 
     pub fn menu_mark(&self) -> result!(String) {
-        Ok(menu::menu_mark(self.handle)?)
+        Ok(menu::menu_mark(Some(self.handle))?)
     }
 
     pub fn menu_opts(&self) -> MenuOptions {
-        menu::menu_opts(self.handle)
+        menu::menu_opts(Some(self.handle))
     }
 
     pub fn menu_opts_off(&self, opts: MenuOptions) -> result!(()) {
-        Ok(menu::menu_opts_off(self.handle, opts)?)
+        Ok(menu::menu_opts_off(Some(self.handle), opts)?)
     }
 
     pub fn menu_opts_on(&self, opts: MenuOptions) -> result!(()) {
-        Ok(menu::menu_opts_on(self.handle, opts)?)
+        Ok(menu::menu_opts_on(Some(self.handle), opts)?)
     }
 
     pub fn menu_pad(&self) -> result!(char) {
-        Ok(menu::menu_pad(self.handle)?)
+        Ok(menu::menu_pad(Some(self.handle))?)
     }
 
     pub fn menu_pattern(&self) -> result!(String) {
@@ -260,25 +260,25 @@ impl Menu {
     }
 
     pub fn menu_spacing(&self) -> result!(MenuSpacing) {
-        Ok(MenuSpacing::try_from(menu::menu_spacing(self.handle)?)?)
+        Ok(MenuSpacing::try_from(menu::menu_spacing(Some(self.handle))?)?)
     }
 
     pub fn menu_sub(&self) -> result!(Window) {
-        Ok(Window::_from(self.screen, menu::menu_sub(self.handle)?, false))
+        Ok(Window::_from(self.screen, menu::menu_sub(Some(self.handle))?, false))
     }
 
     #[deprecated(since = "0.5.0")]
     pub fn menu_term(&self) -> result!(Menu_Hook) {
-        Ok(menu::menu_term(self.handle)?)
+        Ok(menu::menu_term(Some(self.handle))?)
     }
 
     // TODO: needs testing!
     pub fn menu_userptr<T>(&self) -> Option<Box<T>> {
-        menu::menu_userptr(self.handle).as_mut().map(|userptr| unsafe { Box::from_raw(*userptr as *mut T) })
+        menu::menu_userptr(Some(self.handle)).as_mut().map(|userptr| unsafe { Box::from_raw(*userptr as *mut T) })
     }
 
     pub fn menu_win(&self) -> result!(Window) {
-        Ok(Window::_from(self.screen, menu::menu_win(self.handle)?, false))
+        Ok(Window::_from(self.screen, menu::menu_win(Some(self.handle))?, false))
     }
 
     pub fn post_menu(&self, refresh: bool) -> result!(PostedMenu) {
@@ -301,7 +301,7 @@ impl Menu {
             .unwrap_or_else(|_| panic!("{}set_item_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::ItemInit), Some(Box::new(move |menu| func(menu))));
 
-        Ok(menu::set_item_init(self.handle, Some(extern_item_init))?)
+        Ok(menu::set_item_init(Some(self.handle), Some(extern_item_init))?)
     }
 
     pub fn set_item_term<F>(&self, func: F) -> result!(())
@@ -312,23 +312,29 @@ impl Menu {
             .unwrap_or_else(|_| panic!("{}set_item_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::ItemTerm), Some(Box::new(move |menu| func(menu))));
 
-        Ok(menu::set_item_term(self.handle, Some(extern_item_term))?)
+        Ok(menu::set_item_term(Some(self.handle), Some(extern_item_term))?)
     }
 
-    pub fn set_menu_back(&self, attr: normal::Attributes) -> result!(()) {
-        Ok(menu::set_menu_back(self.handle, attr)?)
+    pub fn set_menu_back(&self, attrs: normal::Attributes) -> result!(()) {
+        assert!(self.screen == attrs.screen());
+
+        Ok(menu::set_menu_back(Some(self.handle), attrs)?)
     }
 
-    pub fn set_menu_fore(&self, attr: normal::Attributes) -> result!(()) {
-        Ok(menu::set_menu_fore(self.handle, attr)?)
+    pub fn set_menu_fore(&self, attrs: normal::Attributes) -> result!(()) {
+        assert!(self.screen == attrs.screen());
+
+        Ok(menu::set_menu_fore(Some(self.handle), attrs)?)
     }
 
     pub fn set_menu_format(&self, menu_size: MenuSize) -> result!(()) {
         Ok(menu::set_menu_format(Some(self.handle), menu_size.try_into()?)?)
     }
 
-    pub fn set_menu_grey(&self, attr: normal::Attributes) -> result!(()) {
-        Ok(menu::set_menu_grey(self.handle, attr)?)
+    pub fn set_menu_grey(&self, attrs: normal::Attributes) -> result!(()) {
+        assert!(self.screen == attrs.screen());
+
+        Ok(menu::set_menu_grey(Some(self.handle), attrs)?)
     }
 
     pub fn set_menu_init<F>(&self, func: F) -> result!(())
@@ -339,7 +345,7 @@ impl Menu {
             .unwrap_or_else(|_| panic!("{}set_menu_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::MenuInit), Some(Box::new(move |menu| func(menu))));
 
-        Ok(menu::set_menu_init(self.handle, Some(extern_menu_init))?)
+        Ok(menu::set_menu_init(Some(self.handle), Some(extern_menu_init))?)
     }
 
     pub fn set_menu_items(&mut self, items: &[&MenuItem]) -> result!(()) {
@@ -372,15 +378,15 @@ impl Menu {
     }
 
     pub fn set_menu_mark(&self, mark: &str) -> result!(()) {
-        Ok(menu::set_menu_mark(self.handle, mark)?)
+        Ok(menu::set_menu_mark(Some(self.handle), mark)?)
     }
 
     pub fn set_menu_opts(&self, opts: MenuOptions) -> result!(()) {
-        Ok(menu::set_menu_opts(self.handle, opts)?)
+        Ok(menu::set_menu_opts(Some(self.handle), opts)?)
     }
 
     pub fn set_menu_pad(&self, pad: char) -> result!(()) {
-        Ok(menu::set_menu_pad(self.handle, pad)?)
+        Ok(menu::set_menu_pad(Some(self.handle), pad)?)
     }
 
     pub fn set_menu_pattern(&self, pattern: &str) -> result!(()) {
@@ -388,7 +394,7 @@ impl Menu {
     }
 
     pub fn set_menu_spacing(&self, menu_spacing: MenuSpacing) -> result!(()) {
-        Ok(menu::set_menu_spacing(self.handle, menu_spacing.try_into()?)?)
+        Ok(menu::set_menu_spacing(Some(self.handle), menu_spacing.try_into()?)?)
     }
 
     pub fn set_menu_sub(&self, window: Option<&Window>) -> result!(()) {
@@ -405,12 +411,12 @@ impl Menu {
             .unwrap_or_else(|_| panic!("{}set_menu_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::MenuTerm), Some(Box::new(move |menu| func(menu))));
 
-        Ok(menu::set_menu_term(self.handle, Some(extern_menu_term))?)
+        Ok(menu::set_menu_term(Some(self.handle), Some(extern_menu_term))?)
     }
 
     // TODO: needs testing!
     pub fn set_menu_userptr<T>(&self, userptr: Option<Box<&T>>) {
-        menu::set_menu_userptr(self.handle, userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
+        menu::set_menu_userptr(Some(self.handle), userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
     }
 
     pub fn set_menu_win(&self, window: Option<&Window>) -> result!(()) {
@@ -425,6 +431,10 @@ impl Menu {
 
     pub fn top_row(&self) -> result!(u16) {
         Ok(u16::try_from(menu::top_row(self.handle))?)
+    }
+
+    fn screenify_attributes(&self, attrs: normal::Attributes) -> normal::Attributes {
+        self.screen.map_or_else(|| normal::Attributes::new(attrs.into()), |screen| normal::Attributes::new_sp(screen, attrs.into()))
     }
 }
 

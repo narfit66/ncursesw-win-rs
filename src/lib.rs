@@ -91,15 +91,13 @@ pub use ncursesw::{
     WideChar, WideCharAndAttributes, WideString
 };
 pub use ncursesw::{
-    AttributesColorPairSet, BaseColor, Changed, CharacterResult,
-    CursorType, Justification, KeyBinding, Legacy, NCursesColorType,
-    NCurseswError, panels::NCurseswPanelsError,
-    mouse::NCurseswMouseError, menu::NCurseswMenuError,
-    form::NCurseswFormError, Orientation, SoftLabelType
+    AttributesColorPairSet, Changed, CharacterResult, CursorType, Justification,
+    KeyBinding, Legacy, NCursesColorType, NCurseswError, panels::NCurseswPanelsError,
+    mouse::NCurseswMouseError, menu::NCurseswMenuError, form::NCurseswFormError,
+    Orientation, SoftLabelType
 };
 pub use ncursesw::{
-    AttributesColorPairType, AttributesGeneric, AttributesType,
-    ColorAttributeTypes, ColorPairColors, ColorPairType, ColorType,
+    AttributesType, ColorAttributeTypes, ColorPairColors, ColorPairType, ColorType,
     ColorsType
 };
 pub use ncursesw::{

@@ -1,6 +1,6 @@
 [package]
 name = "ncursesw-win"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Steve Whittle <narfit66@googlemail.com>"]
 edition = "2018"
 description = "An extension wrapper around the ncursesw-rs crate that encapsulates the exposed raw pointers of the core NCurses TUI library"
@@ -22,7 +22,7 @@ is-it-maintained-open-issues = { repository = "narfit66/ncursesw-win-rs" }
 
 [dependencies]
 libc = "0.2"
-ncursesw = "0.5"
+ncursesw = "0.6"
 custom_error = "1.7"
 lazy_static = "1.4"
 strum = "0.17"
@@ -35,7 +35,7 @@ rand = "0.7"
 gettext-rs = "0.4"
 
 [patch.crates-io]
-ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
+ncursesw = { git = "https://github.com/narfit66/ncursesw-rs", branch = "api-v0.6.0" }
 #ncursesw = { path = "../ncursesw-rs" }
 
 [features]

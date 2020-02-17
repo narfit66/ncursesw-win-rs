@@ -77,8 +77,7 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     // Crate menu.
     let my_menu = &Menu::new(&my_items)?;
 
-    let mut menu_opts = MenuOptions::default();
-    menu_opts.set_show_description(true);
+    let menu_opts = MenuOptions::default().set_show_description(true);
 
     my_menu.menu_opts_off(menu_opts)?;
 

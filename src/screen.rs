@@ -237,7 +237,7 @@ impl Screen {
     }
 
     pub fn intrflush(&self, flag: bool) -> result!(()) {
-        Ok(ncursesw::intrflush_sp(self.handle, ptr::null_mut(), flag)?)
+        Ok(ncursesw::intrflush_sp(self.handle, flag)?)
     }
 
     pub fn is_term_resized(&self, size: Size) -> result!(bool) {

@@ -32,11 +32,12 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use ncursesw::{
-    SCREEN, form, form::{FormOptions, FORM, FIELD},
+    SCREEN, normal, form, form::{FormOptions, FORM, FIELD},
     shims::nform, shims::constants::E_OK
 };
 use crate::{
-    Screen, Size, Window, HasHandle, NCurseswWinError, form::{Field, PostedForm}
+    Screen, Size, Window, HasHandle, NCurseswWinError, AttributesType,
+    form::{Field, PostedForm}
 };
 
 #[deprecated(since = "0.5.0")]
@@ -195,7 +196,7 @@ impl Form {
 
     /// Returns the current field of the given form.
     pub fn current_field(&self) -> result!(Field) {
-        Ok(Field::_from(form::current_field(self.handle)?, false))
+        Ok(Field::_from(form::current_field(Some(self.handle))?, false))
     }
 
     /// Tests whether there is off-screen data ahead in the given form.
@@ -210,72 +211,72 @@ impl Form {
 
     /// Returns the count of fields in form.
     pub fn field_count(&self) -> result!(usize) {
-        Ok(usize::try_from(form::field_count(self.handle)?)?)
+        Ok(usize::try_from(form::field_count(Some(self.handle))?)?)
     }
 
     #[deprecated(since = "0.5.0")]
     /// Returns the current field init hook.
     pub fn field_init(&self) -> result!(Form_Hook) {
-        Ok(form::field_init(self.handle)?)
+        Ok(form::field_init(Some(self.handle))?)
     }
 
     #[deprecated(since = "0.5.0")]
     /// Returns the current field term hook.
     pub fn field_term(&self) -> result!(Form_Hook) {
-        Ok(form::field_term(self.handle)?)
+        Ok(form::field_term(Some(self.handle))?)
     }
 
     /// Returns a vector of the fields of the given form.
     pub fn form_fields(&self) -> result!(Vec<Field>) {
-        Ok(form::form_fields(self.handle)?.iter().map(|handle| Field::_from(*handle, false)).collect())
+        Ok(form::form_fields(Some(self.handle))?.iter().map(|handle| Field::_from(*handle, false)).collect())
     }
 
     #[deprecated(since = "0.5.0")]
     /// Returns the current form init hook.
     pub fn form_init(&self) -> result!(Form_Hook) {
-        Ok(form::form_init(self.handle)?)
+        Ok(form::form_init(Some(self.handle))?)
     }
 
     /// Returns the form's current options.
     pub fn form_opts(&self) -> FormOptions {
-        form::form_opts(self.handle)
+        form::form_opts(Some(self.handle))
     }
 
     /// Turns off the given options, and leaves others alone.
     pub fn form_opts_off(&self, opts: FormOptions) -> result!(()) {
-        Ok(form::form_opts_off(self.handle, opts)?)
+        Ok(form::form_opts_off(Some(self.handle), opts)?)
     }
 
     /// Turns on the given options, and leaves others alone.
     pub fn form_opts_on(&self, opts: FormOptions) -> result!(()) {
-        Ok(form::form_opts_on(self.handle, opts)?)
+        Ok(form::form_opts_on(Some(self.handle), opts)?)
     }
 
     /// Returns the form's current page number.
     pub fn form_page(&self) -> result!(usize) {
-        Ok(usize::try_from(form::form_page(self.handle)?)?)
+        Ok(usize::try_from(form::form_page(Some(self.handle))?)?)
     }
 
     /// Return the forms sub-window.
     pub fn form_sub(&self) -> result!(Window) {
-        Ok(Window::_from(self.screen, form::form_sub(self.handle)?, false))
+        Ok(Window::_from(self.screen, form::form_sub(Some(self.handle))?, false))
     }
 
     #[deprecated(since = "0.5.0")]
     /// Returns the current form term hook.
     pub fn form_term(&self) -> result!(Form_Hook) {
-        Ok(form::form_term(self.handle)?)
+        Ok(form::form_term(Some(self.handle))?)
     }
 
     /// Returns the forms user pointer.
     // TODO: needs testing!
     pub fn form_userptr<T>(&self) -> result!(Option<Box<T>>) {
-        Ok(unsafe { form::form_userptr(self.handle)?.as_mut().map(|userptr| Box::from_raw(userptr as *mut libc::c_void as *mut T)) })
+        Ok(unsafe { form::form_userptr(Some(self.handle))?.as_mut().map(|userptr| Box::from_raw(userptr as *mut libc::c_void as *mut T)) })
     }
 
     /// Return the forms main window.
     pub fn form_win(&self) -> result!(Window) {
-        Ok(Window::_from(self.screen, form::form_win(self.handle)?, false))
+        Ok(Window::_from(self.screen, form::form_win(Some(self.handle))?, false))
     }
 
     /// Displays a form to its associated sub-window. To trigger physical display
@@ -306,7 +307,7 @@ impl Form {
             .unwrap_or_else(|_| panic!("{}set_field_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::FieldInit), Some(Box::new(move |menu| func(menu))));
 
-        Ok(form::set_field_init(self.handle, Some(extern_field_init))?)
+        Ok(form::set_field_init(Some(self.handle), Some(extern_field_init))?)
     }
 
     /// Sets a callback to be called at form-unpost time and each time
@@ -319,7 +320,7 @@ impl Form {
             .unwrap_or_else(|_| panic!("{}set_field_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::FieldTerm), Some(Box::new(move |menu| func(menu))));
 
-        Ok(form::set_field_term(self.handle, Some(extern_field_term))?)
+        Ok(form::set_field_term(Some(self.handle), Some(extern_field_term))?)
     }
 
     /// Clear the list of current fields and replace them with a new list.
@@ -362,12 +363,12 @@ impl Form {
             .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::FormInit), Some(Box::new(move |menu| func(menu))));
 
-        Ok(form::set_form_init(self.handle, Some(extern_form_init))?)
+        Ok(form::set_form_init(Some(self.handle), Some(extern_form_init))?)
     }
 
     /// Sets all the given form's options.
     pub fn set_form_opts(&self, opts: FormOptions) -> result!(()) {
-        Ok(form::set_form_opts(self.handle, opts)?)
+        Ok(form::set_form_opts(Some(self.handle), opts)?)
     }
 
     /// Sets the form's page number (goes to page `number` of the form).
@@ -392,13 +393,13 @@ impl Form {
             .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
             .insert(CallbackKey::new(self.handle, CallbackType::FormTerm), Some(Box::new(move |menu| func(menu))));
 
-        Ok(form::set_form_term(self.handle, Some(extern_form_term))?)
+        Ok(form::set_form_term(Some(self.handle), Some(extern_form_term))?)
     }
 
     /// Sets the forms user pointer.
     // TODO: needs testing!
     pub fn set_form_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_form_userptr(self.handle, userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
+        Ok(form::set_form_userptr(Some(self.handle), userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
     }
 
     /// Set the forms main window.
@@ -412,6 +413,30 @@ impl Form {
     /// In such state, inquiries via `self.current_field()` will error.
     pub fn unfocus_current_field(&self) -> result!(()) {
         Ok(form::unfocus_current_field(self.handle)?)
+    }
+
+    pub fn field_back(&self, field: &Field) -> normal::Attributes {
+        self.screenify_attributes(field.field_back())
+    }
+
+    pub fn field_fore(&self, field: &Field) -> normal::Attributes {
+        self.screenify_attributes(field.field_fore())
+    }
+
+    pub fn set_field_back(&self, field: &Field, attrs: normal::Attributes) -> result!(()) {
+        assert!(self.screen == attrs.screen());
+
+        field.set_field_back(attrs)
+    }
+
+    pub fn set_field_fore(&self, field: &Field, attrs: normal::Attributes) -> result!(()) {
+        assert!(self.screen == attrs.screen());
+
+        field.set_field_fore(attrs)
+    }
+
+    fn screenify_attributes(&self, attrs: normal::Attributes) -> normal::Attributes {
+        self.screen.map_or_else(|| normal::Attributes::new(attrs.into()), |screen| normal::Attributes::new_sp(screen, attrs.into()))
     }
 }
 

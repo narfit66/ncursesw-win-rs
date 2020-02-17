@@ -2,7 +2,7 @@
 
 All breaking changes are marked with [BC] and potentially require API consumer changes after updating to the respective version.
 
-## [0.5.0] - ????-??-?? [BC]
+## [0.6.0] - ????-??-?? [BC]
 - NCurses form module implemented as `form`.
 - Added NCurses screen functionality.
 - Added `{normal,extend}::SoftLabels`.
@@ -20,6 +20,9 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - Moved `is_subwin()` from `Scrollable` trait to `BaseCanvas` trait. [BC]
 - `Mouse::new()` no longer required an `id` parameter. [BC]
 - `curscr()`, `newscr()` and `stdscr()` now return `Window` instead of `Result<Window, NCurseswWinError>`. [BC]
+
+## [0.5.0] - ????-??-?? [BC]
+- Unreleased.
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]

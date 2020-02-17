@@ -68,10 +68,10 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
     start_color()?;
     use_default_colors()?;
 
-    let light_yellow = Color::Light(BaseColor::Yellow);
-    let dark_blue = Color::Dark(BaseColor::Blue);
-    let dark_red = Color::Dark(BaseColor::Red);
-    let dark_green = Color::Dark(BaseColor::Green);
+    let light_yellow = Color::new(ColorPalette::LightYellow);
+    let dark_blue = Color::new(ColorPalette::Blue);
+    let dark_red = Color::new(ColorPalette::Red);
+    let dark_green = Color::new(ColorPalette::Green);
 
     let border_color_pair = ColorPair::new(1, Colors::new(light_yellow, dark_blue))?;
     let display_color_pair = ColorPair::new(2, Colors::new(dark_red, dark_green))?;
