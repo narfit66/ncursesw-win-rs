@@ -34,11 +34,11 @@ fn main() {
         cursor_set(CursorType::Visible)?;
         set_echo(false)?;
 
-        mouse_test(&window)
+        mouse_test(window)
     }) {
         match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
         }
     }
 
@@ -107,7 +107,7 @@ fn mouse_test(stdscr: &Window) -> result!(()) {
             CharacterResult::Character(character) => {
                 other_event(stdscr, origin, &format!("{}", character))?;
 
-                if character == 'q' || character == 'Q' {
+                if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             }

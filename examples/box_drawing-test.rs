@@ -46,10 +46,12 @@ enum Corner {
 }
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        match source {
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
+        }
+    }
 }
 
 fn main_routine() -> result!(()) {
@@ -60,7 +62,7 @@ fn main_routine() -> result!(()) {
         cursor_set(CursorType::Invisible)?;
         set_echo(false)?;
 
-        box_drawing_test(&window)
+        box_drawing_test(window)
     })
 }
 
@@ -187,16 +189,16 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
         match stdscr.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
             #[cfg(feature = "key_resize_as_error")]
             Some(char_result) => if let CharacterResult::Character(character) = char_result {
-                if character == 'q' || character == 'Q' {
+                if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             },
             #[cfg(not(feature = "key_resize_as_error"))]
             Some(char_result) => match char_result {
-                CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
+                CharacterResult::Key(key_binding)     => if key_binding == KeyBinding::ResizeEvent {
                     return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
                 },
-                CharacterResult::Character(chracter) => if chracter == 'q' || chracter == 'Q' {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             },

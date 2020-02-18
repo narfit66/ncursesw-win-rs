@@ -1,7 +1,7 @@
 /*
     examples/ncursesw_entry-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -35,13 +35,11 @@ fn main() {
 
         ncursesw_entry_test_pass(window)?;
 
-        let rc = ncursesw_entry_test_fail()?;
-
-        Ok(rc)
+        Ok(ncursesw_entry_test_fail()?)
     }) {
         Err(source) => match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
         },
         Ok(value)   => {
             assert!(value == -1);

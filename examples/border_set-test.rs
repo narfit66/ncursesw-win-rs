@@ -31,10 +31,12 @@ use ncurseswwin::{*, extend::*};
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        match source {
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
+        }
+    }
 }
 
 fn main_routine() -> result!(()) {
@@ -46,7 +48,7 @@ fn main_routine() -> result!(()) {
         cursor_set(CursorType::Invisible)?;
         set_echo(false)?;
 
-        border_set_test(&window)
+        border_set_test(window)
     })
 }
 
@@ -129,7 +131,7 @@ fn border_set_test(stdscr: &Window) -> result!(()) {
                 CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
                     return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
                 },
-                CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             },

@@ -31,10 +31,12 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        match source {
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
+        }
+    }
 }
 
 fn main_routine() -> result!(()) {
@@ -45,7 +47,7 @@ fn main_routine() -> result!(()) {
         cursor_set(CursorType::Visible)?;
         set_echo(true)?;
 
-        getch_nonblocking_test(&window)
+        getch_nonblocking_test(window)
     })
 }
 
@@ -61,15 +63,12 @@ fn getch_nonblocking_test(stdscr: &Window) -> result!(()) {
 
     stdscr.mvaddstr(display_origin, display_str)?;
 
-    let lower_q = WideChar::new('q');
-    let upper_q = WideChar::new('Q');
-
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait until we timeout.
         let getch_result = match stdscr.mvget_wch_nonblocking(getch_origin, Some(timeout))? {
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
-                CharacterResult::Character(character) => if character == lower_q || character == upper_q {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 } else {
                     format!("character: '{:?}'", character)

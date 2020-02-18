@@ -112,6 +112,7 @@ pub use ncursesw::{
     scr_set, scrl, set_escdelay, set_tabsize, setcchar, typeahead,
     use_legacy_coding
 };
+pub use ncursesw::features;
 pub use ncursesw::mouse::{
     has_mouse, mouseinterval, mouse_version, has_mouse_interface
 };

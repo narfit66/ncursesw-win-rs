@@ -1,7 +1,7 @@
 /*
     examples/ripoff_line-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -27,17 +27,19 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        match source {
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
+        }
+    }
 }
 
 fn main_routine() -> result!(()) {
     // ripoff a line from the top of the screen.
-    let top_ripoff = RipoffLine::new(Orientation::Top)?;
+    let top_ripoff = &RipoffLine::new(Orientation::Top)?;
     // ripoff a line from the bottom of the screen.
-    let bottom_ripoff = RipoffLine::new(Orientation::Bottom)?;
+    let bottom_ripoff = &RipoffLine::new(Orientation::Bottom)?;
 
     assert!(top_ripoff != bottom_ripoff);
 
@@ -46,7 +48,7 @@ fn main_routine() -> result!(()) {
         cursor_set(CursorType::Invisible)?;
         set_echo(false)?;
 
-        ripoff_line_test(&window, &top_ripoff, &bottom_ripoff)
+        ripoff_line_test(window, top_ripoff, bottom_ripoff)
     })
 }
 
@@ -99,9 +101,7 @@ fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) 
     ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
 
     ripoff_window.addstr(ripoff_message)?;
-    ripoff_window.noutrefresh()?;
-
-    Ok(())
+    ripoff_window.noutrefresh()
 }
 
 fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
@@ -110,7 +110,5 @@ fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!((
     ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
 
     ripoff_window.addstr(ripoff_message)?;
-    ripoff_window.noutrefresh()?;
-
-    Ok(())
+    ripoff_window.noutrefresh()
 }

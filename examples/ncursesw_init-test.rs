@@ -1,7 +1,7 @@
 /*
     examples/ncursesw_init-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -31,8 +31,8 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 fn main() {
     match main_routine() {
         Err(source) => match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
         },
         Ok(value)   => {
             assert!(value == -1);
@@ -47,11 +47,11 @@ fn main_routine() -> result!(i32) {
     match ncursesw_init(|window| {
         // In here we get an initialized Window structure (stdscr) and then proceed
         // to use it exactly like we normally would use it.
-        match ncursesw_init_test(&window) {
+        match ncursesw_init_test(window) {
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
         }
-    }).unwrap_or_else(|e| Err(match e {
+    }).unwrap_or_else(|source| Err(match source {
         // This block only runs if there was an error. We might or might not
         // have been able to recover an error message. You technically can pass
         // any value into a panic, but we only get an error message if the panic
@@ -74,9 +74,7 @@ fn ncursesw_init_test(initial_window: &Window) -> result!(i32) {
 
     ncursesw_init_test_pass(initial_window)?;
 
-    let rc = ncursesw_init_test_fail()?;
-
-    Ok(rc)
+    ncursesw_init_test_fail()
 }
 
 fn ncursesw_init_test_pass(stdscr: &Window) -> result!(()) {

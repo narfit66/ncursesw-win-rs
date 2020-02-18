@@ -31,10 +31,12 @@ use ncurseswwin::*;
 macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        match source {
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
+        }
+    }
 }
 
 fn main_routine() -> result!(()) {
@@ -45,26 +47,28 @@ fn main_routine() -> result!(()) {
         cursor_set(CursorType::Visible)?;
         set_echo(true)?;
 
-        getch_nonblocking_test(&window)
+        getch_nonblocking_test(window)
     })
 }
 
 fn getch_nonblocking_test(stdscr: &Window) -> result!(()) {
     stdscr.keypad(true)?;
 
+    let timeout = time::Duration::new(5, 0);
+
     let display_origin = Origin { y: 2, x: 2 };
-    let display_str = "Press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds:";
+    let display_str = &format!("Press 'q' or 'Q' to quit, any other key to continue or wait for {:?} :", timeout);
     let getch_origin = Origin { y: display_origin.y, x: display_origin.x + display_str.len() as u16 + 1 };
     let getch_result_origin = Origin { y: getch_origin.y, x: getch_origin.x + 3 };
 
     stdscr.mvaddstr(display_origin, display_str)?;
 
     loop {
-        // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds,
-        let getch_result = match stdscr.mvgetch_nonblocking(getch_origin, Some(time::Duration::new(5, 0)))? {
+        // press 'q' or 'Q' to quit, any other key to continue or wait until we timeout.
+        let getch_result = match stdscr.mvgetch_nonblocking(getch_origin, Some(timeout))? {
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
-                CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 } else {
                     format!("character: '{}'", character)

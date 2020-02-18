@@ -1,7 +1,7 @@
 /*
     examples/border-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -33,11 +33,11 @@ fn main() {
         cursor_set(CursorType::Invisible)?;
         set_echo(false)?;
 
-        border_test(&window)
+        border_test(window)
     }) {
         match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
         }
     }
 }

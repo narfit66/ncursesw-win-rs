@@ -1,7 +1,7 @@
 /*
     examples/ncursesw-features.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,11 +20,12 @@
     IN THE SOFTWARE.
 */
 
-extern crate ncursesw;
+extern crate ncurseswwin;
 
-use ncursesw::features;
+use ncurseswwin::features::*;
 
 fn main() {
-    println!("key_resize_as_error = {}", features::key_resize_as_error());
-    println!("key_event_as_error  = {}", features::key_event_as_error());
+    println!("key_resize_as_error = {}", key_resize_as_error());
+    println!("key_event_as_error  = {}", key_event_as_error());
+    println!("docs_rs             = {}", docs_rs());
 }

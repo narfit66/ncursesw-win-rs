@@ -37,10 +37,12 @@ macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 const CHOICES: [&str; 5] = ["Choice 1", "Choice 2", "Choice 3", "Choice 4", "Exit"];
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        match source {
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
+        }
+    }
 }
 
 fn main_routine() -> result!(()) {
@@ -52,7 +54,7 @@ fn main_routine() -> result!(()) {
         set_echo(false)?;
         cursor_set(CursorType::Invisible)?;
 
-        menu_test(&window)
+        menu_test(window)
     })
 }
 
@@ -105,42 +107,39 @@ fn menu_test(stdscr: &Window) -> result!(()) {
     stdscr.mvaddstr(origin, "F1 to exit")?;
     stdscr.refresh()?;
 
+    origin = Origin { y: 20, x: 0 };
+
     // Post the menu and refresh the menu's window.
     let posted_menu = &my_menu.post_menu(true)?;
 
     loop {
         match stdscr.getch()? {
-            CharacterResult::Key(key) => {
-                if key == KeyBinding::FunctionKey(1) {
-                    break;
-                } else if key == KeyBinding::DownArrow {
-                    if let Err(source) = posted_menu.menu_driver(MenuRequest::DownItem) {
-                        if source != request_denied_error() {
-                            return Err(source)
-                        }
-                    }
-                } else if key == KeyBinding::UpArrow {
-                    if let Err(source) = posted_menu.menu_driver(MenuRequest::UpItem) {
-                        if source != request_denied_error() {
-                            return Err(source)
-                        }
-                    }
-                }
+            CharacterResult::Key(key_binding)     => match key_binding {
+                KeyBinding::FunctionKey(1) => break,
+                KeyBinding::DownArrow      => menu_driver(posted_menu, MenuRequest::DownItem)?,
+                KeyBinding::UpArrow        => menu_driver(posted_menu, MenuRequest::UpItem)?,
+                _                          => continue
             },
-            CharacterResult::Character(key) => {
-                if key == '\n' {
-                    origin = Origin { y: 20, x: 0 };
-
-                    stdscr.set_cursor(origin)?;
-                    stdscr.clrtoeol()?;
-                    stdscr.mvaddstr(origin, &format!("Item selected is : {}", my_menu.current_item()?.item_name()?))?;
-                    stdscr.refresh()?;
-                    posted_menu.pos_menu_cursor()?;
-                }
+            CharacterResult::Character(character) => if character == '\n' {
+                stdscr.set_cursor(origin)?;
+                stdscr.clrtoeol()?;
+                stdscr.mvaddstr(origin, &format!("Item selected is : {}", my_menu.current_item()?.item_name()?))?;
+                stdscr.refresh()?;
+                posted_menu.pos_menu_cursor()?;
             }
         }
 
         posted_menu.refresh()?;
+    }
+
+    Ok(())
+}
+
+fn menu_driver(posted_menu: &PostedMenu, menu_request: MenuRequest) -> result!(()) {
+    if let Err(source) = posted_menu.menu_driver(menu_request) {
+        if source != request_denied_error() {
+            return Err(source)
+        }
     }
 
     Ok(())
@@ -154,12 +153,12 @@ fn test_item_init(menu: &Menu) {
     let current_item = menu.current_item().unwrap_or_else(|source| panic!("test_item_init() : {}", source));
     let item_description = current_item.item_description().unwrap_or_else(|source| panic!("test_item_init() : {}", source));
 
-    eprintln!("item_init for {:?} using {:?} : {}", menu, current_item, item_description)
+    eprintln!("item_init {:?} : {}", current_item, item_description)
 }
 
 fn test_item_term(menu: &Menu) {
     let current_item = menu.current_item().unwrap_or_else(|source| panic!("test_item_term() : {}", source));
     let item_description = current_item.item_description().unwrap_or_else(|source| panic!("test_item_term() : {}", source));
 
-    eprintln!("item_term for {:?} using {:?} : {}", menu, current_item, item_description)
+    eprintln!("item_term {:?} : {}", current_item, item_description)
 }
