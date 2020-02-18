@@ -20,6 +20,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - Moved `is_subwin()` from `Scrollable` trait to `BaseCanvas` trait. [BC]
 - `Mouse::new()` no longer required an `id` parameter. [BC]
 - `curscr()`, `newscr()` and `stdscr()` now return `Window` instead of `Result<Window, NCurseswWinError>`. [BC]
+- Changed the follwoing functions `length` parameters from `u16` to `Option<u16>` : `addchnstr()`, `addnstr()` `addnwstr()` `add_wchnstr()` `chgat()` `insnstr()` `ins_nwstr()` `mvaddchnstr()` `mvaddnstr()` `mvaddnwstr()` `mvadd_wchnstr()` `mvchgat()` `mvinsnstr()` and `mvins_nwstr()`. [BC]
 
 ## [0.5.0] - ????-??-?? [BC]
 - Unreleased.

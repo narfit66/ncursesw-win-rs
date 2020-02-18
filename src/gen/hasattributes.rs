@@ -103,7 +103,7 @@ pub trait HasAttributes: HasHandle<WINDOW> {
         Ok(ncursesw::wcolor_set(self._handle(), color_pair)?)
     }
 
-    fn chgat<A, P, T>(&self, length: u16, attrs: A, color_pair: P) -> result!(())
+    fn chgat<A, P, T>(&self, length: Option<u16>, attrs: A, color_pair: P) -> result!(())
         where A: AttributesType<T>,
               P: ColorPairType<T>,
               T: ColorAttributeTypes
@@ -111,15 +111,13 @@ pub trait HasAttributes: HasHandle<WINDOW> {
         assert!(self._screen() == attrs.screen());
         assert!(self._screen() == color_pair.screen());
 
-        Ok(ncursesw::wchgat(self._handle(), i32::try_from(length)?, attrs, color_pair)?)
+        Ok(ncursesw::wchgat(self._handle(), option_length!(length)?, attrs, color_pair)?)
     }
 
     fn getattrs(&self) -> normal::Attributes {
-        let mut attrs = ncursesw::getattrs(self._handle());
+        let attrs = ncursesw::getattrs(self._handle());
 
-        attrs.set_screen(self._screen());
-
-        attrs
+        self._screen().map_or_else(|| normal::Attributes::new(attrs.into()), |screen| normal::Attributes::new_sp(screen, attrs.into()))
     }
 
     fn standend(&self) -> result!(()) {
