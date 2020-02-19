@@ -88,7 +88,7 @@ impl SoftLabels {
     pub fn slk_attr(&self) -> Attributes {
         let attrs = self.screen.map_or_else(|| ncursesw::slk_attr(), |screen| ncursesw::slk_attr_sp(screen));
 
-        self.screen.map_or_else(|| Attributes::new(attrs), |screen| Attributes::new_sp(screen, attrs))
+        self.screen.map_or_else(|| Attributes::new(attrs.into()), |screen| Attributes::new_sp(screen, attrs.into()))
     }
 
     pub fn slk_attr_off<A, T>(&self, attrs: A) -> result!(())
