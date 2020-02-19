@@ -1,7 +1,7 @@
 /*
-    src/form/mod.rs
+    src/screen/funcs.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,20 +20,21 @@
     IN THE SOFTWARE.
 */
 
-#![allow(clippy::module_inception)]
+use std::{os::unix::io::AsRawFd, io::{Write, Read}};
 
-mod callbacks;
-mod field;
-mod fieldbuffer;
-mod fieldparameters;
-mod fieldtype;
-mod fieldtypes;
-mod fieldinfo;
-mod form;
-mod funcs;
-mod postedform;
+use crate::{NCurseswWinError, screen::Screen};
 
-pub use self::{
-    field::*, fieldbuffer::*, fieldparameters::*, fieldtype::*, fieldtypes::*,
-    fieldinfo::*, form::*, funcs::*, postedform::*
-};
+pub fn new_prescr() -> result!(Screen) {
+    Ok(Screen::_from(ncursesw::new_prescr()?, true))
+}
+
+pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: O, input: I) -> result!(Screen)
+    where O: AsRawFd + Write,
+          I: AsRawFd + Read
+{
+    Ok(Screen::_from(ncursesw::newterm_sp(screen._handle(), term, output, input)?, true))
+}
+
+pub fn set_term(screen: &Screen) -> result!(Screen) {
+    Ok(Screen::_from(ncursesw::set_term(screen._handle())?, false))
+}

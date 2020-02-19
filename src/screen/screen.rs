@@ -114,6 +114,14 @@ impl Screen {
         }
     }
 
+    pub fn set_filter(&self, flag: bool) {
+        if flag {
+            ncursesw::filter_sp(self.handle)
+        } else {
+            ncursesw::nofilter_sp(self.handle)
+        }
+    }
+
     /// Control whether NCurses translates the return key into newline on input on this Screen.
     ///
     /// This determines wether ncurses translates newline into return and line-feed on output (in either
@@ -129,14 +137,6 @@ impl Screen {
         } {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(_)       => Ok(())
-        }
-    }
-
-    pub fn set_filter(screen: &Screen, flag: bool) {
-        if flag {
-            ncursesw::filter_sp(screen._handle())
-        } else {
-            ncursesw::nofilter_sp(screen._handle())
         }
     }
 
@@ -190,6 +190,10 @@ impl Screen {
 
     pub fn doupdate(&self) -> result!(()) {
         Ok(ncursesw::doupdate_sp(self.handle)?)
+    }
+
+    pub fn endwin(&self) -> result!(()) {
+        Ok(ncursesw::endwin_sp(self.handle)?)
     }
 
     pub fn erasechar(&self) -> result!(char) {
@@ -332,7 +336,7 @@ impl Screen {
     }
 
     pub fn set_term(&self) -> result!(Screen) {
-        Ok(Screen::_from(ncursesw::set_term(self._handle())?, false))
+        Ok(Screen::_from(ncursesw::set_term(self.handle)?, false))
     }
 
     pub fn start_color(&self) -> result!(()) {
@@ -397,6 +401,10 @@ impl Screen {
 impl Drop for Screen {
     fn drop(&mut self) {
         if self.free_on_drop {
+            if let Err(source) = self.endwin() {
+                panic!("{} @ {:?}", source, self)
+            }
+
             ncursesw::delscreen(self.handle);
         }
     }
@@ -423,15 +431,4 @@ impl fmt::Debug for Screen {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Screen {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
     }
-}
-
-pub fn new_prescr() -> result!(Screen) {
-    Ok(Screen::_from(ncursesw::new_prescr()?, true))
-}
-
-pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: O, input: I) -> result!(Screen)
-    where O: AsRawFd + Write,
-          I: AsRawFd + Read
-{
-    Ok(Screen::_from(ncursesw::newterm_sp(screen._handle(), term, output, input)?, true))
 }

@@ -31,9 +31,9 @@ lazy_static! {
     pub(in crate) static ref COLOR_STARTED: AtomicBool = AtomicBool::new(false);
 }
 
-/// Safely initialise ncurses, panic's will be caught correctly and
+/// Safely initialise NCurses, panic's will be caught correctly and
 /// passed back as `NCurseswWinError::Panic`.
-/// ncurses should free (as best it can) memory etc correctly.
+/// NCurses should free (as best it can) memory etc correctly.
 pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_function: F) -> result!(T) {
     // We wrap all our use of ncurseswin with this function.
     match ncursesw_init(|window| {
@@ -63,7 +63,7 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
 }
 
 #[deprecated(since = "0.3.0", note = "Use ncursesw_entry() instead")]
-/// Safely initialise ncurses, panic will be caught correctly and ncurses unallocated (as best it can) correctly.
+/// Safely initialise NCurses, panic will be caught correctly and NCurses unallocated (as best it can) correctly.
 pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
     // use `catch_unwind()` to catch panic's, an error will be a panic
     // so try and convert it into a string.
@@ -78,6 +78,21 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) 
         };
 
         user_function(&ncurses.initial_window())
+    }).map_err(|source| match source.downcast_ref::<&str>() {
+        Some(andstr) => Some(andstr.to_string()),
+        None         => match source.downcast_ref::<String>() {
+            Some(string) => Some(string.to_string()),
+            None         => None
+        }
+    })
+}
+
+/// Create an application entry point, panic will be caught correctly.
+pub fn safe_entry<F: FnOnce() -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
+    // use `catch_unwind()` to catch panic's, an error will be a panic
+    // so try and convert it into a string.
+    catch_unwind(|| {
+        user_function()
     }).map_err(|source| match source.downcast_ref::<&str>() {
         Some(andstr) => Some(andstr.to_string()),
         None         => match source.downcast_ref::<String>() {

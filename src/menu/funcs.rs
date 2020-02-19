@@ -25,7 +25,7 @@ use std::convert::{TryFrom, TryInto};
 use ncursesw::menu::{Menu_Hook, MenuRequest, MenuOptions, ItemOptions};
 use crate::{
     normal, Screen, Window, HasHandle, NCurseswWinError,
-    menu::{MenuSize, MenuSpacing}
+    menu::{/*callbacks::*, Menu,*/ MenuSize, MenuSpacing}
 };
 
 //static MODULE_PATH: &str = "ncurseswwin::menu::funcs::";
@@ -133,6 +133,9 @@ pub fn menu_win() -> result!(Window) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Menu` but
+          unsure how to access this at the moment!!!
+
 pub fn set_item_init<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
@@ -151,6 +154,9 @@ pub fn set_item_opts(opts: ItemOptions) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Menu` but
+          unsure how to access this at the moment!!!
+
 pub fn set_item_term<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
@@ -186,6 +192,9 @@ pub fn set_menu_grey(attrs: normal::Attributes) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Menu` but
+          unsure how to access this at the moment!!!
+
 pub fn set_menu_init<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
@@ -219,6 +228,9 @@ pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Menu` but
+          unsure how to access this at the moment!!!
+
 pub fn set_menu_term<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {

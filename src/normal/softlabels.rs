@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{fmt, convert::From, sync::{Mutex, atomic::Ordering}, collections::HashSet};
+use std::{fmt, sync::{Mutex, atomic::Ordering}, collections::HashSet};
 
 use ncursesw;
 use ncursesw::{SCREEN, normal::{ColorPair, Attributes}};

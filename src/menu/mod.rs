@@ -22,6 +22,7 @@
 
 #![allow(clippy::module_inception)]
 
+mod callbacks;
 mod funcs;
 mod menu;
 mod menuitem;

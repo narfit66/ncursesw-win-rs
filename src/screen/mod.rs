@@ -1,7 +1,7 @@
 /*
-    src/form/mod.rs
+    src/screen/mod.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,20 +20,7 @@
     IN THE SOFTWARE.
 */
 
-#![allow(clippy::module_inception)]
-
-mod callbacks;
-mod field;
-mod fieldbuffer;
-mod fieldparameters;
-mod fieldtype;
-mod fieldtypes;
-mod fieldinfo;
-mod form;
 mod funcs;
-mod postedform;
+mod screen;
 
-pub use self::{
-    field::*, fieldbuffer::*, fieldparameters::*, fieldtype::*, fieldtypes::*,
-    fieldinfo::*, form::*, funcs::*, postedform::*
-};
+pub use self::{funcs::*, screen::*};

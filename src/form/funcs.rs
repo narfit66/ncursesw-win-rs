@@ -27,8 +27,10 @@ use ncursesw::form::{
 };
 use crate::{
     Screen, Window, HasHandle, NCurseswWinError, normal,
-    form::{Field, FieldType, Form_Hook}
+    form::{/*callbacks::*, Form,*/ Field, FieldType, Form_Hook}
 };
+
+//static MODULE_PATH: &str = "ncurseswwin::form::funcs::";
 
 /// Returns the default current field of the given form.
 pub fn current_field() -> result!(Field) {
@@ -190,6 +192,9 @@ pub fn set_field_fore(attr: normal::Attributes) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+          unsure how to access this at the moment!!!
+
 /// Sets a callback to be called at form-post time and each time
 /// the selected field changes (after the change).
 pub fn set_field_init<F>(func: F) -> result!(())
@@ -225,6 +230,9 @@ pub fn set_field_status(status: bool) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+          unsure how to access this at the moment!!!
+
 /// Sets a callback to be called at form-unpost time and each time
 /// the selected field changes (before the change).
 pub fn set_field_term<F>(func: F) -> result!(())
@@ -251,6 +259,9 @@ pub fn set_new_page(new_page_flag: bool) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+          unsure how to access this at the moment!!!
+
 /// Sets a callback to be called at form-post time and just after
 /// a page change once it is posted.
 pub fn set_form_init<F>(func: F) -> result!(())
@@ -276,6 +287,9 @@ pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
 }
 
 /*
+    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+          unsure how to access this at the moment!!!
+
 /// Sets a callback to be called at form-unpost time and just before
 /// a page change once it is posted.
 pub fn set_form_term<F>(func: F) -> result!(())
