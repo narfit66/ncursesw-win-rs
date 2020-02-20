@@ -25,7 +25,6 @@
 use std::{ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
 
 use errno::errno;
-use strum::IntoEnumIterator;
 
 use ncursesw::{
     SCREEN, menu, menu::{MENU, ITEM},
@@ -33,14 +32,18 @@ use ncursesw::{
 };
 use crate::{
     normal, Screen, Window, HasHandle, NCurseswWinError, AttributesType,
-    menu::{MenuSize, MenuItem, MenuSpacing, PostedMenu, callbacks::*}
+    menu::{
+        MenuSize, MenuItem, MenuSpacing, PostedMenu,
+        callbacks::{
+            CallbackType, set_menu_screen, set_menu_callback, extern_item_init,
+            extern_item_term, extern_menu_init, extern_menu_term, menu_tidyup
+        }
+    }
 };
 
 #[deprecated(since = "0.4.1")]
 pub use ncursesw::menu::Menu_Hook;
 pub use ncursesw::menu::{MenuOptions, MenuRequest};
-
-static MODULE_PATH: &str = "ncurseswwin::menu::menu::";
 
 /// Menu.
 pub struct Menu {
@@ -56,6 +59,10 @@ impl Menu {
         assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "Menu::_from() : screen.is_null()");
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
         assert!(!item_handles.is_null(), "Menu::_from() : item_handles.is_null()");
+
+        if free_on_drop {
+            set_menu_screen(handle, screen);
+        }
 
         Self { screen, handle, item_handles, free_on_drop }
     }
@@ -241,10 +248,7 @@ impl Menu {
     pub fn set_item_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_item_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::ItemInit), Some(Box::new(move |menu| func(menu))));
+        set_menu_callback(Some(self.handle), CallbackType::ItemInit, func);
 
         Ok(menu::set_item_init(Some(self.handle), Some(extern_item_init))?)
     }
@@ -252,10 +256,7 @@ impl Menu {
     pub fn set_item_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_item_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::ItemTerm), Some(Box::new(move |menu| func(menu))));
+        set_menu_callback(Some(self.handle), CallbackType::ItemTerm, func);
 
         Ok(menu::set_item_term(Some(self.handle), Some(extern_item_term))?)
     }
@@ -285,10 +286,7 @@ impl Menu {
     pub fn set_menu_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_menu_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::MenuInit), Some(Box::new(move |menu| func(menu))));
+        set_menu_callback(Some(self.handle), CallbackType::MenuInit, func);
 
         Ok(menu::set_menu_init(Some(self.handle), Some(extern_menu_init))?)
     }
@@ -351,10 +349,7 @@ impl Menu {
     pub fn set_menu_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_menu_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::MenuTerm), Some(Box::new(move |menu| func(menu))));
+        set_menu_callback(Some(self.handle), CallbackType::MenuTerm, func);
 
         Ok(menu::set_menu_term(Some(self.handle), Some(extern_menu_term))?)
     }
@@ -379,7 +374,7 @@ impl Menu {
     }
 
     fn screenify_attributes(&self, attrs: normal::Attributes) -> normal::Attributes {
-        self.screen.map_or_else(|| normal::Attributes::new(attrs.into()), |screen| normal::Attributes::new_sp(screen, attrs.into()))
+        self.screen.map_or_else(|| attrs, |screen| normal::Attributes::new_sp(screen, attrs.into()))
     }
 }
 
@@ -394,22 +389,7 @@ impl Drop for Menu {
             // unallocate the item_handles memory.
             unsafe { libc::free(self.item_handles as *mut libc::c_void) };
 
-            // remove any callbacks created for this instance.
-            let mut callbacks = CALLBACKS
-                .lock()
-                .unwrap_or_else(|_| panic!("Menu::drop() : CALLBACKS.lock() failed!!!"));
-
-            let mut shrink_to_fit = false;
-
-            for cb_type in CallbackType::iter() {
-                if callbacks.remove(&CallbackKey::new(Some(self.handle), cb_type)).is_some() {
-                    shrink_to_fit = true;
-                }
-            }
-
-            if shrink_to_fit {
-                callbacks.shrink_to_fit();
-            }
+            menu_tidyup(self.handle);
         }
     }
 }

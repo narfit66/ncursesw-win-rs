@@ -25,7 +25,7 @@ use std::{
     hash::{Hash, Hasher}
 };
 
-use ncursesw::{SCREEN, WINDOW, Orientation, shims::constants::OK};
+use ncursesw::{SCREEN, WINDOW, Orientation, shims::constants};
 
 use crate::{
     Screen, RipoffWindow, NCurseswWinError, HasHandle,
@@ -54,7 +54,7 @@ extern fn ripoff_init(window: WINDOW, columns: i32) -> i32 {
     // Get the screen associated with this ripoff line.
     let screen = &RIPOFFLINESCREENS
         .lock()
-        .unwrap_or_else(|_| panic!("ripoff_init() : RIPOFFLINESCREENS.lock()[{}] failed!!!", number))[number];
+        .unwrap_or_else(|_| panic!("ripoff_init() : &RIPOFFLINESCREENS.lock()[{}] failed!!!", number))[number];
 
     // Save the window and columns assigned by `initscr()`.
     RIPOFFLINES
@@ -62,7 +62,7 @@ extern fn ripoff_init(window: WINDOW, columns: i32) -> i32 {
         .unwrap_or_else(|_| panic!("ripoff_init() : RIPOFFLINES.lock() failed!!!"))
         .insert(number, (RipoffWindow::_from(screen.as_ref().map_or_else(|| None, |screen| Some(screen._handle())), window, false), columns));
 
-    OK
+    constants::OK
 }
 
 /// A ripoff line.

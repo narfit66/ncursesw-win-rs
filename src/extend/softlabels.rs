@@ -26,12 +26,8 @@ use ncursesw;
 use ncursesw::{SCREEN, extend::{ColorPair, Attributes}};
 
 use crate::{
-    Screen,
-    AttributesType, ColorPairType, ColorAttributeTypes,
-    NCurseswWinError,
-    SoftLabelType,
-    Justification,
-    WideString,
+    Screen, NCurseswWinError, SoftLabelType, Justification, WideString,
+    AttributesType, ColorPairType,
     ncurses::INITSCR_CALLED
 };
 
@@ -91,39 +87,25 @@ impl SoftLabels {
         self.screen.map_or_else(|| Attributes::new(attrs.into()), |screen| Attributes::new_sp(screen, attrs.into()))
     }
 
-    pub fn slk_attr_off<A, T>(&self, attrs: A) -> result!(())
-        where A: AttributesType<T>,
-              T: ColorAttributeTypes
-    {
+    pub fn slk_attr_off(&self, attrs: Attributes) -> result!(()) {
         assert!(self.screen.is_some(), "{}slk_attr_off() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
         assert!(self.screen == attrs.screen());
 
         Ok(ncursesw::slk_attr_off(attrs)?)
     }
 
-    pub fn slk_attr_on<A, T>(&self, attrs: A) -> result!(())
-        where A: AttributesType<T>,
-              T: ColorAttributeTypes
-    {
+    pub fn slk_attr_on(&self, attrs: Attributes) -> result!(()) {
         assert!(self.screen.is_some(), "{}slk_attr_on() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
         assert!(self.screen == attrs.screen());
 
         Ok(ncursesw::slk_attr_on(attrs)?)
     }
 
-    pub fn slk_attr_set<A, P, T>(&self, attrs: A, color_pair: P) -> result!(())
-        where A: AttributesType<T>,
-              P: ColorPairType<T>,
-              T: ColorAttributeTypes
-    {
+    pub fn slk_attr_set(&self, attrs: Attributes, color_pair: ColorPair) -> result!(()) {
         assert!(self.screen == attrs.screen());
         assert!(self.screen == color_pair.screen());
 
-        Ok(if let Some(screen) = self.screen {
-            ncursesw::slk_attr_set_sp(screen, attrs, color_pair)
-        } else {
-            ncursesw::slk_attr_set(attrs, color_pair)
-        }?)
+        Ok(self.screen.map_or_else(|| ncursesw::slk_attr_set(attrs, color_pair), |screen| ncursesw::slk_attr_set_sp(screen, attrs, color_pair))?)
     }
 
     pub fn slk_clear(&self) -> result!(()) {

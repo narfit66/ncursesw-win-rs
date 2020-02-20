@@ -27,10 +27,14 @@ use ncursesw::form::{
 };
 use crate::{
     Screen, Window, HasHandle, NCurseswWinError, normal,
-    form::{/*callbacks::*, Form,*/ Field, FieldType, Form_Hook}
+    form::{
+        Form, Field, FieldType, Form_Hook,
+        callbacks::{
+            set_form_callback, extern_field_init, extern_field_term,
+            extern_form_init, extern_form_term, CallbackType
+        }
+    }
 };
-
-//static MODULE_PATH: &str = "ncurseswwin::form::funcs::";
 
 /// Returns the default current field of the given form.
 pub fn current_field() -> result!(Field) {
@@ -191,23 +195,15 @@ pub fn set_field_fore(attr: normal::Attributes) -> result!(()) {
     Ok(ncursesw::form::set_field_fore(None, attr)?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
-          unsure how to access this at the moment!!!
-
-/// Sets a callback to be called at form-post time and each time
+/// Sets a default callback to be called at form-post time and each time
 /// the selected field changes (after the change).
 pub fn set_field_init<F>(func: F) -> result!(())
     where F: Fn(&Form) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_field_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::FieldInit), Some(Box::new(move |menu| func(menu))));
+    set_form_callback(None, CallbackType::FieldInit, func);
 
     Ok(ncursesw::form::set_field_init(None, Some(extern_field_init))?)
 }
-*/
 
 /// Sets the justification attribute of a field.
 pub fn set_field_just(justification: FieldJustification) -> result!(()) {
@@ -229,23 +225,15 @@ pub fn set_field_status(status: bool) -> result!(()) {
     Ok(ncursesw::form::set_field_status(None, status)?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
-          unsure how to access this at the moment!!!
-
-/// Sets a callback to be called at form-unpost time and each time
+/// Sets a default callback to be called at form-unpost time and each time
 /// the selected field changes (before the change).
 pub fn set_field_term<F>(func: F) -> result!(())
     where F: Fn(&Form) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_field_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::FieldTerm), Some(Box::new(move |menu| func(menu))));
+    set_form_callback(None, CallbackType::FieldTerm, func);
 
     Ok(ncursesw::form::set_field_term(None, Some(extern_field_term))?)
 }
-*/
 
 /// Sets the fields user pointer.
 // TODO: needs testing!
@@ -258,23 +246,15 @@ pub fn set_new_page(new_page_flag: bool) -> result!(()) {
     Ok(ncursesw::form::set_new_page(None, new_page_flag)?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
-          unsure how to access this at the moment!!!
-
-/// Sets a callback to be called at form-post time and just after
+/// Sets a default callback to be called at form-post time and just after
 /// a page change once it is posted.
 pub fn set_form_init<F>(func: F) -> result!(())
     where F: Fn(&Form) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::FormInit), Some(Box::new(move |menu| func(menu))));
+    set_form_callback(None, CallbackType::FormInit, func);
 
     Ok(ncursesw::form::set_form_init(None, Some(extern_form_init))?)
 }
-*/
 
 /// Sets all the given form's options.
 pub fn set_form_opts(opts: FormOptions) -> result!(()) {
@@ -286,23 +266,15 @@ pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
     Ok(ncursesw::form::set_form_sub(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
-          unsure how to access this at the moment!!!
-
-/// Sets a callback to be called at form-unpost time and just before
+/// Sets a default callback to be called at form-unpost time and just before
 /// a page change once it is posted.
 pub fn set_form_term<F>(func: F) -> result!(())
     where F: Fn(&Form) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::FormTerm), Some(Box::new(move |menu| func(menu))));
+    set_form_callback(None, CallbackType::FormTerm, func);
 
     Ok(ncursesw::form::set_form_term(None, Some(extern_form_term))?)
 }
-*/
 
 /// Sets the forms user pointer.
 // TODO: needs testing!

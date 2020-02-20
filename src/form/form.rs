@@ -25,7 +25,6 @@
 use std::{ptr, fmt, mem, convert::TryFrom, hash::{Hash, Hasher}};
 
 use errno::errno;
-use strum::IntoEnumIterator;
 
 use ncursesw::{
     SCREEN, normal, form, form::{FormOptions, FORM, FIELD},
@@ -33,13 +32,17 @@ use ncursesw::{
 };
 use crate::{
     Screen, Size, Window, HasHandle, NCurseswWinError, AttributesType,
-    form::{Field, PostedForm, callbacks::*}
+    form::{
+        Field, PostedForm,
+        callbacks::{
+            CallbackType, set_form_screen, set_form_callback, extern_field_init,
+            extern_field_term, extern_form_init, extern_form_term, form_tidyup
+        }
+    }
 };
 
 #[deprecated(since = "0.5.0")]
 pub use ncursesw::form::Form_Hook;
-
-static MODULE_PATH: &str = "ncurseswwin::form::";
 
 /// Form.
 pub struct Form {
@@ -54,6 +57,10 @@ impl Form {
         assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "Form::_from() : screen.is_null()");
         assert!(!handle.is_null(), "Form::_from() : handle.is_null()");
         assert!(!field_handles.is_null(), "Form::_from() : field_handles.is_null()");
+
+        if free_on_drop {
+            set_form_screen(handle, screen);
+        }
 
         Self { screen, handle, field_handles, free_on_drop }
     }
@@ -247,10 +254,7 @@ impl Form {
     pub fn set_field_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_field_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::FieldInit), Some(Box::new(move |menu| func(menu))));
+        set_form_callback(Some(self.handle), CallbackType::FieldInit, func);
 
         Ok(form::set_field_init(Some(self.handle), Some(extern_field_init))?)
     }
@@ -260,10 +264,7 @@ impl Form {
     pub fn set_field_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_field_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::FieldTerm), Some(Box::new(move |menu| func(menu))));
+        set_form_callback(Some(self.handle), CallbackType::FieldTerm, func);
 
         Ok(form::set_field_term(Some(self.handle), Some(extern_field_term))?)
     }
@@ -303,10 +304,7 @@ impl Form {
     pub fn set_form_init<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::FormInit), Some(Box::new(move |menu| func(menu))));
+        set_form_callback(Some(self.handle), CallbackType::FormInit, func);
 
         Ok(form::set_form_init(Some(self.handle), Some(extern_form_init))?)
     }
@@ -333,10 +331,7 @@ impl Form {
     pub fn set_form_term<F>(&self, func: F) -> result!(())
         where F: Fn(&Self) + 'static + Send
     {
-        CALLBACKS
-            .lock()
-            .unwrap_or_else(|_| panic!("{}set_form_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-            .insert(CallbackKey::new(Some(self.handle), CallbackType::FormTerm), Some(Box::new(move |menu| func(menu))));
+        set_form_callback(Some(self.handle), CallbackType::FormTerm, func);
 
         Ok(form::set_form_term(Some(self.handle), Some(extern_form_term))?)
     }
@@ -381,7 +376,7 @@ impl Form {
     }
 
     fn screenify_attributes(&self, attrs: normal::Attributes) -> normal::Attributes {
-        self.screen.map_or_else(|| normal::Attributes::new(attrs.into()), |screen| normal::Attributes::new_sp(screen, attrs.into()))
+        self.screen.map_or_else(|| attrs, |screen| normal::Attributes::new_sp(screen, attrs.into()))
     }
 }
 
@@ -396,23 +391,7 @@ impl Drop for Form {
             // unallocate the field_handles memory.
             unsafe { libc::free(self.field_handles as *mut libc::c_void) };
 
-            // remove any callbacks created for this instance.
-            let mut callbacks = CALLBACKS
-                .lock()
-                .unwrap_or_else(|_| panic!("Form::drop() : CALLBACKS.lock() failed!!!"));
-
-            // remove any callbacks set against the form and free memory if required.
-            let mut shrink_to_fit = false;
-
-            for cb_type in CallbackType::iter() {
-                if callbacks.remove(&CallbackKey::new(Some(self.handle), cb_type)).is_some() {
-                    shrink_to_fit = true;
-                }
-            }
-
-            if shrink_to_fit {
-                callbacks.shrink_to_fit();
-            }
+            form_tidyup(self.handle);
         }
     }
 }

@@ -25,10 +25,14 @@ use std::convert::{TryFrom, TryInto};
 use ncursesw::menu::{Menu_Hook, MenuRequest, MenuOptions, ItemOptions};
 use crate::{
     normal, Screen, Window, HasHandle, NCurseswWinError,
-    menu::{/*callbacks::*, Menu,*/ MenuSize, MenuSpacing}
+    menu::{
+        Menu, MenuSize, MenuSpacing,
+        callbacks::{
+            set_menu_callback, extern_item_init, extern_item_term,
+            extern_menu_init, extern_menu_term, CallbackType
+        }
+    }
 };
-
-//static MODULE_PATH: &str = "ncurseswwin::menu::funcs::";
 
 #[deprecated(since = "0.6.0")]
 pub fn item_init() -> result!(Menu_Hook) {
@@ -132,42 +136,26 @@ pub fn menu_win() -> result!(Window) {
     Ok(Window::_from(None, ncursesw::menu::menu_win(None)?, false))
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Menu` but
-          unsure how to access this at the moment!!!
-
 pub fn set_item_init<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_item_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::ItemInit), Some(Box::new(move |menu| func(menu))));
+    set_menu_callback(None, CallbackType::ItemInit, func);
 
     Ok(ncursesw::menu::set_item_init(None, Some(extern_item_init))?)
 }
-*/
 
 /// Set the menu items passed options.
 pub fn set_item_opts(opts: ItemOptions) -> result!(()) {
     Ok(ncursesw::menu::set_item_opts(None, opts)?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Menu` but
-          unsure how to access this at the moment!!!
-
 pub fn set_item_term<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_item_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::ItemTerm), Some(Box::new(move |menu| func(menu))));
+    set_menu_callback(None, CallbackType::ItemTerm, func);
 
     Ok(ncursesw::menu::set_item_term(None, Some(extern_item_term))?)
 }
-*/
 
 /// Set the menu items user client code defined value.
 // TODO: needs testing!
@@ -191,21 +179,13 @@ pub fn set_menu_grey(attrs: normal::Attributes) -> result!(()) {
     Ok(ncursesw::menu::set_menu_grey(None, attrs)?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Menu` but
-          unsure how to access this at the moment!!!
-
 pub fn set_menu_init<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_menu_init() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::MenuInit), Some(Box::new(move |menu| func(menu))));
+    set_menu_callback(None, CallbackType::MenuInit, func);
 
     Ok(ncursesw::menu::set_menu_init(None, Some(extern_menu_init))?)
 }
-*/
 
 pub fn set_menu_mark(mark: &str) -> result!(()) {
     Ok(ncursesw::menu::set_menu_mark(None, mark)?)
@@ -227,21 +207,13 @@ pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
     Ok(ncursesw::menu::set_menu_sub(None, window.map_or_else(|| None, |window| Some(window._handle())))?)
 }
 
-/*
-    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Menu` but
-          unsure how to access this at the moment!!!
-
 pub fn set_menu_term<F>(func: F) -> result!(())
     where F: Fn(&Menu) + 'static + Send
 {
-    CALLBACKS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}set_menu_term() : CALLBACKS.lock() failed!!!", MODULE_PATH))
-        .insert(CallbackKey::new(None, CallbackType::MenuTerm), Some(Box::new(move |menu| func(menu))));
+    set_menu_callback(None, CallbackType::MenuTerm, func);
 
     Ok(ncursesw::menu::set_menu_term(None, Some(extern_menu_term))?)
 }
-*/
 
 // TODO: needs testing!
 pub fn set_menu_userptr<T>(userptr: Option<Box<&T>>) {
