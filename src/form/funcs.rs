@@ -192,7 +192,7 @@ pub fn set_field_fore(attr: normal::Attributes) -> result!(()) {
 }
 
 /*
-    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
           unsure how to access this at the moment!!!
 
 /// Sets a callback to be called at form-post time and each time
@@ -230,7 +230,7 @@ pub fn set_field_status(status: bool) -> result!(()) {
 }
 
 /*
-    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
           unsure how to access this at the moment!!!
 
 /// Sets a callback to be called at form-unpost time and each time
@@ -259,7 +259,7 @@ pub fn set_new_page(new_page_flag: bool) -> result!(()) {
 }
 
 /*
-    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
           unsure how to access this at the moment!!!
 
 /// Sets a callback to be called at form-post time and just after
@@ -287,7 +287,7 @@ pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
 }
 
 /*
-    TODO: need to see if this is possible NCurses seems to values an internal `_nc_Default_Form` but
+    TODO: need to see if this is possible NCurses seems to have an internal `_nc_Default_Form` but
           unsure how to access this at the moment!!!
 
 /// Sets a callback to be called at form-unpost time and just before
