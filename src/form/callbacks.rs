@@ -62,7 +62,7 @@ impl FormValue {
 unsafe impl Send for FormValue { }
 unsafe impl Sync for FormValue { }
 
-#[derive(EnumIter, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, EnumIter, Debug, PartialEq, Eq, Hash)]
 pub(in crate::form) enum CallbackType {
     FieldInit,
     FieldTerm,
@@ -92,51 +92,55 @@ lazy_static! {
     static ref CALLBACKS: Mutex<HashMap<CallbackKey, CALLBACK>> = Mutex::new(HashMap::new());
 }
 
-macro_rules! form_callback {
+macro_rules! extern_form_callback {
     ($func: ident, $cb_t: ident) => {
         pub(in crate::form) extern fn $func(form: FORM) {
-            let callback_form = || -> Form { Form::_from(get_form_screen(form), form, unsafe { (*form).field }, false) };
-
-            let callbacks = CALLBACKS
-                .lock()
-                .unwrap_or_else(|_| panic!("{}{}({:p}) : CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($func), form));
-
-            if let Some(ref callback) = callbacks
-                .get(&CallbackKey::new(Some(form), CallbackType::$cb_t))
-                .unwrap_or_else(|| &None)
-            {
-                callback(&callback_form())
-            } else if let Some(ref callback) = callbacks
-                .get(&CallbackKey::new(None, CallbackType::$cb_t))
-                .unwrap_or_else(|| &None)
-            {
-                callback(&callback_form())
-            } else {
-                panic!("{}{}({:p}) : callbacks.lock().get() returned None!!!", MODULE_PATH, stringify!($func), form)
-            }
+            form_callback(form, CallbackType::$cb_t)
         }
     }
 }
 
-form_callback!(extern_field_init, FieldInit);
-form_callback!(extern_field_term, FieldTerm);
-form_callback!(extern_form_init, FormInit);
-form_callback!(extern_form_term, FormTerm);
+extern_form_callback!(extern_field_init, FieldInit);
+extern_form_callback!(extern_field_term, FieldTerm);
+extern_form_callback!(extern_form_init, FormInit);
+extern_form_callback!(extern_form_term, FormTerm);
+
+fn form_callback(form: FORM, cb_type: CallbackType) {
+    let get_form = || -> Form {
+        let screen = FORMSCREENS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}form_callback({:p}, {:?}) : FORMSCREENS.lock() failed!!!", MODULE_PATH, form, cb_type))
+            .get(&FormKey::new(form))
+            .unwrap_or_else(|| panic!("{}form_callback({:p}, {:?}) : FORMSCREENS.lock().get() failed!!!", MODULE_PATH, form, cb_type))
+            .screen();
+
+        Form::_from(screen, form, unsafe { (*form).field }, false)
+    };
+
+    let callbacks = CALLBACKS
+        .lock()
+        .unwrap_or_else(|_| panic!("{}form_callback({:p}, {:?}) : CALLBACKS.lock() failed!!!", MODULE_PATH, form, cb_type));
+
+    if let Some(ref callback) = callbacks
+        .get(&CallbackKey::new(Some(form), cb_type))
+        .unwrap_or_else(|| &None)
+    {
+        callback(&get_form())
+    } else if let Some(ref callback) = callbacks
+        .get(&CallbackKey::new(None, cb_type))
+        .unwrap_or_else(|| &None)
+    {
+        callback(&get_form())
+    } else {
+        panic!("{}form_callback({:p}, {:?}) : callbacks.lock().get() returned None!!!", MODULE_PATH, form, cb_type)
+    }
+}
 
 pub(in crate::form) fn set_form_screen(form: FORM, screen: Option<SCREEN>) {
     FORMSCREENS
         .lock()
-        .unwrap_or_else(|_| panic!("{}get_form_screen({:p}) : FORMSCREENS.lock() failed!!!", MODULE_PATH, form))
+        .unwrap_or_else(|_| panic!("{}set_form_screen({:p}) : FORMSCREENS.lock() failed!!!", MODULE_PATH, form))
         .insert(FormKey::new(form), FormValue::new(screen));
-}
-
-pub(in crate::form) fn get_form_screen(form: FORM) -> Option<SCREEN> {
-    FORMSCREENS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}get_form_screen({:p}) : FORMSCREENS.lock() failed!!!", MODULE_PATH, form))
-        .get(&FormKey::new(form))
-        .unwrap_or_else(|| panic!("{}get_form_screen({:p}) : FORMSCREENS.lock().get() failed!!!", MODULE_PATH, form))
-        .screen()
 }
 
 pub(in crate::form) fn set_form_callback<F>(form: Option<FORM>, cb_type: CallbackType, func: F)
@@ -149,10 +153,12 @@ pub(in crate::form) fn set_form_callback<F>(form: Option<FORM>, cb_type: Callbac
 }
 
 pub(in crate::form) fn form_tidyup(form: FORM) {
-    FORMSCREENS
+    let mut form_screens = FORMSCREENS
         .lock()
-        .unwrap_or_else(|_| panic!("{}form_tidyup({:p}) : FORMSCREENS.lock() failed!!!", MODULE_PATH, form))
-        .remove(&FormKey::new(form));
+        .unwrap_or_else(|_| panic!("{}form_tidyup({:p}) : FORMSCREENS.lock() failed!!!", MODULE_PATH, form));
+
+    form_screens.remove(&FormKey::new(form));
+    form_screens.shrink_to_fit();
 
     let mut callbacks = CALLBACKS
         .lock()

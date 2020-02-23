@@ -62,7 +62,7 @@ impl MenuValue {
 unsafe impl Send for MenuValue { }
 unsafe impl Sync for MenuValue { }
 
-#[derive(EnumIter, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, EnumIter, Debug, PartialEq, Eq, Hash)]
 pub(in crate::menu) enum CallbackType {
     ItemInit,
     ItemTerm,
@@ -92,51 +92,55 @@ lazy_static! {
     static ref CALLBACKS: Mutex<HashMap<CallbackKey, CALLBACK>> = Mutex::new(HashMap::new());
 }
 
-macro_rules! menu_callback {
+macro_rules! extern_menu_callback {
     ($func: ident, $cb_t: ident) => {
         pub(in crate::menu) extern fn $func(menu: MENU) {
-            let callback_menu = || -> Menu { Menu::_from(get_menu_screen(menu), menu, unsafe { (*menu).items }, false) };
-
-            let callbacks = CALLBACKS
-                .lock()
-                .unwrap_or_else(|_| panic!("{}{}({:p}) : CALLBACKS.lock() failed!!!", MODULE_PATH, stringify!($func), menu));
-
-            if let Some(ref callback) = callbacks
-                .get(&CallbackKey::new(Some(menu), CallbackType::$cb_t))
-                .unwrap_or_else(|| &None)
-            {
-                callback(&callback_menu())
-            } else if let Some(ref callback) = callbacks
-                .get(&CallbackKey::new(None, CallbackType::$cb_t))
-                .unwrap_or_else(|| &None)
-            {
-                callback(&callback_menu())
-            } else {
-                panic!("{}{}({:p}) : callbacks.lock().get() returned None!!!", MODULE_PATH, stringify!($func), menu)
-            }
+            menu_callback(menu, CallbackType::$cb_t)
         }
     }
 }
 
-menu_callback!(extern_item_init, ItemInit);
-menu_callback!(extern_item_term, ItemTerm);
-menu_callback!(extern_menu_init, MenuInit);
-menu_callback!(extern_menu_term, MenuTerm);
+extern_menu_callback!(extern_item_init, ItemInit);
+extern_menu_callback!(extern_item_term, ItemTerm);
+extern_menu_callback!(extern_menu_init, MenuInit);
+extern_menu_callback!(extern_menu_term, MenuTerm);
+
+fn menu_callback(menu: MENU, cb_type: CallbackType) {
+    let get_menu = || -> Menu {
+        let screen = MENUSCREENS
+            .lock()
+            .unwrap_or_else(|_| panic!("{}menu_callback({:p}, {:?}) : MENUSCREENS.lock() failed!!!", MODULE_PATH, menu, cb_type))
+            .get(&MenuKey::new(menu))
+            .unwrap_or_else(|| panic!("{}menu_callback({:p}, {:?}) : MENUSCREENS.lock().get() failed!!!", MODULE_PATH, menu, cb_type))
+            .screen();
+
+        Menu::_from(screen, menu, unsafe { (*menu).items }, false)
+    };
+
+    let callbacks = CALLBACKS
+        .lock()
+        .unwrap_or_else(|_| panic!("{}menu_callback({:p}, {:?}) : CALLBACKS.lock() failed!!!", MODULE_PATH, menu, cb_type));
+
+    if let Some(ref callback) = callbacks
+        .get(&CallbackKey::new(Some(menu), cb_type))
+        .unwrap_or_else(|| &None)
+    {
+        callback(&get_menu())
+    } else if let Some(ref callback) = callbacks
+        .get(&CallbackKey::new(None, cb_type))
+        .unwrap_or_else(|| &None)
+    {
+        callback(&get_menu())
+    } else {
+        panic!("{}menu_callback({:p}, {:?}) : callbacks.lock().get() returned None!!!", MODULE_PATH, menu, cb_type)
+    }
+}
 
 pub(in crate::menu) fn set_menu_screen(menu: MENU, screen: Option<SCREEN>) {
     MENUSCREENS
         .lock()
-        .unwrap_or_else(|_| panic!("{}get_menu_screen({:p}) : MENUSCREENS.lock() failed!!!", MODULE_PATH, menu))
+        .unwrap_or_else(|_| panic!("{}set_menu_screen({:p}) : MENUSCREENS.lock() failed!!!", MODULE_PATH, menu))
         .insert(MenuKey::new(menu), MenuValue::new(screen));
-}
-
-pub(in crate::menu) fn get_menu_screen(menu: MENU) -> Option<SCREEN> {
-    MENUSCREENS
-        .lock()
-        .unwrap_or_else(|_| panic!("{}get_menu_screen({:p}) : MENUSCREENS.lock() failed!!!", MODULE_PATH, menu))
-        .get(&MenuKey::new(menu))
-        .unwrap_or_else(|| panic!("{}get_menu_screen({:p}) : MENUSCREENS.lock().get() failed!!!", MODULE_PATH, menu))
-        .screen()
 }
 
 pub(in crate::menu) fn set_menu_callback<F>(menu: Option<MENU>, cb_type: CallbackType, func: F)
@@ -149,10 +153,12 @@ pub(in crate::menu) fn set_menu_callback<F>(menu: Option<MENU>, cb_type: Callbac
 }
 
 pub(in crate::menu) fn menu_tidyup(menu: MENU) {
-    MENUSCREENS
+    let mut menu_screens = MENUSCREENS
         .lock()
-        .unwrap_or_else(|_| panic!("{}menu_tidyup({:p}) : MENUSCREENS.lock() failed!!!", MODULE_PATH, menu))
-        .remove(&MenuKey::new(menu));
+        .unwrap_or_else(|_| panic!("{}menu_tidyup({:p}) : MENUSCREENS.lock() failed!!!", MODULE_PATH, menu));
+
+    menu_screens.remove(&MenuKey::new(menu));
+    menu_screens.shrink_to_fit();
 
     let mut callbacks = CALLBACKS
         .lock()

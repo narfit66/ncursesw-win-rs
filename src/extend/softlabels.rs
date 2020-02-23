@@ -38,47 +38,52 @@ lazy_static! {
 }
 
 pub struct SoftLabels {
-    screen: Option<SCREEN>
+    screen:     Option<SCREEN>,
+    label_type: SoftLabelType
 }
 
 impl SoftLabels {
-    pub(in crate) fn _from(screen: Option<SCREEN>) -> Self {
+    pub(in crate) fn _from(screen: Option<SCREEN>, label_type: SoftLabelType) -> Self {
         assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "SoftLabels::_from() : screen.is_null()");
 
-        Self { screen }
+        Self { screen, label_type }
     }
 }
 
 impl SoftLabels {
-    pub fn new(fmt: SoftLabelType) -> result!(Self) {
+    pub fn new(label_type: SoftLabelType) -> result!(Self) {
         check_softlabel_init(None)?;
 
-        ncursesw::slk_init(fmt)?;
+        ncursesw::slk_init(label_type)?;
 
-        Ok(Self::_from(None))
+        Ok(Self::_from(None, label_type))
     }
 
     #[deprecated(since = "0.5.0", note = "Use SoftLabels::new() instead")]
-    pub fn slk_init(fmt: SoftLabelType) -> result!(Self) {
-        Self::new(fmt)
+    pub fn slk_init(label_type: SoftLabelType) -> result!(Self) {
+        Self::new(label_type)
     }
 
-    pub fn new_sp(screen: &Screen, fmt: SoftLabelType) -> result!(Self) {
+    pub fn new_sp(screen: &Screen, label_type: SoftLabelType) -> result!(Self) {
         check_softlabel_init(Some(Screen::_from(screen._handle(), false)))?;
 
-        ncursesw::slk_init_sp(screen._handle(), fmt)?;
+        ncursesw::slk_init_sp(screen._handle(), label_type)?;
 
-        Ok(Self::_from(Some(screen._handle())))
+        Ok(Self::_from(Some(screen._handle()), label_type))
     }
 
     #[deprecated(since = "0.5.0", note = "Use SoftLabels::new_sp() instead")]
-    pub fn slk_init_sp(screen: &Screen, fmt: SoftLabelType) -> result!(Self) {
-        Self::new_sp(screen, fmt)
+    pub fn slk_init_sp(screen: &Screen, label_type: SoftLabelType) -> result!(Self) {
+        Self::new_sp(screen, label_type)
     }
 
     /// The screen associated with the soft labels.
     pub fn screen(&self) -> Option<Screen> {
         self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+    }
+
+    pub fn label_type(&self) -> SoftLabelType {
+        self.label_type
     }
 
     pub fn slk_attr(&self) -> Attributes {
@@ -118,8 +123,10 @@ impl SoftLabels {
         Ok(self.screen.map_or_else(|| ncursesw::extended_slk_color(color_pair), |screen| ncursesw::extended_slk_color_sp(screen, color_pair))?)
     }
 
-    pub fn slk_label(&self, labnum: u8) -> result!(String) {
-        Ok(self.screen.map_or_else(|| ncursesw::slk_label(i32::from(labnum)), |screen| ncursesw::slk_label_sp(screen, i32::from(labnum)))?)
+    pub fn slk_label(&self, labnum: u8) -> Option<String> {
+        assert!(labnum >= self.label_type.min_label() as u8 && labnum <= self.label_type.max_label() as u8);
+
+        self.screen.map_or_else(|| ncursesw::slk_label(i32::from(labnum)), |screen| ncursesw::slk_label_sp(screen, i32::from(labnum)))
     }
 
     pub fn slk_noutrefresh(&self) -> result!(()) {
@@ -134,7 +141,9 @@ impl SoftLabels {
         Ok(self.screen.map_or_else(|| ncursesw::slk_restore(), |screen| ncursesw::slk_restore_sp(screen))?)
     }
 
-    pub fn slk_set(&self, labnum: u8, label: &str, fmt: Justification) -> result!(()) {
+    pub fn slk_set(&self, labnum: u8, label: Option<&str>, fmt: Justification) -> result!(()) {
+        assert!(labnum >= self.label_type.min_label() as u8 && labnum <= self.label_type.max_label() as u8);
+
         Ok(self.screen.map_or_else(|| ncursesw::slk_set(i32::from(labnum), label, fmt), |screen| ncursesw::slk_set_sp(screen, i32::from(labnum), label, fmt))?)
     }
 
@@ -144,6 +153,7 @@ impl SoftLabels {
 
     pub fn slk_wset(&self, labnum: u8, label: &WideString, fmt: Justification) -> result!(()) {
         assert!(self.screen.is_some(), "{}slk_wset() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(labnum >= self.label_type.min_label() as u8 && labnum <= self.label_type.max_label() as u8);
 
         Ok(ncursesw::slk_wset(i32::from(labnum), label, fmt)?)
     }
