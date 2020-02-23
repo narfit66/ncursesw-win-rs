@@ -181,6 +181,11 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
     Ok(ncursesw::curs_set(cursor)?)
 }
 
+#[deprecated(since = "0.6.0", note = "Use cursor_set() instead")]
+pub fn curs_set(cursor: CursorType) -> result!(CursorType) {
+    cursor_set(cursor)
+}
+
 pub fn intrflush(flag: bool) -> result!(()) {
     check_initscr_called()?;
 

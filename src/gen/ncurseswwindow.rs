@@ -43,7 +43,7 @@ pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
         Ok(Window::_from(Some(screen._handle()), ncursesw::newwin_sp(screen._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
-    #[deprecated(since = "0.5.0", note = "Use Window::new() instead")]
+    #[deprecated(since = "0.5.0", note = "Use Window::new_sp() instead")]
     fn newwin_sp(screen: &Screen, size: Size, origin: Origin) -> result!(Window) {
         Self::new_sp(screen, size, origin)
     }

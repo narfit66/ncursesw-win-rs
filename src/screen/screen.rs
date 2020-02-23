@@ -168,8 +168,13 @@ impl Screen {
         ncursesw::can_change_color_sp(self.handle)
     }
 
-    pub fn curs_set(&self, cursor: CursorType) -> result!(CursorType) {
+    pub fn cursor_set(&self, cursor: CursorType) -> result!(CursorType) {
         Ok(ncursesw::curs_set_sp(self.handle, cursor)?)
+    }
+
+    #[deprecated(since = "0.6.0", note = "Use Screen::cursor_set() instead")]
+    pub fn curs_set(&self, cursor: CursorType) -> result!(CursorType) {
+        self.cursor_set(cursor)
     }
 
     pub fn define_key(&self, definition: Option<&str>, keycode: KeyBinding) -> result!(()) {
