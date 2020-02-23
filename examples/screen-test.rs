@@ -40,8 +40,10 @@ fn main() {
 fn main_routine() -> result!(()) {
     // We wrap our use of ncurseswin with this function.
     safe_entry(|| {
+        let term = &env::var("TERM").unwrap_or_else(|_| panic!("$TERM is undefined!!!"));
+
         // create a screen using stdout and stdin for output and input.
-        let screen = &Screen::new(Some(&env::var("TERM")?), io::stdout(), io::stdin())?;
+        let screen = &Screen::new(Some(term), io::stdout(), io::stdin())?;
 
         // make the screens cursor invisible.
         screen.cursor_set(CursorType::Invisible)?;

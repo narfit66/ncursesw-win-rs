@@ -20,7 +20,7 @@
     IN THE SOFTWARE.
 */
 
-use std::{num, convert, ffi, env};
+use std::{num, convert, ffi};
 
 use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
@@ -52,6 +52,5 @@ pub NCurseswWinError
 
     TryFromIntError { source: num::TryFromIntError } = "{source}",
     NulError { source: ffi::NulError } = "{source}",
-    Infallible { source: convert::Infallible } = "{source}",
-    VarError { source: env::VarError } = "{source}"
+    Infallible { source: convert::Infallible } = "{source}"
 }
