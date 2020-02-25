@@ -22,7 +22,7 @@
 
 extern crate ncurseswwin;
 
-use std::{env,io};
+use std::{convert::TryFrom, env, io};
 
 use ncurseswwin::*;
 
@@ -71,19 +71,32 @@ fn screen_test(screen: &Screen) -> result!(()) {
     // create a border on the inital window.
     window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
-    let window_size = window.size()?;
-
+    // the text we are going to output.
     let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
     let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
+    let line3 = "Press any key to exit";
 
-    let mut origin = Origin { y: (window_size.lines / 2) - 1, x: (window_size.columns / 2) - (line1.len() as u16 / 2) + 1};
+    // get the window's size.
+    let window_size = window.size()?;
 
+    // calculate the initial origin for line 1.
+    let mut origin = Origin { y: (window_size.lines / 2) - 2, x: calc_x_axis(line1, window_size)? };
+
+    // output our lines centered on the x-axis.
     window.mvaddstr(origin, line1)?;
     origin.y += 1;
-    origin.x = (window_size.columns / 2) - (line2.len() as u16 / 2) + 1;
+    origin.x = calc_x_axis(line2, window_size)?;
     window.mvaddstr(origin, line2)?;
+    origin.y += 2;
+    origin.x = calc_x_axis(line3, window_size)?;
+    window.mvaddstr(origin, line3)?;
 
+    // wait for the user to press a key.
     window.getch()?;
 
     Ok(())
+}
+
+fn calc_x_axis(line: &str, window_size: Size) -> result!(u16) {
+    Ok((window_size.columns / 2) - (u16::try_from(line.len())? / 2))
 }

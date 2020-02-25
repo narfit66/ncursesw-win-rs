@@ -36,7 +36,7 @@ pub trait CanSubWindow: HasHandle<WINDOW> + HasYXAxis + NCurseswWindow + IsWindo
 
     /// returns the parent Window for subwindows, or None if their is no parent.
     fn getparent(&self) -> Option<Window> {
-        ncursesw::wgetparent(self._handle()).map_or_else(|| None, |ptr| Some(Window::_from(self._screen(), ptr, false)))
+        ncursesw::wgetparent(self._handle()).and_then(|ptr| Some(Window::_from(self._screen(), ptr, false)))
     }
 
     fn getparx(&self) -> result!(u16) {

@@ -79,7 +79,7 @@ impl SoftLabels {
 
     /// The screen associated with the soft labels.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
     }
 
     pub fn label_type(&self) -> SoftLabelType {

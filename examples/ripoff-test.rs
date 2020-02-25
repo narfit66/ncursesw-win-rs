@@ -22,9 +22,11 @@
 
 extern crate ncurseswwin;
 
+use std::convert::TryFrom;
+
 use ncurseswwin::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     if let Err(source) = main_routine() {
@@ -70,22 +72,26 @@ fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Ri
 
     let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
     let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
+    let line3 = "Press any key to exit";
 
-    let mut origin = Origin { y: (stdscr_size.lines / 2) - 1, x: (stdscr_size.columns / 2) - (line1.len() as u16 / 2) + 1};
+    let mut origin = Origin { y: (stdscr_size.lines / 2) - 2, x: calc_x_axis(line1, stdscr_size.columns)? };
 
     stdscr.mvaddstr(origin, line1)?;
     origin.y += 1;
-    origin.x = (stdscr_size.columns / 2) - (line2.len() as u16 / 2) + 1;
+    origin.x = calc_x_axis(line2, stdscr_size.columns)?;
     stdscr.mvaddstr(origin, line2)?;
+    origin.y += 2;
+    origin.x = calc_x_axis(line3, stdscr_size.columns)?;
+    stdscr.mvaddstr(origin, line3)?;
 
     //  update the top ripoff line.
     top_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        update_top_ripoff(ripoff_window, columns)
+        update_ripoff(ripoff_window, columns, top_ripoff.orientation())
     })?;
 
     //  update the bottom ripoff line.
     bottom_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        update_bottom_ripoff(ripoff_window, columns)
+        update_ripoff(ripoff_window, columns, bottom_ripoff.orientation())
     })?;
 
     doupdate()?;
@@ -95,20 +101,15 @@ fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Ri
     Ok(())
 }
 
-fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
-    let ripoff_message = &format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns);
+fn update_ripoff(ripoff_window: &RipoffWindow, columns: u16, orientation: Orientation) -> result!(()) {
+    let ripoff_message = &format!("this is the ripoff line at the {:?} of the screen with a maximum of {} columns", orientation, columns);
 
-    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
+    ripoff_window.set_column(calc_x_axis(ripoff_message, columns)?)?;
 
     ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()
 }
 
-fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
-    let ripoff_message = &format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns);
-
-    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
-
-    ripoff_window.addstr(ripoff_message)?;
-    ripoff_window.noutrefresh()
+fn calc_x_axis(line: &str, columns: u16) -> result!(u16) {
+    Ok((columns / 2) - (u16::try_from(line.len())? / 2))
 }

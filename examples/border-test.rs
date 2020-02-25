@@ -24,7 +24,7 @@ extern crate ncurseswwin;
 
 use ncurseswwin::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     // initialize ncurses in a safe way.

@@ -35,7 +35,7 @@ use rand::prelude::*;
 use strum_macros::{Display, EnumIter};
 use strum::IntoEnumIterator;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 #[derive(Copy, Clone, Display, EnumIter, PartialEq, Eq, Hash)]
 enum Corner {

@@ -69,7 +69,7 @@ impl HasGetFunctions for RipoffWindow { }
 impl RipoffWindow {
     /// The screen the window is attached to.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
     }
 
     /// Get the cursor column.

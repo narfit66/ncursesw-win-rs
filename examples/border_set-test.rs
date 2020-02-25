@@ -28,7 +28,7 @@ use std::time;
 use gettextrs::*;
 use ncurseswwin::{*, extend::*};
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     if let Err(source) = main_routine() {

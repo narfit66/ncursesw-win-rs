@@ -71,7 +71,7 @@ impl Mouse {
 
     /// The screen associated with the mouse.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
     }
 
     /// Refresh the mouse pointer's events, `self.events()`.

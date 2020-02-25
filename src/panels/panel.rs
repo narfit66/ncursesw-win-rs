@@ -69,7 +69,7 @@ impl Panel {
 
     /// The screen associated with the panel.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
     }
 
     /// Puts panel at the bottom of all panels.
@@ -133,12 +133,12 @@ impl Panel {
 
     /// Sets the panel's user pointer to the passed `Panel`.
     pub fn set_panel_userptr<T>(&self, ptr: Option<Box<&T>>) -> result!(()) {
-        Ok(panels::set_panel_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *const libc::c_void)))?)
+        Ok(panels::set_panel_userptr(self.handle, ptr.and_then(|ptr| Some(Box::into_raw(ptr) as *const libc::c_void)))?)
     }
 
     /// Returns the user pointers `Panel` for the given panel.
     pub fn panel_userptr<T>(&self) -> Option<Box<T>> {
-        panels::panel_userptr(self.handle).map_or_else(|| None, |ptr| Some(unsafe { Box::from_raw(ptr as *mut T) }))
+        panels::panel_userptr(self.handle).and_then(|ptr| Some(unsafe { Box::from_raw(ptr as *mut T) }))
     }
 }
 

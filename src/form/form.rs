@@ -143,7 +143,7 @@ impl Form {
 
     /// The screen associated with the form.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
     }
 
     /// Returns the current field of the given form.
@@ -321,9 +321,9 @@ impl Form {
 
     /// Sets the forms sub-window.
     pub fn set_form_sub(&self, window: Option<&Window>) -> result!(()) {
-        assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
+        assert!(self.screen == window.and_then(|window| window._screen()));
 
-        Ok(form::set_form_sub(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
+        Ok(form::set_form_sub(Some(self.handle), window.and_then(|window| Some(window._handle())))?)
     }
 
     /// Sets a callback to be called at form-unpost time and just before
@@ -339,14 +339,14 @@ impl Form {
     /// Sets the forms user pointer.
     // TODO: needs testing!
     pub fn set_form_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_form_userptr(Some(self.handle), userptr.map_or_else(|| None, |userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
+        Ok(form::set_form_userptr(Some(self.handle), userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
     }
 
     /// Set the forms main window.
     pub fn set_form_win(&self, window: Option<&Window>) -> result!(()) {
-        assert!(self._screen() == window.map_or_else(|| None, |window| window._screen()));
+        assert!(self.screen == window.and_then(|window| window._screen()));
 
-        Ok(form::set_form_win(Some(self.handle), window.map_or_else(|| None, |window| Some(window._handle())))?)
+        Ok(form::set_form_win(Some(self.handle), window.and_then(|window| Some(window._handle())))?)
     }
 
     /// Removes the focus from the current field of the form.
@@ -401,7 +401,7 @@ unsafe impl Sync for Form { } // too make thread safe
 
 impl PartialEq for Form {
     fn eq(&self, rhs: &Self) -> bool {
-        self.screen == rhs._screen() && ptr::eq(self.handle, rhs.handle)
+        self.screen == rhs.screen && ptr::eq(self.handle, rhs.handle)
     }
 }
 

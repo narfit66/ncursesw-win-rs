@@ -60,48 +60,38 @@ extern fn ripoff_init(window: WINDOW, columns: i32) -> i32 {
     RIPOFFLINES
         .lock()
         .unwrap_or_else(|_| panic!("ripoff_init() : RIPOFFLINES.lock() failed!!!"))
-        .insert(number, (RipoffWindow::_from(screen.as_ref().map_or_else(|| None, |screen| Some(screen._handle())), window, false), columns));
+        .insert(number, (RipoffWindow::_from(screen.as_ref().and_then(|screen| Some(screen._handle())), window, false), columns));
 
     constants::OK
 }
 
 /// A ripoff line.
 pub struct RipoffLine {
-    screen: Option<SCREEN>,
-    number: usize
+    screen:      Option<SCREEN>,
+    orientation: Orientation,
+    number:      usize
 }
 
 impl RipoffLine {
-    /// Create a new instance of a RipoffLine (NCurses allows for a maximum of 5 ripoff lines).
-    pub fn new(orientation: Orientation) -> result!(Self) {
-        // Return the ripoff callback number (base 0).
-        let number = get_ripoff_number()?;
+    fn _from(screen: Option<SCREEN>, orientation: Orientation) -> result!(Self) {
+        assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "RipoffLine::_from() : screen.is_null()");
 
-        // Call the NCurses ripoff function with one of our pre-defined call-back function.
-        // NCurses allows for a maximum of 5 ripoff lines.
-        if let Err(source) = ncursesw::ripoffline(orientation, ripoff_init) {
-            return Err(NCurseswWinError::NCurseswError { source })
+        // Return the ripoff callback number (base 0).
+        if INITSCR_CALLED.load(Ordering::SeqCst) {
+            return Err(NCurseswWinError::InitscrAlreadyCalled)
         }
 
-        // Save the screen of the ripoff window so the `ripoff_init` function can initialise
-        // it's `RipoffWindow` correctly. As this function is for non-screen then this is
-        // always a `None`.
-        RIPOFFLINESCREENS
-            .lock()
-            .unwrap_or_else(|_| panic!("RipoffLine::new() : RIPOFFLINESCREENS.lock() failed!!!"))
-            .insert(number, None);
+        let number = RIPOFFCOUNT.fetch_add(1, Ordering::SeqCst);
 
-        Ok(Self { screen: None, number })
-    }
-
-    /// Create a new instance of a RipoffLine for a Screen (NCurses allows for a maximum of 5 ripoff lines).
-    pub fn new_sp(screen: &Screen, orientation: Orientation) -> result!(Self) {
-        // Return the ripoff callback number (base 0).
-        let number = get_ripoff_number()?;
+        if number >= MAX_RIPOFF_LINES {
+            return Err(NCurseswWinError::MaximumRipoffLines { number })
+        }
 
         // Call the NCurses ripoff function with one of our pre-defined call-back function.
         // NCurses allows for a maximum of 5 ripoff lines.
-        if let Err(source) = ncursesw::ripoffline_sp(screen._handle(), orientation, ripoff_init) {
+        if let Err(source) = screen
+            .map_or_else(|| ncursesw::ripoffline(orientation, ripoff_init), |screen| ncursesw::ripoffline_sp(screen, orientation, ripoff_init))
+        {
             return Err(NCurseswWinError::NCurseswError { source })
         }
 
@@ -110,17 +100,34 @@ impl RipoffLine {
         RIPOFFLINESCREENS
             .lock()
             .unwrap_or_else(|_| panic!("RipoffLine::new_sp() : RIPOFFLINESCREENS.lock() failed!!!"))
-            .insert(number, Some(Screen::_from(screen._handle(), false)));
+            .insert(number, screen.and_then(|screen| Some(Screen::_from(screen, false))));
 
-        Ok(Self { screen: Some(screen._handle()), number })
+        Ok(Self { screen, orientation, number })
+    }
+}
+
+impl RipoffLine {
+    /// Create a new instance of a RipoffLine (NCurses allows for a maximum of 5 ripoff lines).
+    pub fn new(orientation: Orientation) -> result!(Self) {
+        Self::_from(None, orientation)
     }
 
-    /// The screen associated with the ripoff line.
+    /// Create a new instance of a RipoffLine for a Screen (NCurses allows for a maximum of 5 ripoff lines).
+    pub fn new_sp(screen: &Screen, orientation: Orientation) -> result!(Self) {
+        Self::_from(Some(screen._handle()), orientation)
+    }
+
+    /// Returns the screen associated with the ripoff line.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
     }
 
-    /// The number of the ripoff line.
+    /// Returns the orientation of the ripoff line.
+    pub fn orientation(&self) -> Orientation {
+        self.orientation
+    }
+
+    /// Returns the number of the ripoff line.
     pub fn number(&self) -> usize {
         self.number
     }
@@ -162,20 +169,5 @@ impl Hash for RipoffLine {
 impl fmt::Debug for RipoffLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "RipoffLine {{ screen: {:?}, number: {} }}", self.screen, self.number)
-    }
-}
-
-// Return the ripoff callback number (base 0).
-fn get_ripoff_number() -> result!(usize) {
-    if INITSCR_CALLED.load(Ordering::SeqCst) {
-        return Err(NCurseswWinError::InitscrAlreadyCalled)
-    }
-
-    let number = RIPOFFCOUNT.fetch_add(1, Ordering::SeqCst);
-
-    if number >= MAX_RIPOFF_LINES {
-        Err(NCurseswWinError::MaximumRipoffLines { number })
-    } else {
-        Ok(number)
     }
 }

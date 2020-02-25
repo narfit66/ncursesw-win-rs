@@ -32,7 +32,7 @@ extern crate ncurseswwin;
 use gettextrs::*;
 use ncurseswwin::{*, menu::*};
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 const CHOICES: [&str; 5] = ["Choice 1", "Choice 2", "Choice 3", "Choice 4", "Exit"];
 
