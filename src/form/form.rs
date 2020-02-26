@@ -65,6 +65,30 @@ impl Form {
         Self { screen, handle, field_handles, free_on_drop }
     }
 
+    pub(in crate::form) fn _new<F>(screen: Option<&Screen>, fields: &[&Field], new_func: F) -> result!(Self)
+        where F: Fn(*mut FIELD) -> result!(Self)
+    {
+        // allocate enougth contiguous memory to store all the field handles plus
+        // a null and set all pointers initially to null.
+        let field_handles = unsafe { libc::calloc(fields.len() + 1, mem::size_of::<FIELD>()) as *mut FIELD };
+
+        // check that we we're able to allocate our memory.
+        if !field_handles.is_null() {
+            // get all the field handles and write them to memory.
+            for (offset, field_handle) in fields.iter().map(|field| field._handle()).enumerate() {
+                unsafe { ptr::write(field_handles.offset(isize::try_from(offset)?), field_handle) };
+            }
+
+            // don't unallocate field_handles when it goes out of scope, we'll do it
+            // ourselves as self.field_handles will point to our contiguous memory.
+            mem::forget(field_handles);
+
+            new_func(field_handles)
+        } else {
+            Err(NCurseswWinError::OutOfMemory { func: format!("Form::{}", screen.map_or_else(|| "new", |_| "new_sp")) })
+        }
+    }
+
     pub(in crate::form) fn _screen(&self) -> Option<SCREEN> {
         self.screen
     }
@@ -77,29 +101,13 @@ impl Form {
 impl Form {
     /// Creates a new form connected to specified fields.
     pub fn new(fields: &[&Field]) -> result!(Self) {
-        // allocate enougth contiguous memory to store all the field handles plus
-        // a null and set all pointers initially to null.
-        let field_handles = unsafe { libc::calloc(fields.len() + 1, mem::size_of::<FIELD>()) as *mut FIELD };
-
-        // check that we we're able to allocate our memory.
-        if !field_handles.is_null() {
-            // get all the field handles and write them to memory.
-            for (offset, field_handle) in fields.iter().map(|field| field._handle()).enumerate() {
-                unsafe { ptr::write(field_handles.offset(isize::try_from(offset)?), field_handle) };
-            }
-
-            // don't unallocate field_handles when it goes out of scope, we'll do it
-            // ourselves as self.field_handles will point to our contiguous memory.
-            mem::forget(field_handles);
-
+        Self::_new(None, fields, |field_handles| {
             // call the ncursesw shims new_form() function with our allocated memory.
             match unsafe { nform::new_form(field_handles) } {
                 Some(form) => Ok(Self::_from(None, form, field_handles, true)),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new", errno().into()) })
             }
-        } else {
-            Err(NCurseswWinError::OutOfMemory { func: "Form::new".to_string() })
-        }
+        })
     }
 
     #[deprecated(since = "0.5.0", note = "Use Form::new() instead")]
@@ -110,29 +118,13 @@ impl Form {
 
     /// Creates a new form on the specified sceen connected to specified fields.
     pub fn new_sp(screen: &Screen, fields: &[&Field]) -> result!(Self) {
-        // allocate enougth contiguous memory to store all the field handles plus
-        // a null and set all pointers initially to null.
-        let field_handles = unsafe { libc::calloc(fields.len() + 1, mem::size_of::<FIELD>()) as *mut FIELD };
-
-        // check that we we're able to allocate our memory.
-        if !field_handles.is_null() {
-            // get all the field handles and write them to memory.
-            for (offset, field_handle) in fields.iter().map(|field| field._handle()).enumerate() {
-                unsafe { ptr::write(field_handles.offset(isize::try_from(offset)?), field_handle) };
-            }
-
-            // don't unallocate field_handles when it goes out of scope, we'll do it
-            // ourselves as self.field_handles will point to our contiguous memory.
-            mem::forget(field_handles);
-
+        Self::_new(Some(screen), fields, |field_handles| {
             // call the ncursesw shims new_form() function with our allocated memory.
             match unsafe { nform::new_form_sp(screen._handle(), field_handles) } {
                 Some(form) => Ok(Self::_from(Some(screen._handle()), form, field_handles, true)),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new_sp", errno().into()) })
             }
-        } else {
-            Err(NCurseswWinError::OutOfMemory { func: "Form::new_sp".to_string() })
-        }
+        })
     }
 
     #[deprecated(since = "0.5.0", note = "Use Form::new_sp() instead")]
