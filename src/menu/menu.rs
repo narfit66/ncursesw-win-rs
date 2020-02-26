@@ -50,11 +50,11 @@ pub struct Menu {
     screen:       Option<SCREEN>, // pointer to optional NCurses screen internal structure.
     handle:       MENU,           // pointer to NCurses menu item internal structure.
     item_handles: *mut ITEM,      // double-pointer to allocated memory that the ncurses menu module uses for menu items.
-    free_on_drop: bool
+    free_on_drop: bool            // call `free_menu()` when instance goes out of scope.
 }
 
 impl Menu {
-    // make a new instance from the passed ncurses menu item pointer.
+    // make a new instance from the passed NCurses optional screen, menu and menu item pointers.
     pub(in crate::menu) fn _from(screen: Option<SCREEN>, handle: MENU, item_handles: *mut ITEM, free_on_drop: bool) -> Self {
         assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "Menu::_from() : screen.is_null()");
         assert!(!handle.is_null(), "Menu::_from() : handle.is_null()");
@@ -67,8 +67,9 @@ impl Menu {
         Self { screen, handle, item_handles, free_on_drop }
     }
 
-    pub(in crate::menu) fn _new<F>(screen: Option<&Screen>, items: &[&MenuItem], new_func: F) -> result!(Self)
-        where F: Fn(*mut ITEM) -> result!(Self)
+    // allocate our passed menu items into some contiguous memory ending with a null.
+    fn _allocate_menu_items<F>(func_str: &str, items: &[&MenuItem], mut func: F) -> result!(Option<Self>)
+        where F: FnMut(*mut ITEM) -> result!(Option<Self>)
     {
         // allocate enougth contiguous memory to store all the menu item handles plus
         // a null and set all pointers initially to null.
@@ -85,9 +86,9 @@ impl Menu {
             // ourselves as self.item_handles will point to our contiguous memory.
             mem::forget(item_handles);
 
-            new_func(item_handles)
+            func(item_handles)
         } else {
-            Err(NCurseswWinError::OutOfMemory { func: format!("Menu::{}", screen.map_or_else(|| "new", |_| "new_sp")) })
+            Err(NCurseswWinError::OutOfMemory { func: format!("Menu::{}()", func_str) })
         }
     }
 
@@ -102,13 +103,13 @@ impl Menu {
 
 impl Menu {
     pub fn new(items: &[&MenuItem]) -> result!(Self) {
-        Self::_new(None, items, |item_handles| {
-            // call the ncursesw shims new_menu() function with our allocated memory.
+        // call the ncursesw shims new_menu() function with our allocated memory.
+        Self::_allocate_menu_items("new", items, |item_handles| {
             match unsafe { nmenu::new_menu(item_handles) } {
-                Some(menu) => Ok(Self::_from(None, menu, item_handles, true)),
+                Some(menu) => Ok(Some(Self::_from(None, menu, item_handles, true))),
                 None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new", errno().into()) })
             }
-        })
+        }).map(|menu| menu.unwrap())
     }
 
     #[deprecated(since = "0.4.0", note = "Use Menu::new() instead")]
@@ -117,13 +118,13 @@ impl Menu {
     }
 
     pub fn new_sp(screen: &Screen, items: &[&MenuItem]) -> result!(Self) {
-        Self::_new(Some(screen), items, |item_handles| {
-            // call the ncursesw shims new_menu_sp() function with our allocated memory.
+        // call the ncursesw shims new_menu_sp() function with our allocated memory.
+        Self::_allocate_menu_items("new_sp", items, |item_handles| {
             match unsafe { nmenu::new_menu_sp(screen._handle(), item_handles) } {
-                Some(menu) => Ok(Self::_from(Some(screen._handle()), menu, item_handles, true)),
+                Some(menu) => Ok(Some(Self::_from(Some(screen._handle()), menu, item_handles, true))),
                 None       => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::new_sp", errno().into()) })
             }
-        })
+        }).map(|menu| menu.unwrap())
     }
 
     #[deprecated(since = "0.5.0", note = "Use Menu::new_sp() instead")]
@@ -287,29 +288,15 @@ impl Menu {
         // unallocate the previous item_handles memory.
         unsafe { libc::free(self.item_handles as *mut libc::c_void) };
 
-        // allocate enougth memory to store all the menu item handles plus
-        // a null and set all pointers initially to null.
-        let item_handles = unsafe { libc::calloc(items.len() + 1, mem::size_of::<ITEM>()) as *mut ITEM };
-
-        if !item_handles.is_null() {
-            // get all the menu item handles and write them to memory.
-            for (offset, item_handle) in items.iter().map(|item| item._handle()).enumerate() {
-                unsafe { ptr::write(item_handles.offset(isize::try_from(offset)?), item_handle) };
-            }
-
-            // don't unallocate item_handles so it can be assigned to self.item_handles
-            mem::forget(item_handles);
-
+        // call the ncursesw shims set_menu_items() function with our allocated memory.
+        Self::_allocate_menu_items("set_menu_items", items, |item_handles| {
             self.item_handles = item_handles;
 
-            // call the ncursesw shims set_menu_items() function with our allocated memory.
             match unsafe { nmenu::set_menu_items(self.handle, item_handles as *mut ITEM) } {
-                E_OK => Ok(()),
-                rc   => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("nmenu::set_menu_items", rc) })
+                E_OK => Ok(None),
+                rc   => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::set_menu_items", rc) })
             }
-        } else {
-            Err(NCurseswWinError::OutOfMemory { func: "Menu::set_menu_items".to_string() })
-        }
+        }).map(|_| ())
     }
 
     pub fn set_menu_mark(&self, mark: &str) -> result!(()) {
