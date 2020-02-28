@@ -43,20 +43,24 @@ fn main_routine() -> result!(()) {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
+        set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
+
         // set the cursor to invisible and switch echoing off.
         cursor_set(CursorType::Invisible)?;
-        set_echo(false)?;
 
-        border_set_test(window)
+        // start colors and use the default color pair of white on black.
+        start_color()?;
+        use_default_colors()?;
+
+        border_set_test(stdscr)
     })
 }
 
 fn border_set_test(stdscr: &Window) -> result!(()) {
-    // start colors and use the default color pair of white on black.
-    start_color()?;
-    use_default_colors()?;
-
     // define color pair 0 and normal attriburs.
     let color_pair = ColorPair::default();
     let attrs = Attributes::default();

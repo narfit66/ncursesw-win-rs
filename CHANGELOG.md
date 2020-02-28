@@ -4,6 +4,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 
 ## [0.6.0] - ????-??-?? [BC]
 - NCurses form module implemented as `form`.
+- Now uses `thiserror` crate instead of `custom_error` crate to create `Error` types.
 - Added NCurses screen functionality.
 - Added `{normal,extend}::SoftLabels`.
 - Removed `setlocale()` function. [BC]

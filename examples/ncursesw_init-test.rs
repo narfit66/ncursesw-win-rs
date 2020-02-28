@@ -44,10 +44,10 @@ fn main() {
 
 fn main_routine() -> result!(i32) {
     // We wrap all our use of ncurseswin with this function.
-    match ncursesw_init(|window| {
+    match ncursesw_init(|stdscr| {
         // In here we get an initialized Window structure (stdscr) and then proceed
         // to use it exactly like we normally would use it.
-        match ncursesw_init_test(window) {
+        match ncursesw_init_test(stdscr) {
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
         }
@@ -68,17 +68,21 @@ fn main_routine() -> result!(i32) {
     }
 }
 
-fn ncursesw_init_test(initial_window: &Window) -> result!(i32) {
-    cursor_set(CursorType::Invisible)?;
+fn ncursesw_init_test(stdscr: &Window) -> result!(i32) {
+    set_input_mode(InputMode::Character)?;
     set_echo(false)?;
+    set_newline(false)?;
+    intrflush(false)?;
 
-    ncursesw_init_test_pass(initial_window)?;
+    cursor_set(CursorType::Invisible)?;
+
+    ncursesw_init_test_pass(stdscr)?;
 
     ncursesw_init_test_fail()
 }
 
 fn ncursesw_init_test_pass(stdscr: &Window) -> result!(()) {
-    let mut origin = Origin { y: 0, x: 0};
+    let mut origin = Origin::default();
 
     stdscr.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;

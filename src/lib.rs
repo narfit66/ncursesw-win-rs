@@ -22,7 +22,6 @@
 
 extern crate libc;
 extern crate ncursesw;
-extern crate custom_error;
 #[macro_use]
 extern crate lazy_static;
 extern crate strum;

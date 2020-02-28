@@ -23,7 +23,7 @@ is-it-maintained-open-issues = { repository = "narfit66/ncursesw-win-rs" }
 [dependencies]
 libc = "0.2"
 ncursesw = "0.6"
-custom_error = "1.7"
+thiserror = "1.0"
 lazy_static = "1.4"
 strum = "0.17"
 strum_macros = "0.17"

@@ -1,7 +1,7 @@
 /*
-    examples/ripoff_line-test.rs
+    examples/window-test.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -38,23 +38,27 @@ fn main() {
 }
 
 fn main_routine() -> result!(()) {
-    // ripoff a line from the top of the screen.
-    let top_ripoff = &RipoffLine::new(Orientation::Top)?;
-    // ripoff a line from the bottom of the screen.
-    let bottom_ripoff = &RipoffLine::new(Orientation::Bottom)?;
-
-    assert!(top_ripoff != bottom_ripoff);
-
     // We wrap all our use of ncurseswin with this function.
-    ncursesw_entry(|window| {
-        cursor_set(CursorType::Invisible)?;
+    ncursesw_entry(|_| {
+        set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        ripoff_line_test(window, top_ripoff, bottom_ripoff)
+        cursor_set(CursorType::Invisible)?;
+
+        // call our test routine.
+        window_test()
     })
 }
 
-fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
+fn window_test() -> result!(()) {
+    // create a window (size default and origin default provided us with
+    // the maximum size of the terminal/display).
+    let window = &Window::new(Size::default(), Origin::default())?;
+
+    window.keypad(true)?;
+
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
     let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);
@@ -65,51 +69,35 @@ fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Ri
     let lower_left  = chtype_box_graphic(BoxDrawingGraphic::LowerLeftCorner);
     let lower_right = chtype_box_graphic(BoxDrawingGraphic::LowerRightCorner);
 
-    // create a border on the inital window (stdscr).
-    stdscr.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
+    // create a border on the window.
+    window.border(left_side, right_side, top_side, bottom_side, upper_left, upper_right, lower_left, lower_right)?;
 
-    let stdscr_size = stdscr.size()?;
-
+    // the text we are going to output.
     let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
     let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
     let line3 = "Press any key to exit";
 
-    let mut origin = Origin { y: (stdscr_size.lines / 2) - 2, x: calc_x_axis(line1, stdscr_size.columns)? };
+    let window_size = window.size()?;
 
-    stdscr.mvaddstr(origin, line1)?;
+    // calculate the initial origin for line 1.
+    let mut origin = Origin { y: (window_size.lines / 2) - 2, x: calc_x_axis(line1, window_size.columns)? };
+
+    // output our lines centered on the x-axis.
+    window.mvaddstr(origin, line1)?;
     origin.y += 1;
-    origin.x = calc_x_axis(line2, stdscr_size.columns)?;
-    stdscr.mvaddstr(origin, line2)?;
+    origin.x = calc_x_axis(line2, window_size.columns)?;
+    window.mvaddstr(origin, line2)?;
     origin.y += 2;
-    origin.x = calc_x_axis(line3, stdscr_size.columns)?;
-    stdscr.mvaddstr(origin, line3)?;
+    origin.x = calc_x_axis(line3, window_size.columns)?;
+    window.mvaddstr(origin, line3)?;
 
-    //  update the top ripoff line.
-    top_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        update_ripoff(ripoff_window, columns, top_ripoff.orientation())
-    })?;
-
-    //  update the bottom ripoff line.
-    bottom_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        update_ripoff(ripoff_window, columns, bottom_ripoff.orientation())
-    })?;
-
-    doupdate()?;
-
-    stdscr.getch()?;
+    // wait for the user to press a key.
+    window.getch()?;
 
     Ok(())
 }
 
-fn update_ripoff(ripoff_window: &RipoffWindow, columns: u16, orientation: Orientation) -> result!(()) {
-    let ripoff_message = &format!("this is the ripoff line at the {:?} of the screen with a maximum of {} columns", orientation, columns);
-
-    ripoff_window.set_column(calc_x_axis(ripoff_message, columns)?)?;
-
-    ripoff_window.addstr(ripoff_message)?;
-    ripoff_window.noutrefresh()
-}
-
+// calculate a centered x-axis based on the length of the string we are outputing.
 fn calc_x_axis(line: &str, columns: u16) -> result!(u16) {
     Ok((columns / 2) - (u16::try_from(line.len())? / 2))
 }

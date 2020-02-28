@@ -67,7 +67,7 @@ impl Form {
     }
 
     // allocate our passed form fields into some contiguous memory ending with a null.
-    fn _allocate_form_field<F>(func_str: &str, fields: &[&Field], mut func: F) -> result!(Option<Self>)
+    fn _allocate_form_fields<F>(func_str: &str, fields: &[&Field], mut func: F) -> result!(Option<Self>)
         where F: FnMut(*mut FIELD) -> result!(Option<Self>)
     {
         // allocate enougth contiguous memory to store all the field handles plus
@@ -104,7 +104,7 @@ impl Form {
     /// Creates a new form connected to specified fields.
     pub fn new(fields: &[&Field]) -> result!(Self) {
         // call the ncursesw shims new_form() function with our allocated memory.
-        Self::_allocate_form_field("new", fields, |field_handles| {
+        Self::_allocate_form_fields("new", fields, |field_handles| {
             match unsafe { nform::new_form(field_handles) } {
                 Some(form) => Ok(Some(Self::_from(None, form, field_handles, true))),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new", errno().into()) })
@@ -121,7 +121,7 @@ impl Form {
     /// Creates a new form on the specified sceen connected to specified fields.
     pub fn new_sp(screen: &Screen, fields: &[&Field]) -> result!(Self) {
         // call the ncursesw shims new_form() function with our allocated memory.
-        Self::_allocate_form_field("new_sp", fields, |field_handles| {
+        Self::_allocate_form_fields("new_sp", fields, |field_handles| {
             match unsafe { nform::new_form_sp(screen._handle(), field_handles) } {
                 Some(form) => Ok(Some(Self::_from(Some(screen._handle()), form, field_handles, true))),
                 None       => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::new_sp", errno().into()) })
@@ -268,11 +268,11 @@ impl Form {
         // unallocate the field_handles memory.
         unsafe { libc::free(self.field_handles as *mut libc::c_void) };
 
-        Self::_allocate_form_field("set_form_fields", fields, |field_handles| {
+        Self::_allocate_form_fields("set_form_fields", fields, |field_handles| {
             self.field_handles = field_handles;
 
             // call the ncursesw shims set_form_fields() function with our allocated memory.
-            match unsafe { nform::set_form_fields(self.handle, field_handles as *mut FIELD) } {
+            match unsafe { nform::set_form_fields(self.handle, field_handles) } {
                 E_OK => Ok(None),
                 rc   => Err(NCurseswWinError::FormError { source: form::ncursesw_form_error_from_rc("Form::set_form_fields", rc) })
             }

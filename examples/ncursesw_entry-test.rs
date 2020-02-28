@@ -29,11 +29,15 @@ macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 fn main() {
     // initialise ncurses safely, this should trap panic's and
     // pass them as a `NCurseswWinError::Panic`.
-    match ncursesw_entry(|window| {
-        cursor_set(CursorType::Visible)?;
+    match ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        ncursesw_entry_test_pass(window)?;
+        cursor_set(CursorType::Visible)?;
+
+        ncursesw_entry_test_pass(stdscr)?;
 
         Ok(ncursesw_entry_test_fail()?)
     }) {
@@ -50,7 +54,7 @@ fn main() {
 }
 
 fn ncursesw_entry_test_pass(stdscr: &Window) -> result!(()) {
-    let mut origin = Origin { y: 0, x: 0};
+    let mut origin = Origin::default();
 
     stdscr.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;

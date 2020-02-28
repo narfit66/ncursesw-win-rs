@@ -58,18 +58,22 @@ fn main_routine() -> result!(()) {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
-        cursor_set(CursorType::Invisible)?;
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        box_drawing_test(window)
+        cursor_set(CursorType::Invisible)?;
+
+        start_color()?;
+        use_default_colors()?;
+
+        box_drawing_test(stdscr)
     })
 }
 
 fn box_drawing_test(stdscr: &Window) -> result!(()) {
-    start_color()?;
-    use_default_colors()?;
-
     let light_yellow = Color::new(ColorPalette::LightYellow);
     let dark_blue = Color::new(ColorPalette::Blue);
     let dark_red = Color::new(ColorPalette::Red);
@@ -105,7 +109,7 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
     let corner_origins = {
         let mut corner_origins: HashMap<Corner, Origin> = HashMap::new();
 
-        corner_origins.insert(Corner::TopLeft, Origin { y: 0, x: 0 });
+        corner_origins.insert(Corner::TopLeft, Origin::default());
         corner_origins.insert(Corner::TopRight, Origin { y: 0, x: stdscr_size.columns - corner_box_size.columns });
         corner_origins.insert(Corner::BottomLeft, Origin { y: stdscr_size.lines - corner_box_size.lines, x: 0 });
         corner_origins.insert(Corner::BottomRight, Origin { y: stdscr_size.lines - corner_box_size.lines, x: stdscr_size.columns - corner_box_size.columns });

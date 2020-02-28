@@ -43,11 +43,15 @@ fn main_routine() -> result!(()) {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
-        cursor_set(CursorType::Visible)?;
-        set_echo(true)?;
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
+        set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        getch_nonblocking_test(window)
+        cursor_set(CursorType::Visible)?;
+
+        getch_nonblocking_test(stdscr)
     })
 }
 

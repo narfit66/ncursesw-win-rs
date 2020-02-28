@@ -30,11 +30,15 @@ macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     // initialize ncurses in a safe way.
-    if let Err(source) = ncursesw_entry(|window| {
-        cursor_set(CursorType::Visible)?;
+    if let Err(source) = ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        mouse_test(window)
+        cursor_set(CursorType::Visible)?;
+
+        mouse_test(stdscr)
     }) {
         match source {
             NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),

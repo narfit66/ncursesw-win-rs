@@ -88,7 +88,7 @@ impl Menu {
 
             func(item_handles)
         } else {
-            Err(NCurseswWinError::OutOfMemory { func: format!("Menu::{}()", func_str) })
+            Err(NCurseswWinError::OutOfMemory { func: format!("Menu::{}", func_str) })
         }
     }
 
@@ -292,7 +292,7 @@ impl Menu {
         Self::_allocate_menu_items("set_menu_items", items, |item_handles| {
             self.item_handles = item_handles;
 
-            match unsafe { nmenu::set_menu_items(self.handle, item_handles as *mut ITEM) } {
+            match unsafe { nmenu::set_menu_items(self.handle, item_handles) } {
                 E_OK => Ok(None),
                 rc   => Err(NCurseswWinError::MenuError { source: menu::ncursesw_menu_error_from_rc("Menu::set_menu_items", rc) })
             }

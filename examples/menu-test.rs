@@ -49,39 +49,44 @@ fn main_routine() -> result!(()) {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
+    ncursesw_entry(|stdscr| {
         set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
+
         cursor_set(CursorType::Invisible)?;
 
-        menu_test(window)
+        menu_test(stdscr)
     })
 }
 
 fn menu_test(stdscr: &Window) -> result!(()) {
     stdscr.keypad(true)?;
 
-    let my_item0 = MenuItem::new(CHOICES[0], &format!("{} description", CHOICES[0]))?;
-    let my_item1 = MenuItem::new(CHOICES[1], &format!("{} description", CHOICES[1]))?;
-    let my_item2 = MenuItem::new(CHOICES[2], &format!("{} description", CHOICES[2]))?;
-    let my_item3 = MenuItem::new(CHOICES[3], &format!("{} description", CHOICES[3]))?;
-    let my_item4 = MenuItem::new(CHOICES[4], &format!("{} description", CHOICES[4]))?;
+    let my_item0 = &MenuItem::new(CHOICES[0], &format!("{} description", CHOICES[0]))?;
+    let my_item1 = &MenuItem::new(CHOICES[1], &format!("{} description", CHOICES[1]))?;
+    let my_item2 = &MenuItem::new(CHOICES[2], &format!("{} description", CHOICES[2]))?;
+    let my_item3 = &MenuItem::new(CHOICES[3], &format!("{} description", CHOICES[3]))?;
+    let my_item4 = &MenuItem::new(CHOICES[4], &format!("{} description", CHOICES[4]))?;
 
     // Create items.
-    let mut my_items = vec!();
+    let my_items = &{
+        let mut my_items = vec!();
 
-    my_items.push(&my_item0);
-    my_items.push(&my_item1);
-    my_items.push(&my_item2);
-    my_items.push(&my_item3);
-    my_items.push(&my_item4);
+        my_items.push(my_item0);
+        my_items.push(my_item1);
+        my_items.push(my_item2);
+        my_items.push(my_item3);
+        my_items.push(my_item4);
+
+        my_items
+    };
 
     // Crate menu.
-    let my_menu = &Menu::new(&my_items)?;
+    let my_menu = &Menu::new(my_items)?;
 
-    let menu_opts = MenuOptions::default().set_show_description(true);
-
-    my_menu.menu_opts_off(menu_opts)?;
+    my_menu.menu_opts_off(MenuOptions::default().set_show_description(true))?;
 
     // set our callbacks for menu item initialisation and termination.
     my_menu.set_item_init(test_item_init)?;
@@ -92,8 +97,8 @@ fn menu_test(stdscr: &Window) -> result!(()) {
 
     // Set main window and sub window.
     my_menu.set_menu_win(Some(my_menu_win))?;
-    let my_menu_win_der_win = &my_menu_win.derwin(Size { lines: 5, columns: 0 }, Origin { y: 2, x: 2 })?;
-    my_menu.set_menu_sub(Some(my_menu_win_der_win))?;
+    let my_menu_win_derwin = &my_menu_win.derwin(Size { lines: 5, columns: 0 }, Origin { y: 2, x: 2 })?;
+    my_menu.set_menu_sub(Some(my_menu_win_derwin))?;
 
     // Set menu mark to the string " * ".
     my_menu.set_menu_mark(" * ")?;
