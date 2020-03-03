@@ -22,6 +22,7 @@
 
 extern crate ncurseswwin;
 
+use std::process::exit;
 use ncurseswwin::*;
 
 macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
@@ -41,14 +42,26 @@ fn main() {
 
         Ok(ncursesw_entry_test_fail()?)
     }) {
-        Err(source) => match source {
-            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-            _                                   => eprintln!("error: {}", source)
+        Err(source) => {
+            if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+                match err {
+                    NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                    _                                   => eprintln!("error: {}", err)
+                }
+            } else {
+                eprintln!("error: {}", source);
+            }
+
+            source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+            exit(1);
         },
         Ok(value)   => {
             assert!(value == -1);
 
-            println!("return: {}", value)
+            println!("return: {}", value);
+
+            exit(0);
         }
     }
 }

@@ -320,16 +320,16 @@ impl Screen {
         Ok(ncursesw::savetty_sp(self.handle)?)
     }
 
-    pub fn scr_init(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_init_sp(self.handle, filename)?)
+    pub fn scr_init<P: AsRef<Path>>(&self, path: P) -> result!(()) {
+        Ok(ncursesw::scr_init_sp(self.handle, path)?)
     }
 
-    pub fn scr_restore(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_restore_sp(self.handle, filename)?)
+    pub fn scr_restore<P: AsRef<Path>>(&self, path: P) -> result!(()) {
+        Ok(ncursesw::scr_restore_sp(self.handle, path)?)
     }
 
-    pub fn scr_set(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_set_sp(self.handle, filename)?)
+    pub fn scr_set<P: AsRef<Path>>(&self, path: P) -> result!(()) {
+        Ok(ncursesw::scr_set_sp(self.handle, path)?)
     }
 
     pub fn set_escdelay(&self, ms: time::Duration) -> result!(()) {

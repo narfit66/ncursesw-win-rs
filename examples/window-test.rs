@@ -22,22 +22,30 @@
 
 extern crate ncurseswwin;
 
-use std::convert::TryFrom;
-
+use std::{convert::TryFrom, process::exit};
+use anyhow::Result;
 use ncurseswwin::*;
-
-macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     if let Err(source) = main_routine() {
-        match source {
-            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-            _                                   => eprintln!("error: {}", source)
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
         }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
     }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     // We wrap all our use of ncurseswin with this function.
     ncursesw_entry(|_| {
         set_input_mode(InputMode::Character)?;
@@ -52,7 +60,7 @@ fn main_routine() -> result!(()) {
     })
 }
 
-fn window_test() -> result!(()) {
+fn window_test() -> Result<()> {
     // create a window (size default and origin default provided us with
     // the maximum size of the terminal/display).
     let window = &Window::new(Size::default(), Origin::default())?;
@@ -98,6 +106,6 @@ fn window_test() -> result!(()) {
 }
 
 // calculate a centered x-axis based on the length of the string we are outputing.
-fn calc_x_axis(line: &str, columns: u16) -> result!(u16) {
+fn calc_x_axis(line: &str, columns: u16) -> Result<u16> {
     Ok((columns / 2) - (u16::try_from(line.len())? / 2))
 }

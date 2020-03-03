@@ -21,23 +21,19 @@
 */
 
 use std::sync::atomic::Ordering;
-
+use anyhow::Result;
 use ncursesw;
-use ncursesw::WINDOW;
-use crate::{
-    Window, NCurseswWinError, gen::HasHandle,
-    ncurses::{INITSCR_CALLED, COLOR_STARTED}
-};
+use crate::{Window, gen::HasHandle, ncurses::{INITSCR_CALLED, COLOR_STARTED}};
 
 // NCurses context.
 pub(in crate::ncurses) struct NCurses {
-    handle: WINDOW
+    handle: ncursesw::WINDOW
 }
 
 // NCurses context, initialise and when out of scope drop ncurses structure.
 impl NCurses {
     // Initialise ncurses.
-    pub fn new() -> result!(Self) {
+    pub fn new() -> Result<Self> {
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
             let handle = ncursesw::initscr()?;
 
@@ -48,12 +44,12 @@ impl NCurses {
 
             Ok(Self { handle })
         } else {
-            Err(NCurseswWinError::InitscrAlreadyCalled)
+            panic!("NCurses already initialised!!!")
         }
     }
 
     // Returns the initial window(stdscr) after initialisation.
-    pub fn initial_window(&self) -> Window {
+    pub fn stdscr(&self) -> Window {
         Window::_from(None, self.handle, true)
     }
 }

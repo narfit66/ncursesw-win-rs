@@ -23,25 +23,25 @@
 #![allow(deprecated)]
 
 use std::{sync::atomic::AtomicBool, panic::{UnwindSafe, catch_unwind}};
-
+use anyhow::{Result, Error};
 use crate::{Window, NCurseswWinError, ncurses::ncurses::NCurses};
 
 lazy_static! {
     pub(in crate) static ref INITSCR_CALLED: AtomicBool = AtomicBool::new(false);
-    pub(in crate) static ref COLOR_STARTED: AtomicBool = AtomicBool::new(false);
+    pub(in crate) static ref COLOR_STARTED:  AtomicBool = AtomicBool::new(false);
 }
 
 /// Safely initialise NCurses, panic's will be caught correctly and
 /// passed back as `NCurseswWinError::Panic`.
 /// NCurses should free (as best it can) memory etc correctly.
-pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_function: F) -> result!(T) {
+pub fn ncursesw_entry<F: FnOnce(&Window) -> Result<T> + UnwindSafe, T>(func: F) -> Result<T> {
     // We wrap all our use of ncurseswin with this function.
-    match ncursesw_init(|window| {
+    match ncursesw_init(|stdscr| {
         // In here we get an initialized Window structure (stdscr) and pass that
         // to our closure, `catch_unwind()` as called in `ncursesw_init()` will
-        // return a `Result` of `Ok` so we will wrap our return of `user_function()`
+        // return a `Result` of `Ok` so we will wrap our return of `func()`
         // in that.
-        match user_function(&window) {
+        match func(stdscr) {
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
         }
@@ -55,7 +55,7 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
     })) {
         // The `Err` branch matches against the `NCurseswWinError::Panic` error
         // from the above `unwrap_or_else()`.
-        Err(source) => Err(source),
+        Err(source) => Err(Error::new(source)),
         // The `Ok` branch unwraps and matches against `ncursesw_init()` error
         // or return value.
         Ok(result)  => result
@@ -64,20 +64,17 @@ pub fn ncursesw_entry<F: FnOnce(&Window) -> result!(T) + UnwindSafe, T>(user_fun
 
 #[deprecated(since = "0.3.0", note = "Use ncursesw_entry() instead")]
 /// Safely initialise NCurses, panic will be caught correctly and NCurses free (as best it can) correctly.
-pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
+pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(func: F) -> Result<R, Option<String>> {
     // use `catch_unwind()` to catch panic's, an error will be a panic
     // so try and convert it into a string.
     catch_unwind(|| {
         // initilise ncurses.
         let ncurses = match NCurses::new() {
-            Err(source)  => panic!(match source {
-                NCurseswWinError::InitscrAlreadyCalled => "NCurses already initialized!",
-                _                                      => "ncursesw::initscr() has failed!"
-            }),
-            Ok(handle)   => handle
+            Err(_)     => panic!("ncursesw::initscr() has failed!"),
+            Ok(handle) => handle
         };
 
-        user_function(&ncurses.initial_window())
+        func(&ncurses.stdscr())
     }).map_err(|source| match source.downcast_ref::<&str>() {
         Some(andstr) => Some(andstr.to_string()),
         None         => match source.downcast_ref::<String>() {
@@ -87,15 +84,16 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(user_function: F) 
     })
 }
 
-/// Safely create an application entry point, panic's will be caught correctly and
-/// passed back as `NCurseswWinError::Panic`. NCurses should free (as best it can)
-/// memory etc correctly.
-pub fn safe_entry<F: FnOnce() -> result!(T) + UnwindSafe, T>(user_function: F) -> result!(T) {
+/// Safely create an application entry point, unlike `ncursesw_entry()` this does
+/// not initialise the NCurses library by calling `initscr()`. panic's will be caught
+/// correctly and passed back as `NCurseswWinError::Panic`. NCurses should free
+/// (as best it can) memory etc correctly.
+pub fn safe_entry<F: FnOnce() -> Result<T> + UnwindSafe, T>(func: F) -> Result<T> {
     // We wrap all our use of ncurseswin with this function.
     match safe_init(|| {
         // The `catch_unwind()` in `safe_init()` will return a `Result` of `Ok
-        // so we will wrap our return of `user_function()` in that.
-        match user_function() {
+        // so we will wrap our return of `func()` in that.
+        match func() {
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
         }
@@ -109,7 +107,7 @@ pub fn safe_entry<F: FnOnce() -> result!(T) + UnwindSafe, T>(user_function: F) -
     })) {
         // The `Err` branch matches against the `NCurseswWinError::Panic` error
         // from the above `unwrap_or_else()`.
-        Err(source) => Err(source),
+        Err(source) => Err(Error::new(source)),
         // The `Ok` branch unwraps and matches against `safe_init()` error
         // or return value
         Ok(result)  => result
@@ -117,11 +115,11 @@ pub fn safe_entry<F: FnOnce() -> result!(T) + UnwindSafe, T>(user_function: F) -
 }
 
 // Create an application entry point, panic will be caught correctly.
-fn safe_init<F: FnOnce() -> R + UnwindSafe, R>(user_function: F) -> Result<R, Option<String>> {
+fn safe_init<F: FnOnce() -> R + UnwindSafe, R>(func: F) -> Result<R, Option<String>> {
     // use `catch_unwind()` to catch panic's, an error will be a panic
     // so try and convert it into a string.
     catch_unwind(|| {
-        user_function()
+        func()
     }).map_err(|source| match source.downcast_ref::<&str>() {
         Some(andstr) => Some(andstr.to_string()),
         None         => match source.downcast_ref::<String>() {

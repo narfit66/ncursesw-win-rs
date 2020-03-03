@@ -29,7 +29,9 @@
 extern crate gettextrs;
 extern crate ncurseswwin;
 
-use gettextrs::*;
+use std::process::exit;
+use anyhow::Result;
+use gettextrs::{setlocale, LocaleCategory};
 use ncurseswwin::{*, menu::*};
 
 macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
@@ -38,14 +40,24 @@ const CHOICES: [&str; 5] = ["Choice 1", "Choice 2", "Choice 3", "Choice 4", "Exi
 
 fn main() {
     if let Err(source) = main_routine() {
-        match source {
-            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-            _                                   => eprintln!("error: {}", source)
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
         }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
     }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
@@ -61,7 +73,7 @@ fn main_routine() -> result!(()) {
     })
 }
 
-fn menu_test(stdscr: &Window) -> result!(()) {
+fn menu_test(stdscr: &Window) -> Result<()> {
     stdscr.keypad(true)?;
 
     let my_item0 = &MenuItem::new(CHOICES[0], &format!("{} description", CHOICES[0]))?;

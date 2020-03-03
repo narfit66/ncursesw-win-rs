@@ -24,15 +24,13 @@ extern crate ncurseswwin;
 
 use ncurseswwin::*;
 
-macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
-
 fn main() {
     if let Err(source) = main_routine() {
         eprintln!("error: {}", source);
     }
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<(), NCurseswWinError> {
     println!("curses_version:  {}", curses_version()?);
     println!("ncurses_version: {}", ncurses_version());
 

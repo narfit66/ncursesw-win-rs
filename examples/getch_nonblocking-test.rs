@@ -23,23 +23,31 @@
 extern crate gettextrs;
 extern crate ncurseswwin;
 
-use std::{convert::TryFrom, time};
-
+use std::{convert::TryFrom, time, process::exit};
+use anyhow::Result;
 use gettextrs::*;
 use ncurseswwin::*;
 
-macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
-
 fn main() {
     if let Err(source) = main_routine() {
-        match source {
-            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-            _                                   => eprintln!("error: {}", source)
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
         }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
     }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
@@ -55,7 +63,7 @@ fn main_routine() -> result!(()) {
     })
 }
 
-fn getch_nonblocking_test(stdscr: &Window) -> result!(()) {
+fn getch_nonblocking_test(stdscr: &Window) -> Result<()> {
     stdscr.keypad(true)?;
 
     let timeout = time::Duration::new(5, 0);

@@ -22,9 +22,9 @@
 
 extern crate ncurseswwin;
 
+use std::process::exit;
+use anyhow::Result;
 use ncurseswwin::*;
-
-macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     // initialize ncurses in a safe way.
@@ -39,14 +39,24 @@ fn main() {
 
         border_test(stdscr)
     }) {
-        match source {
-            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-            _                                   => eprintln!("error: {}", source)
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
         }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
     }
+
+    exit(0);
 }
 
-fn border_test(stdscr: &Window) -> result!(()) {
+fn border_test(stdscr: &Window) -> Result<()> {
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
     let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);

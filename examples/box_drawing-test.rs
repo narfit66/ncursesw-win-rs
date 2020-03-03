@@ -26,16 +26,14 @@ extern crate rand;
 extern crate strum;
 extern crate strum_macros;
 
-use std::{time, collections::HashMap};
-
+use std::{time, collections::HashMap, process::exit};
+use anyhow::{Result, Error};
 use gettextrs::*;
 use ncurseswwin::{*, normal::*};
 
 use rand::prelude::*;
 use strum_macros::{Display, EnumIter};
 use strum::IntoEnumIterator;
-
-macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 #[derive(Copy, Clone, Display, EnumIter, PartialEq, Eq, Hash)]
 enum Corner {
@@ -47,14 +45,24 @@ enum Corner {
 
 fn main() {
     if let Err(source) = main_routine() {
-        match source {
-            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
-            _                                   => eprintln!("error: {}", source)
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
         }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
     }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
@@ -73,7 +81,7 @@ fn main_routine() -> result!(()) {
     })
 }
 
-fn box_drawing_test(stdscr: &Window) -> result!(()) {
+fn box_drawing_test(stdscr: &Window) -> Result<()> {
     let light_yellow = Color::new(ColorPalette::LightYellow);
     let dark_blue = Color::new(ColorPalette::Blue);
     let dark_red = Color::new(ColorPalette::Red);
@@ -200,7 +208,7 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
             #[cfg(not(feature = "key_resize_as_error"))]
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)     => if key_binding == KeyBinding::ResizeEvent {
-                    return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                    return Err(Error::new(NCurseswError::KeyResize));
                 },
                 CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;

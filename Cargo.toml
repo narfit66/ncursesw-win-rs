@@ -25,9 +25,10 @@ libc = "0.2"
 ncursesw = "0.6"
 thiserror = "1.0"
 lazy_static = "1.4"
-strum = "0.17"
-strum_macros = "0.17"
+strum = "0.18"
+strum_macros = "0.18"
 errno = "0.2"
+anyhow = "1.0"
 
 [dev-dependencies]
 ascii = "1.0"
