@@ -51,7 +51,7 @@ fn main_routine() -> Result<()> {
         let term = &env::var("TERM").with_context(|| "$TERM is invalid!!!")?;
 
         // create a screen using stdout and stdin for output and input.
-        let screen = &Screen::new(Some(term), io::stdout(), io::stdin())?;
+        let screen = &Screen::new(Some(term), &io::stdout().lock(), &io::stdin().lock())?;
 
         screen.set_input_mode(InputMode::Character)?;
         screen.set_echo(false)?;

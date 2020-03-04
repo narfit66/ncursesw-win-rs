@@ -61,11 +61,11 @@ pub trait IsPad: HasHandle<WINDOW> {
     /// Create a Pad instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Pad::putwin() routine.
-    fn getwin<I: AsRawFd + Read>(file: I) -> result!(Pad) {
+    fn getwin<I: AsRawFd + Read>(file: &I) -> result!(Pad) {
         Ok(Pad::_from(None, ncursesw::getwin(file)?, true))
     }
 
-    fn putwin<O: AsRawFd + Write>(&self, file: O) -> result!(()) {
+    fn putwin<O: AsRawFd + Write>(&self, file: &O) -> result!(()) {
         Ok(ncursesw::putwin(self._handle(), file)?)
     }
 

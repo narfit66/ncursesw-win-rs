@@ -28,7 +28,7 @@ pub fn new_prescr() -> result!(Screen) {
     Ok(Screen::_from(ncursesw::new_prescr()?, true))
 }
 
-pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: O, input: I) -> result!(Screen)
+pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: &O, input: &I) -> result!(Screen)
     where O: AsRawFd + Write,
           I: AsRawFd + Read
 {

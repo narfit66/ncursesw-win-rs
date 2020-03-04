@@ -53,7 +53,7 @@ impl Screen {
 }
 
 impl Screen {
-    pub fn new<O, I>(term: Option<&str>, output: O, input: I) -> result!(Self)
+    pub fn new<O, I>(term: Option<&str>, output: &O, input: &I) -> result!(Self)
         where O: AsRawFd + Write,
               I: AsRawFd + Read
     {
@@ -61,7 +61,7 @@ impl Screen {
     }
 
     #[deprecated(since = "0.5.0", note = "Use Screen::new() instead")]
-    pub fn newterm<O, I>(term: Option<&str>, output: O, input: I) -> result!(Self)
+    pub fn newterm<O, I>(term: Option<&str>, output: &O, input: &I) -> result!(Self)
         where O: AsRawFd + Write,
               I: AsRawFd + Read
     {
@@ -217,7 +217,7 @@ impl Screen {
         Ok(ncursesw::get_escdelay_sp(self.handle)?)
     }
 
-    pub fn getwin<I: AsRawFd + Read>(&self, file: I) -> result!(Window) {
+    pub fn getwin<I: AsRawFd + Read>(&self, file: &I) -> result!(Window) {
         Ok(Window::_from(Some(self.handle), ncursesw::getwin_sp(self.handle, file)?, true))
     }
 

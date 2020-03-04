@@ -66,7 +66,7 @@ pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
     /// Create a Window instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
-    fn getwin<I: AsRawFd + Read>(file: I) -> result!(Window) {
+    fn getwin<I: AsRawFd + Read>(file: &I) -> result!(Window) {
         Ok(Window::_from(None, ncursesw::getwin(file)?, true))
     }
 

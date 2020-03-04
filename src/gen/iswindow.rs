@@ -27,7 +27,7 @@ use crate::{NCurseswWinError, gen::HasHandle};
 
 /// is the window canvas type a window.
 pub trait IsWindow: HasHandle<WINDOW> {
-    fn putwin<O: AsRawFd + Write>(&self, file: O) -> result!(()) {
+    fn putwin<O: AsRawFd + Write>(&self, file: &O) -> result!(()) {
         Ok(ncursesw::putwin(self._handle(), file)?)
     }
 
