@@ -21,7 +21,6 @@
 */
 
 use std::{convert::TryInto, os::unix::io::AsRawFd, io::{Read, Write}};
-
 use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{Screen, Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
 
@@ -55,7 +54,7 @@ pub trait IsPad: HasHandle<WINDOW> {
 
     /// returns the parent Window for subwindows, or None if their is no parent.
     fn getparent(&self) -> Option<Pad> {
-        ncursesw::wgetparent(self._handle()).and_then(|ptr| Some(Pad::_from(self._screen(), ptr, false)))
+        ncursesw::wgetparent(self._handle()).map(|ptr| Pad::_from(self._screen(), ptr, false))
     }
 
     /// Create a Pad instance from a previous saved file.

@@ -23,9 +23,7 @@
 #![allow(clippy::forget_copy)]
 
 use std::{ptr, fmt, mem, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
-
 use errno::errno;
-
 use ncursesw::{
     SCREEN, menu, menu::{MENU, ITEM},
     shims::nmenu, shims::constants::E_OK
@@ -134,7 +132,7 @@ impl Menu {
 
     /// Return the screen associated with the menu.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 
     pub fn current_item(&self) -> result!(MenuItem) {
@@ -322,7 +320,7 @@ impl Menu {
     pub fn set_menu_sub(&self, window: Option<&Window>) -> result!(()) {
         assert!(self.screen == window.and_then(|window| window._screen()));
 
-        Ok(menu::set_menu_sub(Some(self.handle), window.and_then(|window| Some(window._handle())))?)
+        Ok(menu::set_menu_sub(Some(self.handle), window.map(|window| window._handle()))?)
     }
 
     pub fn set_menu_term<F>(&self, func: F) -> result!(())
@@ -335,13 +333,13 @@ impl Menu {
 
     // TODO: needs testing!
     pub fn set_menu_userptr<T>(&self, userptr: Option<Box<&T>>) {
-        menu::set_menu_userptr(Some(self.handle), userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
+        menu::set_menu_userptr(Some(self.handle), userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))
     }
 
     pub fn set_menu_win(&self, window: Option<&Window>) -> result!(()) {
         assert!(self.screen == window.and_then(|window| window._screen()));
 
-        Ok(menu::set_menu_win(Some(self.handle), window.and_then(|window| Some(window._handle())))?)
+        Ok(menu::set_menu_win(Some(self.handle), window.map(|window| window._handle()))?)
     }
 
     pub fn set_top_row(&self, row: u16) -> result!(()) {

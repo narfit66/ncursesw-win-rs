@@ -21,7 +21,6 @@
 */
 
 use std::{fmt, convert::{TryFrom, TryInto}};
-
 use ncursesw::{SCREEN, WINDOW};
 use crate::{Screen, Origin, NCurseswWinError, gen::*};
 
@@ -69,7 +68,7 @@ impl HasGetFunctions for RipoffWindow { }
 impl RipoffWindow {
     /// The screen the window is attached to.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 
     /// Get the cursor column.

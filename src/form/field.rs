@@ -21,7 +21,6 @@
 */
 
 use std::{ptr, fmt, convert::{TryFrom, TryInto}, hash::{Hash, Hasher}};
-
 use ncursesw::{
     normal, form,
     form::{
@@ -29,7 +28,6 @@ use ncursesw::{
     },
     shims::bindings, shims::constants::E_OK
 };
-
 use crate::{
     Origin, HasHandle, NCurseswWinError,
     form::{FieldBuffer, FieldType, FieldInfo, FieldParameters, fieldtypes::IsFieldType}
@@ -248,7 +246,7 @@ impl Field {
     /// Sets the fields user pointer.
     // TODO: needs testing!
     pub fn set_field_userptr<T>(&self, userptr: Option<Box<&T>>) -> result!(()) {
-        Ok(form::set_field_userptr(Some(self.handle), userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
+        Ok(form::set_field_userptr(Some(self.handle), userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))?)
     }
 
     /// Sets the maximum size for a dynamic field. An argument of 0 turns off any

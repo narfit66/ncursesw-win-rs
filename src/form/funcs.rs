@@ -21,7 +21,6 @@
 */
 
 use std::convert::TryFrom;
-
 use ncursesw::form::{
     FormRequest, FormOptions, FieldJustification, FieldOptions
 };
@@ -238,7 +237,7 @@ pub fn set_field_term<F>(func: F) -> result!(())
 /// Sets the fields user pointer.
 // TODO: needs testing!
 pub fn set_field_userptr<T>(userptr: Option<Box<&T>>) -> result!(()) {
-    Ok(ncursesw::form::set_field_userptr(None, userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
+    Ok(ncursesw::form::set_field_userptr(None, userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))?)
 }
 
 /// Sets or resets a flag marking the given field as the beginning of a new page on its form.
@@ -263,7 +262,7 @@ pub fn set_form_opts(opts: FormOptions) -> result!(()) {
 
 /// Sets the forms sub-window.
 pub fn set_form_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::form::set_form_sub(None, window.and_then(|window| Some(window._handle())))?)
+    Ok(ncursesw::form::set_form_sub(None, window.map(|window| window._handle()))?)
 }
 
 /// Sets a default callback to be called at form-unpost time and just before
@@ -279,12 +278,12 @@ pub fn set_form_term<F>(func: F) -> result!(())
 /// Sets the forms user pointer.
 // TODO: needs testing!
 pub fn set_form_userptr<T>(userptr: Option<Box<&T>>) -> result!(()) {
-    Ok(ncursesw::form::set_form_userptr(None, userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))?)
+    Ok(ncursesw::form::set_form_userptr(None, userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))?)
 }
 
 /// Set the forms main window.
 pub fn set_form_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::form::set_form_win(None, window.and_then(|window| Some(window._handle())))?)
+    Ok(ncursesw::form::set_form_win(None, window.map(|window| window._handle()))?)
 }
 
 // screen functions.

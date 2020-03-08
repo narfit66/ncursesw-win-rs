@@ -21,10 +21,8 @@
 */
 
 use std::{fmt, sync::{Mutex, atomic::Ordering}, collections::HashSet};
-
 use ncursesw;
 use ncursesw::{SCREEN, extend::{ColorPair, Attributes}};
-
 use crate::{
     Screen, NCurseswWinError, SoftLabelType, Justification, WideString,
     AttributesType, ColorPairType,
@@ -79,7 +77,7 @@ impl SoftLabels {
 
     /// The screen associated with the soft labels.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 
     pub fn label_type(&self) -> SoftLabelType {
@@ -173,7 +171,7 @@ fn check_softlabel_init(screen: Option<Screen>) -> result!(()) {
         Err(NCurseswWinError::InitscrAlreadyCalled)
     } else if !SOFTLABELS
         .lock()
-        .unwrap_or_else(|_| panic!("{}check_softlabel_init() : SOFTLABEL.lock() failed!!!"))
+        .unwrap_or_else(|_| panic!("{}check_softlabel_init() : SOFTLABEL.lock() failed!!!", MODULE_PATH))
         .insert(screen)
     {
         Err(NCurseswWinError::SoftLabelAlreadyDefined)

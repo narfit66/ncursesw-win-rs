@@ -21,7 +21,6 @@
 */
 
 use std::{ptr, fmt, convert::TryFrom, hash::{Hash, Hasher}};
-
 use ncursesw::{menu, menu::ITEM, menu::ItemOptions};
 use crate::NCurseswWinError;
 
@@ -109,7 +108,7 @@ impl MenuItem {
     /// Set the menu items user client code defined value.
     // TODO: needs testing!
     pub fn set_item_userptr<T>(&self, userptr: Option<Box<&T>>) {
-        menu::set_item_userptr(Some(self.handle), userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
+        menu::set_item_userptr(Some(self.handle), userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))
     }
 
     /// In a multi-valued menu sets the menu item too selected.

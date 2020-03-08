@@ -24,7 +24,6 @@ use std::{
     fmt, i16, hash::{Hash, Hasher}, convert::TryFrom,
     sync::Mutex, collections::HashSet
 };
-
 use ncursesw::{
     SCREEN,
     mouse::{
@@ -71,7 +70,7 @@ impl Mouse {
 
     /// The screen associated with the mouse.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 
     /// Refresh the mouse pointer's events, `self.events()`.

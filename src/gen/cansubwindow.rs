@@ -21,7 +21,6 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::WINDOW;
 use crate::{
     Origin, Size, NCurseswWinError,
@@ -34,9 +33,9 @@ pub trait CanSubWindow: HasHandle<WINDOW> + HasYXAxis + NCurseswWindow + IsWindo
         Ok(Window::_from(self._screen(), ncursesw::subwin(self._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
-    /// returns the parent Window for subwindows, or None if their is no parent.
+    /// Return the parent `Window` for subwindows, or `None` if their is no parent.
     fn getparent(&self) -> Option<Window> {
-        ncursesw::wgetparent(self._handle()).and_then(|ptr| Some(Window::_from(self._screen(), ptr, false)))
+        ncursesw::wgetparent(self._handle()).map(|ptr| Window::_from(self._screen(), ptr, false))
     }
 
     fn getparx(&self) -> result!(u16) {

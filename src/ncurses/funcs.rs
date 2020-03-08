@@ -76,7 +76,7 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(func: F) -> Result
 
         func(&ncurses.stdscr())
     }).map_err(|source| match source.downcast_ref::<&str>() {
-        Some(andstr) => Some(andstr.to_string()),
+        Some(andstr) => Some((*andstr).to_string()),
         None         => match source.downcast_ref::<String>() {
             Some(string) => Some(string.to_string()),
             None         => None
@@ -121,7 +121,7 @@ fn safe_init<F: FnOnce() -> R + UnwindSafe, R>(func: F) -> Result<R, Option<Stri
     catch_unwind(|| {
         func()
     }).map_err(|source| match source.downcast_ref::<&str>() {
-        Some(andstr) => Some(andstr.to_string()),
+        Some(andstr) => Some((*andstr).to_string()),
         None         => match source.downcast_ref::<String>() {
             Some(string) => Some(string.to_string()),
             None         => None

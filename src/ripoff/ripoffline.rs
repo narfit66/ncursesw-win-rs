@@ -24,9 +24,7 @@ use std::{
     fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}},
     hash::{Hash, Hasher}
 };
-
 use ncursesw::{SCREEN, WINDOW, Orientation, shims::constants};
-
 use crate::{
     Screen, RipoffWindow, NCurseswWinError, HasHandle,
     ncurses::INITSCR_CALLED
@@ -60,7 +58,7 @@ extern fn ripoff_init(window: WINDOW, columns: i32) -> i32 {
     RIPOFFLINES
         .lock()
         .unwrap_or_else(|_| panic!("ripoff_init() : RIPOFFLINES.lock() failed!!!"))
-        .insert(number, (RipoffWindow::_from(screen.as_ref().and_then(|screen| Some(screen._handle())), window, false), columns));
+        .insert(number, (RipoffWindow::_from(screen.as_ref().map(|screen| screen._handle()), window, false), columns));
 
     constants::OK
 }
@@ -100,7 +98,7 @@ impl RipoffLine {
         RIPOFFLINESCREENS
             .lock()
             .unwrap_or_else(|_| panic!("RipoffLine::new_sp() : RIPOFFLINESCREENS.lock() failed!!!"))
-            .insert(number, screen.and_then(|screen| Some(Screen::_from(screen, false))));
+            .insert(number, screen.map(|screen| Screen::_from(screen, false)));
 
         Ok(Self { screen, orientation, number })
     }
@@ -119,7 +117,7 @@ impl RipoffLine {
 
     /// Returns the screen associated with the ripoff line.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.and_then(|screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 
     /// Returns the orientation of the ripoff line.

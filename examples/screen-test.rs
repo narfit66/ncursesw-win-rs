@@ -53,6 +53,8 @@ fn main_routine() -> Result<()> {
         // create a screen using stdout and stdin for output and input.
         let screen = &Screen::new(Some(term), &io::stdout().lock(), &io::stdin().lock())?;
 
+        assert!(&screen.termname()? == term);
+
         screen.set_input_mode(InputMode::Character)?;
         screen.set_echo(false)?;
         screen.set_newline(false)?;

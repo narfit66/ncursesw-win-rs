@@ -21,7 +21,6 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::menu::{Menu_Hook, MenuRequest, MenuOptions, ItemOptions};
 use crate::{
     normal, Screen, Window, HasHandle, NCurseswWinError,
@@ -160,7 +159,7 @@ pub fn set_item_term<F>(func: F) -> result!(())
 /// Set the menu items user client code defined value.
 // TODO: needs testing!
 pub fn set_item_userptr<T>(userptr: Option<Box<&T>>) {
-    ncursesw::menu::set_item_userptr(None, userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
+    ncursesw::menu::set_item_userptr(None, userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))
 }
 
 pub fn set_menu_back(attrs: normal::Attributes) -> result!(()) {
@@ -204,7 +203,7 @@ pub fn set_menu_spacing(menu_spacing: MenuSpacing) -> result!(()) {
 }
 
 pub fn set_menu_sub(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_sub(None, window.and_then(|window| Some(window._handle())))?)
+    Ok(ncursesw::menu::set_menu_sub(None, window.map(|window| window._handle()))?)
 }
 
 pub fn set_menu_term<F>(func: F) -> result!(())
@@ -217,11 +216,11 @@ pub fn set_menu_term<F>(func: F) -> result!(())
 
 // TODO: needs testing!
 pub fn set_menu_userptr<T>(userptr: Option<Box<&T>>) {
-    ncursesw::menu::set_menu_userptr(None, userptr.and_then(|userptr| Some(Box::into_raw(userptr) as *mut libc::c_void)))
+    ncursesw::menu::set_menu_userptr(None, userptr.map(|userptr| Box::into_raw(userptr) as *mut libc::c_void))
 }
 
 pub fn set_menu_win(window: Option<&Window>) -> result!(()) {
-    Ok(ncursesw::menu::set_menu_win(None, window.and_then(|window| Some(window._handle())))?)
+    Ok(ncursesw::menu::set_menu_win(None, window.map(|window| window._handle()))?)
 }
 
 // screen functions.
