@@ -8,6 +8,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - `ncursesw_entry()`, `ncursesw_init()` and `safe_entry()` now use `anyhow::Result` as a return type. [BC]
 - Added NCurses screen functionality.
 - Added `{normal,extend}::SoftLabels`.
+- Changed `Window::default()` to return `newscr()` instead of `stdscr()`.
 - Removed `setlocale()` function. [BC]
 - Removed `intrflush()` from `BaseCanvas` trait and made a crate public function. [BC]
 - Removed `NCurseswWinError::RipoffNotInitialized`. [BC]

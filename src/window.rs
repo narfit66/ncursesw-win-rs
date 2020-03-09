@@ -21,8 +21,8 @@
 */
 
 use std::{ptr, fmt, hash::{Hash, Hasher}};
-use ncursesw::{stdscr, SCREEN, WINDOW};
-use crate::{Screen, gen::*};
+use ncursesw::{SCREEN, WINDOW};
+use crate::{Screen, newscr, gen::*};
 
 /// A moveable window canvas.
 ///
@@ -98,10 +98,10 @@ impl Drop for Window {
     }
 }
 
-/// The default window which is the stdscr created by `ncursesw_entry()`
+/// The default window which is the newscr.
 impl Default for Window {
     fn default() -> Self {
-        Self::_from(None, stdscr(), false)
+        newscr()
     }
 }
 
