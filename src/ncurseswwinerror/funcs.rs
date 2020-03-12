@@ -1,7 +1,7 @@
 /*
     src/ncurseswwinerror.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,9 +20,9 @@
     IN THE SOFTWARE.
 */
 
-use crate::ncurseswwinerror::NCurseswWinError;
+use crate::NCurseswWinError;
 use ncursesw::{NCurseswError, shims::constants::ERR};
 
 pub(in crate) fn timeout_error(func: &str) -> NCurseswWinError {
-    NCurseswWinError::from(NCurseswError::LibraryError { func: func.to_string(), rc: ERR })
+    NCurseswWinError::from(NCurseswError::LibraryError { func: func.to_string(), rc: Some(ERR) })
 }

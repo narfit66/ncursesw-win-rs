@@ -36,8 +36,8 @@ lazy_static! {
 }
 
 pub struct SoftLabels {
-    screen: Option<SCREEN>,
-    label_type:    SoftLabelType
+    screen:     Option<SCREEN>,
+    label_type: SoftLabelType
 }
 
 impl SoftLabels {
@@ -91,14 +91,14 @@ impl SoftLabels {
     }
 
     pub fn slk_attr_off(&self, attrs: Attributes) -> result!(()) {
-        assert!(self.screen.is_some(), "{}slk_attr_off() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(self.screen.is_none(), "{}slk_attr_off() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
         assert!(self.screen == attrs.screen());
 
         Ok(ncursesw::slk_attr_off(attrs)?)
     }
 
     pub fn slk_attr_on(&self, attrs: Attributes) -> result!(()) {
-        assert!(self.screen.is_some(), "{}slk_attr_on() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+        assert!(self.screen.is_none(), "{}slk_attr_on() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
         assert!(self.screen == attrs.screen());
 
         Ok(ncursesw::slk_attr_on(attrs)?)
@@ -167,8 +167,8 @@ impl SoftLabels {
         Ok(self.screen.map_or_else(|| ncursesw::slk_touch(), |screen| ncursesw::slk_touch_sp(screen))?)
     }
 
-    pub fn slk_wset(&self, labnum: u8, label: &WideString, fmt: Justification) -> result!(()) {
-        assert!(self.screen.is_some(), "{}slk_wset() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
+    pub fn slk_wset(&self, labnum: u8, label: Option<&WideString>, fmt: Justification) -> result!(()) {
+        assert!(self.screen.is_none(), "{}slk_wset() : not supported on screen defined SoftLabels!!!", MODULE_PATH);
         assert!(labnum >= self.label_type.min_label() as u8 && labnum <= self.label_type.max_label() as u8);
 
         Ok(ncursesw::slk_wset(i32::from(labnum), label, fmt)?)
