@@ -39,7 +39,7 @@ pub fn panel_above(panel: Option<&Panel>) -> result!(Panel) {
 ///
 /// If the specified panel argument is None, it returns the top panel in the stack.
 pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
-    match panels::panel_above(panel.map(|panel| panel._handle())) {
+    match panels::panel_below(panel.map(|panel| panel._handle())) {
         Err(source) => Err(NCurseswWinError::PanelsError { source }),
         Ok(handle)  => Ok(Panel::_from(None, handle, false))
     }
