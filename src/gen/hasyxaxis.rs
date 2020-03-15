@@ -21,12 +21,8 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::{Changed, WINDOW};
-use crate::{
-    Origin, Size, Region, NCurseswWinError,
-    gen::{HasHandle, HasYAxis, HasXAxis}
-};
+use crate::{Origin, Size, Region, NCurseswWinError, gen::{HasHandle, HasYAxis, HasXAxis}};
 
 /// Does the window canvas have an x and y axis.
 pub trait HasYXAxis: HasHandle<WINDOW> + HasYAxis + HasXAxis {

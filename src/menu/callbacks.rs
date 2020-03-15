@@ -21,10 +21,8 @@
 */
 
 use std::{collections::HashMap, sync::Mutex};
-
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-
 use ncursesw::{SCREEN, menu::MENU};
 use crate::menu::Menu;
 

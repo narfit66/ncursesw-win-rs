@@ -26,13 +26,11 @@ use std::{
     ptr, fmt, time, hash::{Hash, Hasher}, convert::{TryFrom, TryInto},
     path::Path, os::unix::io::AsRawFd, io::{Write, Read}
 };
-
 use ncursesw::{SCREEN, panels, mouse};
 use crate::{
-    ColorType, ColorsType, ColorAttributeTypes,
-    HasHandle, NCurseswWinError,
-    ChtypeChar, WideChar, ComplexChar, Panel,
-    InputMode, CursorType, KeyBinding, Window, Size, Origin, Legacy
+    ColorType, ColorsType, ColorAttributeTypes, HasHandle, NCurseswWinError,
+    ChtypeChar, WideChar, ComplexChar, Panel, InputMode, CursorType, KeyBinding,
+    Window, Size, Origin, Legacy
 };
 
 pub struct Screen {

@@ -21,7 +21,6 @@
 */
 
 use std::{os::unix::io::AsRawFd, io::{Write, Read}};
-
 use crate::{NCurseswWinError, screen::Screen};
 
 pub fn new_prescr() -> result!(Screen) {

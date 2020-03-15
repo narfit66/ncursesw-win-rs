@@ -21,9 +21,7 @@
 */
 
 use std::{num, convert, ffi};
-
 use thiserror::Error;
-
 use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
     menu::NCurseswMenuError, form::NCurseswFormError

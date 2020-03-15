@@ -21,7 +21,6 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::{AttributesType, ColorPairType, ColorAttributeTypes, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 

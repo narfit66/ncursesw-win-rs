@@ -1,7 +1,7 @@
 /*
     src/mouse/mouseevents.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,10 +21,7 @@
 */
 
 use strum::IntoEnumIterator;
-
-use crate::{
-    MouseButtonEvent, MouseButtonState, MouseButton, mouse::mouseevent::MouseEvent
-};
+use crate::{MouseButtonEvent, MouseButtonState, MouseButton, mouse::mouseevent::MouseEvent};
 use ncursesw::mouse::mmask_t;
 
 macro_rules! pub_getter {

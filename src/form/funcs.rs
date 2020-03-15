@@ -21,9 +21,7 @@
 */
 
 use std::convert::TryFrom;
-use ncursesw::form::{
-    FormRequest, FormOptions, FieldJustification, FieldOptions
-};
+use ncursesw::form::{FormRequest, FormOptions, FieldJustification, FieldOptions};
 use crate::{
     Screen, Window, HasHandle, NCurseswWinError, normal,
     form::{

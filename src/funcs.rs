@@ -23,15 +23,10 @@
 #![allow(non_snake_case)]
 
 use std::{sync::atomic::Ordering, convert::TryFrom};
-
-use ncursesw::{
-    ColorsType, ColorType, ColorAttributeTypes, CursorType
-};
-
+use ncursesw::{ColorsType, ColorType, ColorAttributeTypes, CursorType};
 use crate::{
     InputMode, Origin, Size, Window, NCurseswWinError,
-    gen::HasHandle,
-    ncurses::{INITSCR_CALLED, COLOR_STARTED}
+    gen::HasHandle, ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
 
 /// Return the maximum number of lines.

@@ -21,7 +21,6 @@
 */
 
 use std::convert::TryFrom;
-
 use ncursesw::{
     AttributesColorPairSet, AttributesType, ColorAttributeTypes, ColorPairType,
     WINDOW, normal

@@ -21,7 +21,6 @@
 */
 
 use std::{os::unix::io::AsRawFd, io::Write};
-
 use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 

@@ -21,7 +21,6 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::WINDOW;
 use crate::{Region, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 

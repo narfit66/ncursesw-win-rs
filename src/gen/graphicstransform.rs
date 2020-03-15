@@ -23,10 +23,7 @@
 #![allow(clippy::never_loop)]
 
 use std::convert::TryInto;
-
-use ncursesw::{
-    AttributesColorPairSet, ComplexChar, WideChar, getcchar
-};
+use ncursesw::{AttributesColorPairSet, ComplexChar, WideChar, getcchar};
 use crate::{
     graphics::WIDEBOXDRAWING, Origin, Size,
     BoxDrawingType, BoxDrawingGraphic, NCurseswWinError,

@@ -1,7 +1,7 @@
 /*
     src/mouse/mouseevent.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,7 +21,6 @@
 */
 
 use std::convert::TryInto;
-
 use ncursesw::mouse::{
     BUTTON1_RELEASED, BUTTON1_PRESSED, BUTTON1_CLICKED, BUTTON1_DOUBLE_CLICKED, BUTTON1_TRIPLE_CLICKED,
     BUTTON2_RELEASED, BUTTON2_PRESSED, BUTTON2_CLICKED, BUTTON2_DOUBLE_CLICKED, BUTTON2_TRIPLE_CLICKED, 

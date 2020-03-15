@@ -21,7 +21,6 @@
 */
 
 use std::{convert::TryInto, os::unix::io::AsRawFd, io::Read};
-
 use ncursesw::WINDOW;
 use crate::{Screen, Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 

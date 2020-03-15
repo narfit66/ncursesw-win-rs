@@ -21,7 +21,6 @@
 */
 
 use std::convert::TryFrom;
-
 use ncursesw::{ChtypeChar, ComplexChar, WideString, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 

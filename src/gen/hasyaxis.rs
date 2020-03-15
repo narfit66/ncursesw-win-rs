@@ -1,7 +1,7 @@
 /*
     src/gen/hasyaxis.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,7 +21,6 @@
 */
 
 use std::convert::TryFrom;
-
 use ncursesw::WINDOW;
 use crate::{Position, NCurseswWinError, gen::HasHandle};
 

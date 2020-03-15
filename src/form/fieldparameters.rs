@@ -21,7 +21,6 @@
 */
 
 use std::{fmt, convert::{TryFrom, TryInto}};
-
 use crate::{Size, Origin, NCurseswWinError};
 
 /// Field parameters.

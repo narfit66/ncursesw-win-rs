@@ -23,8 +23,8 @@
 use std::convert::{TryFrom, TryInto};
 use ncursesw::WINDOW;
 use crate::{
-    Origin, Size, NCurseswWinError,
-    window::Window, gen::{HasHandle, HasYXAxis, NCurseswWindow, IsWindow}
+    Origin, Size, NCurseswWinError, window::Window,
+    gen::{HasHandle, HasYXAxis, NCurseswWindow, IsWindow}
 };
 
 /// Is the window canvas type capable of creating a sub-window.
