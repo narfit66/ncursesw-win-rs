@@ -251,11 +251,11 @@ impl Screen {
         Ok(ncursesw::is_term_resized_sp(self.handle, size.try_into()?))
     }
 
-    pub fn keybound(&self, keycode: KeyBinding, count: i32) -> result!(String) {
-        Ok(ncursesw::keybound_sp(self.handle, keycode, count)?)
+    pub fn keybound(&self, keycode: KeyBinding, count: i32) -> Option<String> {
+        ncursesw::keybound_sp(self.handle, keycode, count)
     }
 
-    pub fn key_defined(&self, definition: &str) -> result!(KeyBinding) {
+    pub fn key_defined(&self, definition: &str) -> result!(Option<KeyBinding>) {
         Ok(ncursesw::key_defined_sp(self.handle, definition)?)
     }
 
