@@ -1,7 +1,7 @@
 /*
     src/ncurses/funcs.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -77,10 +77,7 @@ pub fn ncursesw_init<F: FnOnce(&Window) -> R + UnwindSafe, R>(func: F) -> Result
         func(&ncurses.stdscr())
     }).map_err(|source| match source.downcast_ref::<&str>() {
         Some(andstr) => Some((*andstr).to_string()),
-        None         => match source.downcast_ref::<String>() {
-            Some(string) => Some(string.to_string()),
-            None         => None
-        }
+        None         => source.downcast_ref::<String>().map(|string| string.to_string())
     })
 }
 
@@ -122,9 +119,6 @@ fn safe_init<F: FnOnce() -> R + UnwindSafe, R>(func: F) -> Result<R, Option<Stri
         func()
     }).map_err(|source| match source.downcast_ref::<&str>() {
         Some(andstr) => Some((*andstr).to_string()),
-        None         => match source.downcast_ref::<String>() {
-            Some(string) => Some(string.to_string()),
-            None         => None
-        }
+        None         => source.downcast_ref::<String>().map(|string| string.to_string())
     })
 }

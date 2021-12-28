@@ -1,7 +1,7 @@
 /*
     src/menu/callbacks.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -121,12 +121,12 @@ fn menu_callback(menu: MENU, cb_type: CallbackType) {
 
     if let Some(ref callback) = callbacks
         .get(&CallbackKey::new(Some(menu), cb_type))
-        .unwrap_or_else(|| &None)
+        .unwrap_or(&None)
     {
         callback(&get_menu())
     } else if let Some(ref callback) = callbacks
         .get(&CallbackKey::new(None, cb_type))
-        .unwrap_or_else(|| &None)
+        .unwrap_or(&None)
     {
         callback(&get_menu())
     } else {

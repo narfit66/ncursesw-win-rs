@@ -1,7 +1,7 @@
 /*
     src/include/softlabels.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -83,7 +83,7 @@ impl SoftLabels {
     }
 
     pub fn slk_attr(&self) -> Attributes {
-        let attrs = self.screen.map_or_else(|| ncursesw::slk_attr(), |screen| ncursesw::slk_attr_sp(screen));
+        let attrs = self.screen.map_or_else(ncursesw::slk_attr, ncursesw::slk_attr_sp);
 
         self.screen.map_or_else(|| Attributes::new(attrs.into()), |screen| Attributes::new_sp(screen, attrs.into()))
     }
@@ -110,7 +110,7 @@ impl SoftLabels {
     }
 
     pub fn slk_clear(&self) -> result!(()) {
-        Ok(self.screen.map_or_else(|| ncursesw::slk_clear(), |screen| ncursesw::slk_clear_sp(screen))?)
+        Ok(self.screen.map_or_else(ncursesw::slk_clear, ncursesw::slk_clear_sp)?)
     }
 
     pub fn slk_label(&self, labnum: u8) -> Option<String> {
@@ -120,15 +120,15 @@ impl SoftLabels {
     }
 
     pub fn slk_noutrefresh(&self) -> result!(()) {
-        Ok(self.screen.map_or_else(|| ncursesw::slk_noutrefresh(), |screen| ncursesw::slk_noutrefresh_sp(screen))?)
+        Ok(self.screen.map_or_else(ncursesw::slk_noutrefresh, ncursesw::slk_noutrefresh_sp)?)
     }
 
     pub fn slk_refresh(&self) -> result!(()) {
-        Ok(self.screen.map_or_else(|| ncursesw::slk_refresh(), |screen| ncursesw::slk_refresh_sp(screen))?)
+        Ok(self.screen.map_or_else(ncursesw::slk_refresh, ncursesw::slk_refresh_sp)?)
     }
 
     pub fn slk_restore(&self) -> result!(()) {
-        Ok(self.screen.map_or_else(|| ncursesw::slk_restore(), |screen| ncursesw::slk_restore_sp(screen))?)
+        Ok(self.screen.map_or_else(ncursesw::slk_restore, ncursesw::slk_restore_sp)?)
     }
 
     pub fn slk_set(&self, labnum: u8, label: Option<&str>, fmt: Justification) -> result!(()) {
@@ -138,7 +138,7 @@ impl SoftLabels {
     }
 
     pub fn slk_touch(&self) -> result!(()) {
-        Ok(self.screen.map_or_else(|| ncursesw::slk_touch(), |screen| ncursesw::slk_touch_sp(screen))?)
+        Ok(self.screen.map_or_else(ncursesw::slk_touch, ncursesw::slk_touch_sp)?)
     }
 
     pub fn slk_wset(&self, labnum: u8, label: Option<&WideString>, fmt: Justification) -> result!(()) {

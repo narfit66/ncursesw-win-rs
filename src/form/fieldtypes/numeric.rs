@@ -112,5 +112,5 @@ fn canonicalize(value: libc::c_double) -> libc::c_long {
 // hash on this bit pattern instead (this is for 64-bit systems,
 // on a 32-bit system it would be a f32 and i32).
 fn transmute_value(value: libc::c_double) -> libc::c_long {
-    unsafe { std::mem::transmute(value) }
+    value.to_bits() as libc::c_long
 }

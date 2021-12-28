@@ -1,7 +1,7 @@
 /*
     src/menu/menu.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -162,7 +162,7 @@ impl Menu {
     }
 
     pub fn menu_format(&self) -> result!(MenuSize) {
-        Ok(MenuSize::try_from(menu::menu_format(Some(self.handle)))?)
+        MenuSize::try_from(menu::menu_format(Some(self.handle)))
     }
 
     pub fn menu_grey(&self) -> normal::Attributes {
@@ -203,7 +203,7 @@ impl Menu {
     }
 
     pub fn menu_spacing(&self) -> result!(MenuSpacing) {
-        Ok(MenuSpacing::try_from(menu::menu_spacing(Some(self.handle))?)?)
+        MenuSpacing::try_from(menu::menu_spacing(Some(self.handle))?)
     }
 
     pub fn menu_sub(&self) -> result!(Window) {
@@ -229,7 +229,7 @@ impl Menu {
     }
 
     pub fn scale_menu(&self) -> result!(MenuSize) {
-        Ok(MenuSize::try_from(menu::scale_menu(self.handle)?)?)
+        MenuSize::try_from(menu::scale_menu(self.handle)?)
     }
 
     pub fn set_current_item(&self, item: &MenuItem) -> result!(()) {

@@ -1,7 +1,7 @@
 /*
-    src/mouse/funcs.rs
+    src/normal/funcs.rs
 
-    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
+    Copyright (c) 2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,10 +20,15 @@
     IN THE SOFTWARE.
 */
 
-use std::convert::{TryFrom, TryInto};
-use ncursesw::mouse;
-use crate::{Origin, OriginResult, NCurseswWinError};
+use crate::{NCurseswWinError, Screen};
+use crate::normal::{ColorPair, Colors};
 
-pub fn mouse_trafo(origin: Origin, to_screen: bool) -> result!(OriginResult) {
-    OriginResult::try_from(mouse::mouse_trafo(origin.try_into()?, to_screen))
+/// Screen function of `alloc_pair()`.
+pub fn alloc_pair_sp(screen: &Screen, colors: Colors) -> result!(ColorPair) {
+    Ok(ncursesw::normal::alloc_pair_sp(screen._handle(), colors)?)
+}
+
+/// Screen function of `find_pair()`.
+pub fn find_pair_sp(screen: &Screen, colors: Colors) -> result!(Option<ColorPair>) {
+    Ok(ncursesw::normal::find_pair_sp(screen._handle(), colors)?)
 }

@@ -1,7 +1,7 @@
 /*
     src/form/field.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -78,7 +78,7 @@ impl Field {
     /// A field can be made dynamic by turning off the `FieldOptions::Static`
     /// option with `self.field_opts_off()`.
     pub fn dynamic_field_info(&self) -> result!(FieldInfo) {
-        Ok(FieldInfo::try_from(form::dynamic_field_info(self.handle)?)?)
+        FieldInfo::try_from(form::dynamic_field_info(self.handle)?)
     }
 
     pub fn field_arg(&self) -> result!(*mut libc::c_void) {
@@ -121,7 +121,7 @@ impl Field {
     /// The attributes are: height, width, row of upper-left corner, column of upper-left
     /// corner, number off-screen rows, and number of working buffers.
     pub fn field_info(&self) -> result!(FieldParameters) {
-        Ok(FieldParameters::try_from(form::field_info(self.handle)?)?)
+        FieldParameters::try_from(form::field_info(self.handle)?)
     }
 
     /// Returns a field's justification attribute.

@@ -1,7 +1,7 @@
 /*
     src/gen/mouseable.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -31,6 +31,6 @@ pub trait Mouseable: HasHandle<WINDOW> {
     }
 
     fn mouse_trafo(&self, origin: Origin, to_screen: bool) -> result!(OriginResult) {
-        Ok(OriginResult::try_from(wmouse_trafo(self._handle(), origin.try_into()?, to_screen))?)
+        OriginResult::try_from(wmouse_trafo(self._handle(), origin.try_into()?, to_screen))
     }
 }

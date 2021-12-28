@@ -1,7 +1,7 @@
 /*
     src/ncurses/ncurses.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,7 +22,6 @@
 
 use std::sync::atomic::Ordering;
 use anyhow::Result;
-use ncursesw;
 use crate::{Window, gen::HasHandle, ncurses::{INITSCR_CALLED, COLOR_STARTED}};
 
 // NCurses context.

@@ -1,7 +1,7 @@
 /*
     src/menu/funcs.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -73,7 +73,7 @@ pub fn menu_fore() -> normal::Attributes {
 }
 
 pub fn menu_format() -> result!(MenuSize) {
-    Ok(MenuSize::try_from(ncursesw::menu::menu_format(None))?)
+    MenuSize::try_from(ncursesw::menu::menu_format(None))
 }
 
 pub fn menu_grey() -> normal::Attributes {
@@ -114,7 +114,7 @@ pub fn menu_request_name(request: MenuRequest) -> result!(String) {
 }
 
 pub fn menu_spacing() -> result!(MenuSpacing) {
-    Ok(MenuSpacing::try_from(ncursesw::menu::menu_spacing(None)?)?)
+    MenuSpacing::try_from(ncursesw::menu::menu_spacing(None)?)
 }
 
 pub fn menu_sub() -> result!(Window) {

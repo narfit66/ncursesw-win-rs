@@ -1,7 +1,7 @@
 /*
     src/form/form.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -233,7 +233,7 @@ impl Form {
 
     /// Returns the minimum size required for the sub-window of form.
     pub fn scale_form(&self) -> result!(Size) {
-        Ok(Size::try_from(form::scale_form(self.handle)?)?)
+        Size::try_from(form::scale_form(self.handle)?)
     }
 
     /// Sets the current field of the given form.

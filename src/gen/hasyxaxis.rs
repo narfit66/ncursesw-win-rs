@@ -1,7 +1,7 @@
 /*
     src/gen/hasyxaxis.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -72,17 +72,17 @@ pub trait HasYXAxis: HasHandle<WINDOW> + HasYAxis + HasXAxis {
 
     /// get the origin of the window.
     fn origin(&self) -> result!(Origin) {
-        Ok(Origin::try_from(ncursesw::getbegyx(self._handle())?)?)
+        Origin::try_from(ncursesw::getbegyx(self._handle())?)
     }
 
     /// get the size of the window.
     fn size(&self) -> result!(Size) {
-        Ok(Size::try_from(ncursesw::getmaxyx(self._handle())?)?)
+        Size::try_from(ncursesw::getmaxyx(self._handle())?)
     }
 
     /// get the cursor origin on the window.
     fn cursor(&self) -> result!(Origin) {
-        Ok(Origin::try_from(ncursesw::getcuryx(self._handle())?)?)
+        Origin::try_from(ncursesw::getcuryx(self._handle())?)
     }
 
     /// set the cursor origin on the window.

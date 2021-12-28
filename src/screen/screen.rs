@@ -1,7 +1,7 @@
 /*
     src/screen.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020, 2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -193,10 +193,6 @@ impl Screen {
 
     pub fn doupdate(&self) -> result!(()) {
         Ok(ncursesw::doupdate_sp(self.handle)?)
-    }
-
-    pub fn endwin(&self) -> result!(()) {
-        Ok(ncursesw::endwin_sp(self.handle)?)
     }
 
     pub fn erasechar(&self) -> result!(char) {
@@ -404,7 +400,7 @@ impl Screen {
 impl Drop for Screen {
     fn drop(&mut self) {
         if self.free_on_drop {
-            if let Err(source) = self.endwin() {
+            if let Err(source) = ncursesw::endwin_sp(self.handle) {
                 panic!("{} @ {:?}", source, self)
             }
 

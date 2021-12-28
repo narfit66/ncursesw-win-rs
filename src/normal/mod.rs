@@ -20,7 +20,13 @@
     IN THE SOFTWARE.
 */
 
+mod funcs;
 mod softlabels;
 
-pub use ncursesw::normal::*;
+pub use ncursesw::normal::{
+    Attribute, AttributesColorPair, Attributes, ColorPair,
+    ColorPalette, Color, Colors, RGB
+};
+pub use ncursesw::normal::{alloc_pair, find_pair};
+pub use self::funcs::*;
 pub use self::softlabels::*;

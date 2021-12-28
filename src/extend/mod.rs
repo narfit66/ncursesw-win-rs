@@ -1,7 +1,7 @@
 /*
     src/extend/mod.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020, 2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,7 +20,13 @@
     IN THE SOFTWARE.
 */
 
+mod funcs;
 mod softlabels;
 
-pub use ncursesw::extend::*;
+pub use ncursesw::extend::{
+    Attribute, AttributesColorPair, Attributes, ColorPair,
+    ColorPalette, Color, Colors, RGB
+};
+pub use ncursesw::extend::{alloc_pair, find_pair};
+pub use self::funcs::*;
 pub use self::softlabels::*;
