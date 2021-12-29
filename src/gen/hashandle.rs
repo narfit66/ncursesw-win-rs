@@ -24,7 +24,7 @@
 
 use ncursesw::SCREEN;
 
-pub trait HasHandle<T>: Drop + Sync + Send {
+pub trait HasHandle<T: ?Sized>: Drop + Sync + Send {
     // make a new instance from the passed ncurses pointer.
     fn _from(screen: Option<SCREEN>, handle: T, free_on_drop: bool) -> Self;
     //
