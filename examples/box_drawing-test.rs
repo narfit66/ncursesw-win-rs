@@ -1,7 +1,7 @@
 /*
     examples/box_drawing-test.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -87,8 +87,9 @@ fn box_drawing_test(stdscr: &Window) -> Result<()> {
     let dark_red = Color::new(ColorPalette::Red);
     let dark_green = Color::new(ColorPalette::Green);
 
-    let border_color_pair = ColorPair::new(1, Colors::new(light_yellow, dark_blue))?;
-    let display_color_pair = ColorPair::new(2, Colors::new(dark_red, dark_green))?;
+    let border_color_pair = alloc_pair(Colors::new(light_yellow, dark_blue))?;
+    let display_color_pair = alloc_pair(Colors::new(dark_red, dark_green))?;
+
     let attrs = Attributes::default();
 
     let stdscr_size = stdscr.size()?;
@@ -171,13 +172,13 @@ fn box_drawing_test(stdscr: &Window) -> Result<()> {
         // generate 20 random sized box's and add them with a random origin.
         for _ in 0..20 {
             let box_size = Size {
-                lines:   rng.gen_range(2, stdscr_size.lines - 2),
-                columns: rng.gen_range(2, stdscr_size.columns - 2)
+                lines:   rng.gen_range(2..=stdscr_size.lines - 2),
+                columns: rng.gen_range(2..=stdscr_size.columns - 2)
             };
 
             let box_origin = Origin {
-                y: rng.gen_range(0, stdscr_size.lines - box_size.lines),
-                x: rng.gen_range(0, stdscr_size.columns - box_size.columns)
+                y: rng.gen_range(0..=stdscr_size.lines - box_size.lines),
+                x: rng.gen_range(0..=stdscr_size.columns - box_size.columns)
             };
 
             stdscr.mvtbox_set(box_origin, box_size, box_drawing_type)?;
