@@ -66,6 +66,15 @@ impl Screen {
         Self::new(term, output, input)
     }
 
+    /// # Safety
+    /// 
+    /// Return's the 'Screen' as a pointer so we can use some of underlying 'ncursesw'
+    /// crates functions, for example 'ncursesw::extend::ColorPair::new_sp()' (as imported
+    /// in this crate as 'crate::extend::ColorPair::new_sp()')
+    pub unsafe fn as_ptr(&self) -> SCREEN {
+        self.handle
+    }
+
     /// Set the input mode to use within NCurses on this Screen.
     ///
     /// The terminal gets input from the user. Then it's sometimes buffered up. At

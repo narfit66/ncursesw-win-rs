@@ -32,14 +32,18 @@ pub trait HasAttributes: HasHandle<WINDOW> {
     fn attr_get(&self) -> result!(AttributesColorPairSet) {
         Ok(match ncursesw::wattr_get(self._handle())? {
             AttributesColorPairSet::Normal(attrs_colorpair) => {
-                attrs_colorpair.attributes().set_screen(self._screen());
-                attrs_colorpair.color_pair().set_screen(self._screen());
+                unsafe {
+                    attrs_colorpair.attributes().set_screen(self._screen());
+                    attrs_colorpair.color_pair().set_screen(self._screen())
+                }
 
                 AttributesColorPairSet::Normal(attrs_colorpair)
             },
             AttributesColorPairSet::Extend(attrs_colorpair) => {
-                attrs_colorpair.attributes().set_screen(self._screen());
-                attrs_colorpair.color_pair().set_screen(self._screen());
+                unsafe {
+                    attrs_colorpair.attributes().set_screen(self._screen());
+                    attrs_colorpair.color_pair().set_screen(self._screen());
+                }
 
                 AttributesColorPairSet::Extend(attrs_colorpair)
             }

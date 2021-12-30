@@ -1,7 +1,7 @@
 /*
     src/screen/funcs.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020, 2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,6 +21,7 @@
 */
 
 use std::{os::unix::io::AsRawFd, io::{Write, Read}};
+use ncursesw::SCREEN;
 use crate::{NCurseswWinError, screen::Screen};
 
 pub fn new_prescr() -> result!(Screen) {
@@ -36,4 +37,11 @@ pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: &O, input: &I)
 
 pub fn set_term(screen: &Screen) -> result!(Screen) {
     Ok(Screen::_from(ncursesw::set_term(screen._handle())?, false))
+}
+
+/// # Safety
+/// 
+/// convert a 'SCREEN' pointer from the underlying 'ncursesw' crate to a 'ncurseswwin::Screen'.
+pub unsafe fn to_screen(screen: SCREEN) -> Screen {
+    Screen::_from(screen, false)
 }
