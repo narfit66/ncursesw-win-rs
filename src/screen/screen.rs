@@ -68,6 +68,14 @@ impl Screen {
 
     /// # Safety
     /// 
+    /// convert a 'SCREEN' pointer from the underlying 'ncursesw' crate
+    /// to a 'ncurseswwin::Screen'.
+    pub unsafe fn from_ptr(screen: SCREEN) -> Self {
+        Self::_from(screen, false)
+    }
+
+    /// # Safety
+    /// 
     /// Return's the 'Screen' as a pointer so we can use some of underlying 'ncursesw'
     /// crates functions, for example 'ncursesw::extend::ColorPair::new_sp()' (as imported
     /// in this crate as 'crate::extend::ColorPair::new_sp()')

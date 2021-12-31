@@ -1,7 +1,7 @@
 /*
     src/gen/hasattributes.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -73,8 +73,7 @@ pub trait HasAttributes: HasHandle<WINDOW> {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        assert!(self._screen() == attrs.screen());
-        assert!(self._screen() == color_pair.screen());
+        assert!(self._screen() == attrs.screen() && self._screen() == color_pair.screen());
 
         Ok(ncursesw::wattr_set(self._handle(), attrs, color_pair)?)
     }
@@ -111,8 +110,7 @@ pub trait HasAttributes: HasHandle<WINDOW> {
               P: ColorPairType<T>,
               T: ColorAttributeTypes
     {
-        assert!(self._screen() == attrs.screen());
-        assert!(self._screen() == color_pair.screen());
+        assert!(self._screen() == attrs.screen() && self._screen() == color_pair.screen());
 
         Ok(ncursesw::wchgat(self._handle(), option_length!(length)?, attrs, color_pair)?)
     }

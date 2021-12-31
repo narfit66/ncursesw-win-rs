@@ -1,7 +1,7 @@
 /*
     src/macros.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -72,7 +72,7 @@ macro_rules! assert_origin_vlength {
 
 macro_rules! c_str_with_nul { ($name: ident) => { unsafe { &*($name.to_c_str()?.as_bytes_with_nul() as *const [u8] as *const [i8]) } } }
 
-macro_rules! option_length { ($length: expr) => { $length.map_or_else(|| Ok(-1), |len| i32::try_from(len)) } }
+macro_rules! option_length { ($length: expr) => { $length.map_or_else(|| Ok(-1), i32::try_from) } }
 
 macro_rules! nonblocking_get {
     ($fname: ident, $func: ident, $str: expr, $type: ty) => {
