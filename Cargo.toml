@@ -36,7 +36,7 @@ rand = "0.8"
 gettext-rs = "0.7"
 
 [patch.crates-io]
-ncursesw = { git = "https://github.com/narfit66/ncursesw-rs", branch = "api-v0.6.0" }
+ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
 #ncursesw = { path = "../ncursesw-rs" }
 
 [features]
