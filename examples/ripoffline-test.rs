@@ -1,7 +1,7 @@
 /*
-    examples/ripoff_line-test.rs
+    examples/ripoffline-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,35 +22,51 @@
 
 extern crate ncurseswwin;
 
+use std::{convert::TryFrom, process::exit};
+use anyhow::Result;
 use ncurseswwin::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
-
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
+        }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
+    }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     // ripoff a line from the top of the screen.
-    let top_ripoff = RipoffLine::new(Orientation::Top)?;
+    let top_ripoff = &RipoffLine::new(Orientation::Top)?;
     // ripoff a line from the bottom of the screen.
-    let bottom_ripoff = RipoffLine::new(Orientation::Bottom)?;
+    let bottom_ripoff = &RipoffLine::new(Orientation::Bottom)?;
 
     assert!(top_ripoff != bottom_ripoff);
 
     // We wrap all our use of ncurseswin with this function.
-    ncursesw_entry(|window| {
-        cursor_set(CursorType::Invisible)?;
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        ripoff_line_test(&window, &top_ripoff, &bottom_ripoff)
+        cursor_set(CursorType::Invisible)?;
+
+        ripoffline_test(stdscr, top_ripoff, bottom_ripoff)
     })
 }
 
-fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> result!(()) {
+fn ripoffline_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &RipoffLine) -> Result<()> {
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
     let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);
@@ -68,22 +84,26 @@ fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Ri
 
     let line1 = "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.";
     let line2 = "For man has closed himself up, till he sees all things thro' narrow chinks of his cavern.";
+    let line3 = "Press any key to exit";
 
-    let mut origin = Origin { y: (stdscr_size.lines / 2) - 1, x: (stdscr_size.columns / 2) - (line1.len() as u16 / 2) + 1};
+    let mut origin = Origin { y: (stdscr_size.lines / 2) - 2, x: calc_x_axis(line1, stdscr_size.columns)? };
 
     stdscr.mvaddstr(origin, line1)?;
     origin.y += 1;
-    origin.x = (stdscr_size.columns / 2) - (line2.len() as u16 / 2) + 1;
+    origin.x = calc_x_axis(line2, stdscr_size.columns)?;
     stdscr.mvaddstr(origin, line2)?;
+    origin.y += 2;
+    origin.x = calc_x_axis(line3, stdscr_size.columns)?;
+    stdscr.mvaddstr(origin, line3)?;
 
     //  update the top ripoff line.
-    top_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        update_top_ripoff(ripoff_window, columns)
+    top_ripoff.update(|ripoff_window, columns| -> Result<(), NCurseswWinError> {
+        update_ripoff(ripoff_window, columns, top_ripoff.orientation())
     })?;
 
     //  update the bottom ripoff line.
-    bottom_ripoff.update(|ripoff_window, columns| -> result!(()) {
-        update_bottom_ripoff(ripoff_window, columns)
+    bottom_ripoff.update(|ripoff_window, columns| -> Result<(), NCurseswWinError> {
+        update_ripoff(ripoff_window, columns, bottom_ripoff.orientation())
     })?;
 
     doupdate()?;
@@ -93,10 +113,10 @@ fn ripoff_line_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Ri
     Ok(())
 }
 
-fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
-    let ripoff_message = &format!("this is the ripoff line at the top of the screen with a maximum of {} columns", columns);
+fn update_ripoff(ripoff_window: &RipoffWindow, columns: u16, orientation: Orientation) -> Result<(), NCurseswWinError> {
+    let ripoff_message = &format!("this is the ripoff line at the {:?} of the screen with a maximum of {} columns", orientation, columns);
 
-    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
+    ripoff_window.set_column(calc_x_axis(ripoff_message, columns)?)?;
 
     ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()?;
@@ -104,13 +124,6 @@ fn update_top_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) 
     Ok(())
 }
 
-fn update_bottom_ripoff(ripoff_window: &RipoffWindow, columns: u16) -> result!(()) {
-    let ripoff_message = &format!("this is the ripoff line at the bottom of the screen with a maximum of {} columns", columns);
-
-    ripoff_window.set_column((columns / 2) - (ripoff_message.len() as u16 / 2))?;
-
-    ripoff_window.addstr(ripoff_message)?;
-    ripoff_window.noutrefresh()?;
-
-    Ok(())
+fn calc_x_axis(line: &str, columns: u16) -> Result<u16, NCurseswWinError> {
+    Ok((columns / 2) - (u16::try_from(line.len())? / 2))
 }

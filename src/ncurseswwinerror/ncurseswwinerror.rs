@@ -21,36 +21,54 @@
 */
 
 use std::{num, convert, ffi};
-
+use thiserror::Error;
 use ncursesw::{
     NCurseswError, panels::NCurseswPanelsError, mouse::NCurseswMouseError,
     menu::NCurseswMenuError, form::NCurseswFormError
 };
 use crate::ripoff::MAX_RIPOFF_LINES;
 
-custom_error::custom_error! {
 /// NCurseswWin Errors.
-#[derive(PartialEq, Eq)]
-pub NCurseswWinError
-    InitscrAlreadyCalled = "ncurses has already been initialised",
-    InitscrNotCalled = "ncurses has not been initialised",
-    StartColorAlreadyCalled = "ncurseswwin::start_color() already called",
-    StartColorNotCalled = "ncurseswwin::start_color() not called",
-    MaximumRipoffLines { number: usize } = @{ format!("attempt to initialise ripoff {}, maximum ripoff's allowed {}", number, MAX_RIPOFF_LINES) },
-    InternalError = "an internal error has occured",
-    Panic { message: String } = "{message}",
-    OutOfMemory { func: String } = "{func}() out of memory!!!",
-    MouseId = "unable to obtain a valid mouse id!!!",
-    FieldTypeArguments { func: String, args: u8 } = "{func}() too many arguments {args}",
-    SoftLabelAlreadyDefined = "softlabel already defined.",
+#[derive(Error, Debug, PartialEq, Eq)]
+pub enum NCurseswWinError {
+    #[error("ncurses has already been initialised")]
+    InitscrAlreadyCalled,
+    #[error("ncurses has not been initialised")]
+    InitscrNotCalled,
+    #[error("ncurseswwin::start_color() already called")]
+    StartColorAlreadyCalled,
+    #[error("ncurseswwin::start_color() not called")]
+    StartColorNotCalled,
+    #[error("attempt to initialise ripoff {number}, maximum ripoff's allowed {}", MAX_RIPOFF_LINES)]
+    MaximumRipoffLines { number: usize },
+    #[error("an internal error has occured")]
+    InternalError,
+    #[error("{message}")]
+    Panic { message: String },
+    #[error("{func}() out of memory!!!")]
+    OutOfMemory { func: String },
+    #[error("unable to obtain a valid mouse id!!!")]
+    MouseId,
+    #[error("{func}() too many arguments {args}")]
+    FieldTypeArguments { func: String, args: u8 },
+    #[error("softlabel already defined.")]
+    SoftLabelAlreadyDefined,
 
-    NCurseswError { source: NCurseswError } = "{source}",
-    PanelsError { source: NCurseswPanelsError } = "{source}",
-    MouseError { source: NCurseswMouseError } = "{source}",
-    MenuError { source: NCurseswMenuError } = "{source}",
-    FormError { source: NCurseswFormError } = "{source}",
+    #[error("{source}")]
+    NCurseswError { #[from] source: NCurseswError },
+    #[error("{source}")]
+    PanelsError { #[from] source: NCurseswPanelsError },
+    #[error("{source}")]
+    MouseError { #[from] source: NCurseswMouseError },
+    #[error("{source}")]
+    MenuError { #[from] source: NCurseswMenuError },
+    #[error("{source}")]
+    FormError { #[from] source: NCurseswFormError },
 
-    TryFromIntError { source: num::TryFromIntError } = "{source}",
-    NulError { source: ffi::NulError } = "{source}",
-    Infallible { source: convert::Infallible } = "{source}"
+    #[error("{source}")]
+    TryFromIntError { #[from] source: num::TryFromIntError },
+    #[error("{source}")]
+    NulError { #[from] source: ffi::NulError },
+    #[error("{source}")]
+    Infallible { #[from] source: convert::Infallible }
 }

@@ -1,7 +1,7 @@
 /*
     examples/ncursesw_init-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -26,13 +26,13 @@ extern crate ncurseswwin;
 
 use ncurseswwin::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
+macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 fn main() {
     match main_routine() {
         Err(source) => match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
+            NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+            _                                   => eprintln!("error: {}", source)
         },
         Ok(value)   => {
             assert!(value == -1);
@@ -44,14 +44,14 @@ fn main() {
 
 fn main_routine() -> result!(i32) {
     // We wrap all our use of ncurseswin with this function.
-    match ncursesw_init(|window| {
+    match ncursesw_init(|stdscr| {
         // In here we get an initialized Window structure (stdscr) and then proceed
         // to use it exactly like we normally would use it.
-        match ncursesw_init_test(&window) {
+        match ncursesw_init_test(stdscr) {
             Err(source) => Ok(Err(source)),
             Ok(value)   => Ok(Ok(value))
         }
-    }).unwrap_or_else(|e| Err(match e {
+    }).unwrap_or_else(|source| Err(match source {
         // This block only runs if there was an error. We might or might not
         // have been able to recover an error message. You technically can pass
         // any value into a panic, but we only get an error message if the panic
@@ -68,19 +68,21 @@ fn main_routine() -> result!(i32) {
     }
 }
 
-fn ncursesw_init_test(initial_window: &Window) -> result!(i32) {
-    cursor_set(CursorType::Invisible)?;
+fn ncursesw_init_test(stdscr: &Window) -> result!(i32) {
+    set_input_mode(InputMode::Character)?;
     set_echo(false)?;
+    set_newline(false)?;
+    intrflush(false)?;
 
-    ncursesw_init_test_pass(initial_window)?;
+    cursor_set(CursorType::Invisible)?;
 
-    let rc = ncursesw_init_test_fail()?;
+    ncursesw_init_test_pass(stdscr)?;
 
-    Ok(rc)
+    ncursesw_init_test_fail()
 }
 
 fn ncursesw_init_test_pass(stdscr: &Window) -> result!(()) {
-    let mut origin = Origin { y: 0, x: 0};
+    let mut origin = Origin::default();
 
     stdscr.mvaddstr(origin, "If the doors of perception were cleansed every thing would appear to man as it is: Infinite.")?;
     origin.y += 1;

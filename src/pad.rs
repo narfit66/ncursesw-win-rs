@@ -21,7 +21,6 @@
 */
 
 use std::{ptr, fmt, hash::{Hash, Hasher}};
-
 use ncursesw::{SCREEN, WINDOW};
 use crate::{Screen, gen::*};
 
@@ -56,7 +55,7 @@ impl HasHandle<WINDOW> for Pad {
 impl Pad {
     /// The screen associated with the pad.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 }
 

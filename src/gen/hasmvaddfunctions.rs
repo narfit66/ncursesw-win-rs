@@ -1,7 +1,7 @@
 /*
     src/gen/hasmvaddfunctions.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,16 +21,15 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
 /// Does the window canvas type have ncursesw origin add functions.
 pub trait HasMvAddFunctions: HasHandle<WINDOW> + HasYXAxis {
-    fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, length: u16) -> result!(()) {
-        assert_origin_hlength!("mvaddchnstr", self.size()?, origin, length);
+    fn mvaddchnstr(&self, origin: Origin, chstr: &ChtypeString, length: Option<u16>) -> result!(()) {
+        assert_origin!("mvaddchnstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwaddchnstr(self._handle(), origin.try_into()?, chstr, i32::try_from(length)?)?)
+        Ok(ncursesw::mvwaddchnstr(self._handle(), origin.try_into()?, chstr, option_length!(length)?)?)
     }
 
     fn mvaddch(&self, origin: Origin, ch: ChtypeChar) -> result!(()) {
@@ -45,16 +44,16 @@ pub trait HasMvAddFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwaddchstr(self._handle(), origin.try_into()?, chstr)?)
     }
 
-    fn mvaddnstr(&self, origin: Origin, str: &str, length: u16) -> result!(()) {
-        assert_origin_hlength!("mvaddnstr", self.size()?, origin, length);
+    fn mvaddnstr(&self, origin: Origin, str: &str, length: Option<u16>) -> result!(()) {
+        assert_origin!("mvaddnstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwaddnstr(self._handle(), origin.try_into()?, str, i32::try_from(length)?)?)
+        Ok(ncursesw::mvwaddnstr(self._handle(), origin.try_into()?, str, option_length!(length)?)?)
     }
 
-    fn mvaddnwstr(&self, origin: Origin, wstr: &WideString, length: u16) -> result!(()) {
-        assert_origin_hlength!("mvaddnwstr", self.size()?, origin, length);
+    fn mvaddnwstr(&self, origin: Origin, wstr: &WideString, length: Option<u16>) -> result!(()) {
+        assert_origin!("mvaddnwstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwaddnwstr(self._handle(), origin.try_into()?, wstr, i32::try_from(length)?)?)
+        Ok(ncursesw::mvwaddnwstr(self._handle(), origin.try_into()?, wstr, option_length!(length)?)?)
     }
 
     fn mvaddstr(&self, origin: Origin, str: &str) -> result!(()) {
@@ -63,10 +62,10 @@ pub trait HasMvAddFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwaddstr(self._handle(), origin.try_into()?, str)?)
     }
 
-    fn mvadd_wchnstr(&self, origin: Origin, wchstr: &ComplexString, length: u16) -> result!(()) {
-        assert_origin_hlength!("mvadd_wchnstr", self.size()?, origin, length);
+    fn mvadd_wchnstr(&self, origin: Origin, wchstr: &ComplexString, length: Option<u16>) -> result!(()) {
+        assert_origin!("mvadd_wchnstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwadd_wchnstr(self._handle(), origin.try_into()?, wchstr, i32::try_from(length)?)?)
+        Ok(ncursesw::mvwadd_wchnstr(self._handle(), origin.try_into()?, wchstr, option_length!(length)?)?)
     }
 
     fn mvadd_wch(&self, origin: Origin, wch: ComplexChar) -> result!(()) {

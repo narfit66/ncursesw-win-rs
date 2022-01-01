@@ -23,38 +23,52 @@
 extern crate gettextrs;
 extern crate ncurseswwin;
 
-use std::time;
-
-use gettextrs::*;
+use std::{time, process::exit};
+use anyhow::{Result, Error};
+use gettextrs::{setlocale, LocaleCategory};
 use ncurseswwin::{*, extend::*};
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
-
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
+        }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
+    }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
+        set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
+
         // set the cursor to invisible and switch echoing off.
         cursor_set(CursorType::Invisible)?;
-        set_echo(false)?;
 
-        border_set_test(&window)
+        // start colors and use the default color pair of white on black.
+        start_color()?;
+        use_default_colors()?;
+
+        border_set_test(stdscr)
     })
 }
 
-fn border_set_test(stdscr: &Window) -> result!(()) {
-    // start colors and use the default color pair of white on black.
-    start_color()?;
-    use_default_colors()?;
-
+fn border_set_test(stdscr: &Window) -> Result<()> {
     // define color pair 0 and normal attriburs.
     let color_pair = ColorPair::default();
     let attrs = Attributes::default();
@@ -127,9 +141,9 @@ fn border_set_test(stdscr: &Window) -> result!(()) {
         match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
-                    return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                    return Err(Error::new(NCurseswError::KeyResize));
                 },
-                CharacterResult::Character(character) => if character == 'q' || character == 'Q' {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             },

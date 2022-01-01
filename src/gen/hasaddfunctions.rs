@@ -1,7 +1,7 @@
 /*
     src/gen/hasaddfunctions.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,14 +21,13 @@
 */
 
 use std::convert::TryFrom;
-
 use ncursesw::{ChtypeChar, ChtypeString, ComplexChar, ComplexString, WideString, WINDOW};
 use crate::{NCurseswWinError, gen::HasHandle};
 
 /// Does the window canvas type have ncursesw add functions.
 pub trait HasAddFunctions: HasHandle<WINDOW> {
-    fn addchnstr(&self, chstr: &ChtypeString, length: u16) -> result!(()) {
-        Ok(ncursesw::waddchnstr(self._handle(), chstr, i32::try_from(length)?)?)
+    fn addchnstr(&self, chstr: &ChtypeString, length: Option<u16>) -> result!(()) {
+        Ok(ncursesw::waddchnstr(self._handle(), chstr, option_length!(length)?)?)
     }
 
     fn addch(&self, ch: ChtypeChar) -> result!(()) {
@@ -39,20 +38,20 @@ pub trait HasAddFunctions: HasHandle<WINDOW> {
         Ok(ncursesw::waddchstr(self._handle(), chstr)?)
     }
 
-    fn addnstr(&self, str: &str, length: u16) -> result!(()) {
-        Ok(ncursesw::waddnstr(self._handle(), str, i32::try_from(length)?)?)
+    fn addnstr(&self, str: &str, length: Option<u16>) -> result!(()) {
+        Ok(ncursesw::waddnstr(self._handle(), str, option_length!(length)?)?)
     }
 
-    fn addnwstr(&self, wstr: &WideString, length: u16) -> result!(()) {
-        Ok(ncursesw::waddnwstr(self._handle(), wstr, i32::try_from(length)?)?)
+    fn addnwstr(&self, wstr: &WideString, length: Option<u16>) -> result!(()) {
+        Ok(ncursesw::waddnwstr(self._handle(), wstr, option_length!(length)?)?)
     }
 
     fn addstr(&self, str: &str) -> result!(()) {
         Ok(ncursesw::waddstr(self._handle(), str)?)
     }
 
-    fn add_wchnstr(&self, wchstr: &ComplexString, length: u16) -> result!(()) {
-        Ok(ncursesw::wadd_wchnstr(self._handle(), wchstr, i32::try_from(length)?)?)
+    fn add_wchnstr(&self, wchstr: &ComplexString, length: Option<u16>) -> result!(()) {
+        Ok(ncursesw::wadd_wchnstr(self._handle(), wchstr, option_length!(length)?)?)
     }
 
     fn add_wch(&self, wch: ComplexChar) -> result!(()) {

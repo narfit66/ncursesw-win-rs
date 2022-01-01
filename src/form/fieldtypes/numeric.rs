@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/numeric.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,7 +21,6 @@
 */
 
 use std::{fmt, hash::{Hash, Hasher}};
-
 use crate::form::{FieldType, FIELDTYPE_NUMERIC, IsFieldType};
 
 /// This field type accepts a decimal number.
@@ -113,5 +112,5 @@ fn canonicalize(value: libc::c_double) -> libc::c_long {
 // hash on this bit pattern instead (this is for 64-bit systems,
 // on a 32-bit system it would be a f32 and i32).
 fn transmute_value(value: libc::c_double) -> libc::c_long {
-    unsafe { std::mem::transmute(value) }
+    value.to_bits() as libc::c_long
 }

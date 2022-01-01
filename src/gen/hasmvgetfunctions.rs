@@ -1,7 +1,7 @@
 /*
     src/gen/hasmvgetfunctions.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -23,12 +23,8 @@
 #![allow(deprecated)]
 
 use std::convert::{TryInto, TryFrom};
-
 use ncursesw::{CharacterResult, WideChar, WideString, WINDOW};
-use crate::{
-    Origin, NonBlockingResult, Timeout, NCurseswWinError,
-    gen::{HasHandle, HasYXAxis, HasNonBlocking}
-};
+use crate::{Origin, NonBlockingResult, Timeout, NCurseswWinError, gen::{HasHandle, HasYXAxis, HasNonBlocking}};
 
 /// Does the window canvas type have ncursesw get origin functions.
 pub trait HasMvGetFunctions: HasHandle<WINDOW> + HasYXAxis + HasNonBlocking {

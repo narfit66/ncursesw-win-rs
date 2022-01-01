@@ -23,53 +23,64 @@
 extern crate gettextrs;
 extern crate ncurseswwin;
 
-use std::time;
-
+use std::{convert::TryFrom, time, process::exit};
+use anyhow::Result;
 use gettextrs::*;
 use ncurseswwin::*;
 
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
-
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
+        }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
+    }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
-        cursor_set(CursorType::Visible)?;
-        set_echo(true)?;
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
+        set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        getch_nonblocking_test(&window)
+        cursor_set(CursorType::Visible)?;
+
+        getch_nonblocking_test(stdscr)
     })
 }
 
-fn getch_nonblocking_test(stdscr: &Window) -> result!(()) {
+fn getch_nonblocking_test(stdscr: &Window) -> Result<()> {
     stdscr.keypad(true)?;
 
     let timeout = time::Duration::new(5, 0);
 
     let display_origin = Origin { y: 2, x: 2 };
     let display_str = &format!("Press 'q' or 'Q' to quit, any other key to continue or wait for {:?} :", timeout);
-    let getch_origin = Origin { y: display_origin.y, x: display_origin.x + display_str.len() as u16 + 1 };
+    let getch_origin = Origin { y: display_origin.y, x: display_origin.x + u16::try_from(display_str.len())? + 1 };
     let getch_result_origin = Origin { y: getch_origin.y, x: getch_origin.x + 3 };
 
     stdscr.mvaddstr(display_origin, display_str)?;
-
-    let lower_q = WideChar::new('q');
-    let upper_q = WideChar::new('Q');
 
     loop {
         // press 'q' or 'Q' to quit, any other key to continue or wait until we timeout.
         let getch_result = match stdscr.mvget_wch_nonblocking(getch_origin, Some(timeout))? {
             Some(char_result) => match char_result {
                 CharacterResult::Key(key_binding)     => format!("key binding: {:?}", key_binding),
-                CharacterResult::Character(character) => if character == lower_q || character == upper_q {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 } else {
                     format!("character: '{:?}'", character)

@@ -1,7 +1,7 @@
 /*
     src/gen/ncurseswwindow.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,8 +20,9 @@
     IN THE SOFTWARE.
 */
 
-use std::{convert::TryInto, os::unix::io::AsRawFd, io::Read};
+#![allow(clippy::new_ret_no_self)]
 
+use std::{convert::TryInto, os::unix::io::AsRawFd, io::Read};
 use ncursesw::WINDOW;
 use crate::{Screen, Origin, Size, Window, NCurseswWinError, gen::{HasHandle, IsWindow}};
 
@@ -43,7 +44,7 @@ pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
         Ok(Window::_from(Some(screen._handle()), ncursesw::newwin_sp(screen._handle(), size.try_into()?, origin.try_into()?)?, true))
     }
 
-    #[deprecated(since = "0.5.0", note = "Use Window::new() instead")]
+    #[deprecated(since = "0.5.0", note = "Use Window::new_sp() instead")]
     fn newwin_sp(screen: &Screen, size: Size, origin: Origin) -> result!(Window) {
         Self::new_sp(screen, size, origin)
     }
@@ -66,7 +67,7 @@ pub trait NCurseswWindow: HasHandle<WINDOW> + IsWindow {
     /// Create a Window instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Window.putwin() routine.
-    fn getwin<I: AsRawFd + Read>(file: I) -> result!(Window) {
+    fn getwin<I: AsRawFd + Read>(file: &I) -> result!(Window) {
         Ok(Window::_from(None, ncursesw::getwin(file)?, true))
     }
 

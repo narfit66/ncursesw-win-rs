@@ -1,7 +1,7 @@
 /*
     src/gen/hasmvinsfunctions.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,7 +21,6 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::{ChtypeChar, ComplexChar, WideString, WINDOW};
 use crate::{Origin, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
@@ -33,16 +32,16 @@ pub trait HasMvInsFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwinsch(self._handle(), origin.try_into()?, ch)?)
     }
 
-    fn mvinsnstr(&self, origin: Origin, str: &str, length: u16) -> result!(()) {
-        assert_origin_hlength!("mvinsnstr", self.size()?, origin, length);
+    fn mvinsnstr(&self, origin: Origin, str: &str, length: Option<u16>) -> result!(()) {
+        assert_origin!("mvinsnstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwinsnstr(self._handle(), origin.try_into()?, str, i32::try_from(length)?)?)
+        Ok(ncursesw::mvwinsnstr(self._handle(), origin.try_into()?, str, option_length!(length)?)?)
     }
 
-    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, length: u16) -> result!(()) {
-        assert_origin_hlength!("mvins_nwstr", self.size()?, origin, length);
+    fn mvins_nwstr(&self, origin: Origin, wstr: &WideString, length: Option<u16>) -> result!(()) {
+        assert_origin!("mvins_nwstr", self.size()?, origin);
 
-        Ok(ncursesw::mvwins_nwstr(self._handle(), origin.try_into()?, wstr, i32::try_from(length)?)?)
+        Ok(ncursesw::mvwins_nwstr(self._handle(), origin.try_into()?, wstr, option_length!(length)?)?)
     }
 
     fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {

@@ -1,7 +1,7 @@
 /*
     src/mouse/mouseevents.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,21 +21,8 @@
 */
 
 use strum::IntoEnumIterator;
-
-use crate::{
-    MouseButtonEvent, MouseButtonState, MouseButton, mouse::mouseevent::MouseEvent
-};
+use crate::{MouseButtonEvent, MouseButtonState, MouseButton, mouse::mouseevent::MouseEvent};
 use ncursesw::mouse::mmask_t;
-
-macro_rules! pub_getter {
-    ($fname: ident, $attr: ident) => {
-        pub fn $fname(&self) -> bool {
-            let event_mask: mmask_t = MouseEvent::$attr.into();
-
-            (self.mask & event_mask) > 0
-        }
-    };
-}
 
 macro_rules! private_method {
     ($fname: ident, $attr: ident) => {
@@ -84,12 +71,26 @@ impl MouseEvents {
         }
     }
 
-    /// Was Ctrl-Button pressed during the mouse event.
-    pub_getter!(ctrl_button, ButtonCtrl);
-    /// Was Shift-Button pressed during the mouse event.
-    pub_getter!(shift_button, ButtonShift);
-    /// Was Alt-Button pressed during the mouse event.
-    pub_getter!(alt_button, ButtonAlt);
+    /// Was the Ctrl-Button pressed during the mouse event.
+    pub fn ctrl_button(&self) -> bool {
+        let event_mask: mmask_t = MouseEvent::ButtonCtrl.into();
+
+        (self.mask & event_mask) > 0
+    }
+
+    /// Was the Shift-Button pressed during the mouse event.
+    pub fn shift_button(&self) -> bool {
+        let event_mask: mmask_t = MouseEvent::ButtonShift.into();
+
+        (self.mask & event_mask) > 0
+    }
+
+    /// Was the Alt-Button pressed during the mouse event.
+    pub fn alt_button(&self) -> bool {
+        let event_mask: mmask_t = MouseEvent::ButtonAlt.into();
+
+        (self.mask & event_mask) > 0
+    }
 
     fn released(self, button: MouseButton) -> bool {
         match button {

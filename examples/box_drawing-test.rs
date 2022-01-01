@@ -1,7 +1,7 @@
 /*
     examples/box_drawing-test.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -26,16 +26,14 @@ extern crate rand;
 extern crate strum;
 extern crate strum_macros;
 
-use std::{time, collections::HashMap};
-
+use std::{time, collections::HashMap, process::exit};
+use anyhow::{Result, Error};
 use gettextrs::*;
 use ncurseswwin::{*, normal::*};
 
 use rand::prelude::*;
 use strum_macros::{Display, EnumIter};
 use strum::IntoEnumIterator;
-
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 #[derive(Copy, Clone, Display, EnumIter, PartialEq, Eq, Hash)]
 enum Corner {
@@ -46,35 +44,52 @@ enum Corner {
 }
 
 fn main() {
-    if let Err(source) = main_routine() { match source {
-        NCurseswWinError::Panic { message } => println!("panic: {}", message),
-        _                                   => println!("error: {}", source)
-    }}
+    if let Err(source) = main_routine() {
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
+        }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
+    }
+
+    exit(0);
 }
 
-fn main_routine() -> result!(()) {
+fn main_routine() -> Result<()> {
     setlocale(LocaleCategory::LcAll, "");
 
     // initialize ncurses in a safe way.
-    ncursesw_entry(|window| {
-        cursor_set(CursorType::Invisible)?;
+    ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
         set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
 
-        box_drawing_test(&window)
+        cursor_set(CursorType::Invisible)?;
+
+        start_color()?;
+        use_default_colors()?;
+
+        box_drawing_test(stdscr)
     })
 }
 
-fn box_drawing_test(stdscr: &Window) -> result!(()) {
-    start_color()?;
-    use_default_colors()?;
+fn box_drawing_test(stdscr: &Window) -> Result<()> {
+    let light_yellow = Color::new(ColorPalette::LightYellow);
+    let dark_blue = Color::new(ColorPalette::Blue);
+    let dark_red = Color::new(ColorPalette::Red);
+    let dark_green = Color::new(ColorPalette::Green);
 
-    let light_yellow = Color::Light(BaseColor::Yellow);
-    let dark_blue = Color::Dark(BaseColor::Blue);
-    let dark_red = Color::Dark(BaseColor::Red);
-    let dark_green = Color::Dark(BaseColor::Green);
+    let border_color_pair = alloc_pair(Colors::new(light_yellow, dark_blue))?;
+    let display_color_pair = alloc_pair(Colors::new(dark_red, dark_green))?;
 
-    let border_color_pair = ColorPair::new(1, Colors::new(light_yellow, dark_blue))?;
-    let display_color_pair = ColorPair::new(2, Colors::new(dark_red, dark_green))?;
     let attrs = Attributes::default();
 
     let stdscr_size = stdscr.size()?;
@@ -101,9 +116,9 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
 
     // define our corner box origins.
     let corner_origins = {
-        let mut corner_origins: HashMap<Corner, Origin> = HashMap::new();
+        let mut corner_origins = HashMap::new();
 
-        corner_origins.insert(Corner::TopLeft, Origin { y: 0, x: 0 });
+        corner_origins.insert(Corner::TopLeft, Origin::default());
         corner_origins.insert(Corner::TopRight, Origin { y: 0, x: stdscr_size.columns - corner_box_size.columns });
         corner_origins.insert(Corner::BottomLeft, Origin { y: stdscr_size.lines - corner_box_size.lines, x: 0 });
         corner_origins.insert(Corner::BottomRight, Origin { y: stdscr_size.lines - corner_box_size.lines, x: stdscr_size.columns - corner_box_size.columns });
@@ -157,13 +172,13 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
         // generate 20 random sized box's and add them with a random origin.
         for _ in 0..20 {
             let box_size = Size {
-                lines:   rng.gen_range(2, stdscr_size.lines - 2),
-                columns: rng.gen_range(2, stdscr_size.columns - 2)
+                lines:   rng.gen_range(2..=stdscr_size.lines - 2),
+                columns: rng.gen_range(2..=stdscr_size.columns - 2)
             };
 
             let box_origin = Origin {
-                y: rng.gen_range(0, stdscr_size.lines - box_size.lines),
-                x: rng.gen_range(0, stdscr_size.columns - box_size.columns)
+                y: rng.gen_range(0..=stdscr_size.lines - box_size.lines),
+                x: rng.gen_range(0..=stdscr_size.columns - box_size.columns)
             };
 
             stdscr.mvtbox_set(box_origin, box_size, box_drawing_type)?;
@@ -187,16 +202,16 @@ fn box_drawing_test(stdscr: &Window) -> result!(()) {
         match stdscr.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
             #[cfg(feature = "key_resize_as_error")]
             Some(char_result) => if let CharacterResult::Character(character) = char_result {
-                if character == 'q' || character == 'Q' {
+                if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             },
             #[cfg(not(feature = "key_resize_as_error"))]
             Some(char_result) => match char_result {
-                CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
-                    return Err(NCurseswWinError::NCurseswError { source: NCurseswError::KeyResize });
+                CharacterResult::Key(key_binding)     => if key_binding == KeyBinding::ResizeEvent {
+                    return Err(Error::new(NCurseswError::KeyResize));
                 },
-                CharacterResult::Character(chracter) => if chracter == 'q' || chracter == 'Q' {
+                CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
             },

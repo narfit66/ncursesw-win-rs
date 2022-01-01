@@ -1,7 +1,7 @@
 /*
     src/gen/ispad.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,8 +20,9 @@
     IN THE SOFTWARE.
 */
 
-use std::{convert::TryInto, os::unix::io::AsRawFd, io::{Read, Write}};
+#![allow(clippy::new_ret_no_self)]
 
+use std::{convert::TryInto, os::unix::io::AsRawFd, io::{Read, Write}};
 use ncursesw::{ChtypeChar, ComplexChar, WINDOW};
 use crate::{Screen, Origin, Size, Pad, NCurseswWinError, gen::HasHandle};
 
@@ -55,17 +56,17 @@ pub trait IsPad: HasHandle<WINDOW> {
 
     /// returns the parent Window for subwindows, or None if their is no parent.
     fn getparent(&self) -> Option<Pad> {
-        ncursesw::wgetparent(self._handle()).map_or_else(|| None, |ptr| Some(Pad::_from(self._screen(), ptr, false)))
+        ncursesw::wgetparent(self._handle()).map(|ptr| Pad::_from(self._screen(), ptr, false))
     }
 
     /// Create a Pad instance from a previous saved file.
     ///
     /// This uses the file previously generated using the Pad::putwin() routine.
-    fn getwin<I: AsRawFd + Read>(file: I) -> result!(Pad) {
+    fn getwin<I: AsRawFd + Read>(file: &I) -> result!(Pad) {
         Ok(Pad::_from(None, ncursesw::getwin(file)?, true))
     }
 
-    fn putwin<O: AsRawFd + Write>(&self, file: O) -> result!(()) {
+    fn putwin<O: AsRawFd + Write>(&self, file: &O) -> result!(()) {
         Ok(ncursesw::putwin(self._handle(), file)?)
     }
 

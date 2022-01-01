@@ -1,7 +1,7 @@
 /*
     src/mouse/funcs.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,10 +21,9 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::mouse;
 use crate::{Origin, OriginResult, NCurseswWinError};
 
 pub fn mouse_trafo(origin: Origin, to_screen: bool) -> result!(OriginResult) {
-    Ok(OriginResult::try_from(mouse::mouse_trafo(origin.try_into()?, to_screen))?)
+    OriginResult::try_from(mouse::mouse_trafo(origin.try_into()?, to_screen))
 }

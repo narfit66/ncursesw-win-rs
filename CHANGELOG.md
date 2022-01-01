@@ -2,10 +2,13 @@
 
 All breaking changes are marked with [BC] and potentially require API consumer changes after updating to the respective version.
 
-## [0.5.0] - ????-??-?? [BC]
+## [0.6.0] - ????-??-?? [BC]
 - NCurses form module implemented as `form`.
+- Now uses `thiserror` crate instead of `custom_error` crate to create `Error` types.
+- `ncursesw_entry()`, `ncursesw_init()` and `safe_entry()` now use `anyhow::Result` as a return type. [BC]
 - Added NCurses screen functionality.
 - Added `{normal,extend}::SoftLabels`.
+- Changed `Window::default()` to return `newscr()` instead of `stdscr()`.
 - Removed `setlocale()` function. [BC]
 - Removed `intrflush()` from `BaseCanvas` trait and made a crate public function. [BC]
 - Removed `NCurseswWinError::RipoffNotInitialized`. [BC]
@@ -20,6 +23,10 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - Moved `is_subwin()` from `Scrollable` trait to `BaseCanvas` trait. [BC]
 - `Mouse::new()` no longer required an `id` parameter. [BC]
 - `curscr()`, `newscr()` and `stdscr()` now return `Window` instead of `Result<Window, NCurseswWinError>`. [BC]
+- Changed the follwoing functions `length` parameters from `u16` to `Option<u16>` : `addchnstr()`, `addnstr()` `addnwstr()` `add_wchnstr()` `chgat()` `insnstr()` `ins_nwstr()` `mvaddchnstr()` `mvaddnstr()` `mvaddnwstr()` `mvadd_wchnstr()` `mvchgat()` `mvinsnstr()` and `mvins_nwstr()`. [BC]
+
+## [0.5.0] - ????-??-?? [BC]
+- Unreleased.
 
 ## [0.4.0] - 2019-12-09 [BC]
 - Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]

@@ -22,16 +22,11 @@
 
 #![allow(non_snake_case)]
 
-use std::{ptr, sync::atomic::Ordering, convert::TryFrom};
-
-use ncursesw::{
-    ColorsType, ColorType, ColorAttributeTypes, CursorType
-};
-
+use std::{sync::atomic::Ordering, convert::TryFrom};
+use ncursesw::{ColorsType, ColorType, ColorAttributeTypes, CursorType};
 use crate::{
     InputMode, Origin, Size, Window, NCurseswWinError,
-    gen::HasHandle,
-    ncurses::{INITSCR_CALLED, COLOR_STARTED}
+    gen::HasHandle, ncurses::{INITSCR_CALLED, COLOR_STARTED}
 };
 
 /// Return the maximum number of lines.
@@ -181,10 +176,15 @@ pub fn cursor_set(cursor: CursorType) -> result!(CursorType) {
     Ok(ncursesw::curs_set(cursor)?)
 }
 
+#[deprecated(since = "0.6.0", note = "Use cursor_set() instead")]
+pub fn curs_set(cursor: CursorType) -> result!(CursorType) {
+    cursor_set(cursor)
+}
+
 pub fn intrflush(flag: bool) -> result!(()) {
     check_initscr_called()?;
 
-    Ok(ncursesw::intrflush(ptr::null_mut(), flag)?)
+    Ok(ncursesw::intrflush(flag)?)
 }
 
 /// The terminal/screen `Size` i.e. lines and columns using 0,0 as top left.
@@ -192,11 +192,14 @@ pub fn terminal_size() -> result!(Size) {
     Ok(Size { lines: LINES()? - 1, columns: COLS()? - 1 })
 }
 
-// The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
+/// The terminal/screen size as an `Origin` i.e. y and x axis using 0,0 as top left.
 pub fn terminal_bottom_right_origin() -> result!(Origin) {
     Ok(Origin { y: LINES()? - 1, x: COLS()? - 1 })
 }
 
+// private module functions.
+
+// check if `initscr()` has been called.
 fn check_initscr_called() -> result!(()) {
     if INITSCR_CALLED.load(Ordering::SeqCst) {
         Ok(())
@@ -205,6 +208,7 @@ fn check_initscr_called() -> result!(()) {
     }
 }
 
+// check if `start_color()` has been called.
 fn color_started() -> bool {
     COLOR_STARTED.load(Ordering::SeqCst)
 }

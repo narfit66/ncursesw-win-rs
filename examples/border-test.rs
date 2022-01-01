@@ -1,7 +1,7 @@
 /*
     examples/border-test.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,27 +22,41 @@
 
 extern crate ncurseswwin;
 
+use std::process::exit;
+use anyhow::Result;
 use ncurseswwin::*;
-
-macro_rules! result { ($t: ty) => { Result<$t, NCurseswWinError> } }
 
 fn main() {
     // initialize ncurses in a safe way.
-    if let Err(source) = ncursesw_entry(|window| {
+    if let Err(source) = ncursesw_entry(|stdscr| {
+        set_input_mode(InputMode::Character)?;
+        set_echo(false)?;
+        set_newline(false)?;
+        intrflush(false)?;
+
         // set the cursor to invisible and switch echoing off.
         cursor_set(CursorType::Invisible)?;
-        set_echo(false)?;
 
-        border_test(&window)
+        border_test(stdscr)
     }) {
-        match source {
-            NCurseswWinError::Panic { message } => println!("panic: {}", message),
-            _                                   => println!("error: {}", source)
+        if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
+            match err {
+                NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
+                _                                   => eprintln!("error: {}", err)
+            }
+        } else {
+            eprintln!("error: {}", source);
         }
+
+        source.chain().skip(1).for_each(|cause| eprintln!("cause: {}", cause));
+
+        exit(1);
     }
+
+    exit(0);
 }
 
-fn border_test(stdscr: &Window) -> result!(()) {
+fn border_test(stdscr: &Window) -> Result<()> {
     // extract the box drawing characters for the box drawing type.
     let left_side   = chtype_box_graphic(BoxDrawingGraphic::LeftVerticalLine);
     let right_side  = chtype_box_graphic(BoxDrawingGraphic::RightVerticalLine);

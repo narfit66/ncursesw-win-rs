@@ -1,7 +1,7 @@
 /*
     src/gen/hasgraphicfunctions.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -23,10 +23,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use std::convert::{TryFrom, TryInto};
-
-use ncursesw::{
-    ChtypeChar, ComplexChar, ComplexString
-};
+use ncursesw::{ChtypeChar, ComplexChar, ComplexString};
 use crate::{
     BoxDrawingType, BoxDrawingGraphic, HorizontalGraphic, VerticalGraphic,
     Origin, Size, NCurseswWinError,

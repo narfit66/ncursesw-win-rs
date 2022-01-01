@@ -9,7 +9,7 @@ Please see the [README.md](https://github.com/narfit66/ncursesw-rs/blob/master/R
 
 ```
 [dependencies]
-ncursesw-win = "0.5"
+ncursesw-win = "0.6"
 ```
 Or to use the latest git version
 ```
@@ -55,7 +55,9 @@ Instead of calling `initscr()` and `endwin()` to initialise and teardown the NCu
 
 To create a window use `Window::new()` which will teardown correctly when going out of scope and provides all NCurses functionality associatiated with a NCurses window. Likewise a pad is created using `Pad::new()` and a panel using `Panel::new()`.
 
-All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either their original NCurses name or where specificlly passed the pointer `_win_st` the 'w' has been removed, for example the NCurses 'C' function `wget_wch(*WINDOW)` has become the method `self.get_wch()` (where `self` is an instance of a `Window` for example).
+All NCurses methods associated with a `Window`, `Pad` or `RipoffWindow` use either their original NCurses name or where specifically passed the pointer to the structure `_win_st` the 'w' has been removed, for example the NCurses 'C' function `wget_wch(WINDOW*)` has become the method `self.get_wch()` (where `self` is an instance of a `Window` for example).
+
+All NCurses methods associated with a `Screen` use either the original NCurses name or where specifically passed the pointer to the structure `screen` the `_sp` suffix has been removed, for example the NCurses 'C' function `start_color_sp(SCREEN*)` has become the method `self.start_color()` (where `self` is an instance of a `Screen` for example). To create a window or pad associated with a screen use `Window::new_sp()` or `Pad::new_sp()` respecitivly.
 
 The NCurses ripoff and mouse features are encapsulated, please see example code for how to use these features.
 
@@ -63,7 +65,7 @@ The NCurses ripoff and mouse features are encapsulated, please see example code 
 
 Examples are built by `cargo build --examples`. To run them, use `cargo run --example <EXAMPLE>`.
 
-Current examples are [Safe Initialisation/Calling Of NCurses](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ncursesw_entry-test.rs) (**ncursesw_entry-test**), [Ansi Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border-test.rs) (**border-test**), [Unicode Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border_set-test.rs) (**border_set-test**), [Unicode Box Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/box_drawing-test.rs) (**box_drawing-test**), [Mouse Events](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/mouse-test.rs) (**mouse-test**), [Ripoff Lines](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ripoff-test.rs) (**ripoff-test**), [Non-Blocking Get](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/getch_nonblocking-test.rs) (**getch_nonblocking-test**) and [Menu](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/menu-test.rs) (**menu-test**).
+Current examples are [Safe Initialisation/Calling Of NCurses](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ncursesw_entry-test.rs) (**ncursesw_entry-test**), [Ansi Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border-test.rs) (**border-test**), [Unicode Border Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/border_set-test.rs) (**border_set-test**), [Unicode Box Drawing](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/box_drawing-test.rs) (**box_drawing-test**), [Mouse Events](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/mouse-test.rs) (**mouse-test**), [Ripoff Lines](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/ripoffline-test.rs) (**ripoffline-test**), [Non-Blocking Get](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/getch_nonblocking-test.rs) (**getch_nonblocking-test**), [Screen](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/screen-test.rs) (**screen-test**), [Window](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/window-test.rs) (**window-test**)  and [Menu](https://github.com/narfit66/ncursesw-win-rs/blob/master/examples/menu-test.rs) (**menu-test**).
 
 ## Documentation
 

@@ -1,7 +1,7 @@
 /*
     src/screen.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020, 2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -26,13 +26,11 @@ use std::{
     ptr, fmt, time, hash::{Hash, Hasher}, convert::{TryFrom, TryInto},
     path::Path, os::unix::io::AsRawFd, io::{Write, Read}
 };
-
 use ncursesw::{SCREEN, panels, mouse};
 use crate::{
-    ColorType, ColorsType, ColorAttributeTypes,
-    HasHandle, NCurseswWinError,
-    ChtypeChar, WideChar, ComplexChar, Panel,
-    InputMode, CursorType, KeyBinding, Window, Size, Origin, Legacy
+    ColorType, ColorsType, ColorAttributeTypes, HasHandle, NCurseswWinError,
+    ChtypeChar, WideChar, ComplexChar, Panel, InputMode, CursorType, KeyBinding,
+    Window, Size, Origin, Legacy
 };
 
 pub struct Screen {
@@ -53,7 +51,7 @@ impl Screen {
 }
 
 impl Screen {
-    pub fn new<O, I>(term: Option<&str>, output: O, input: I) -> result!(Self)
+    pub fn new<O, I>(term: Option<&str>, output: &O, input: &I) -> result!(Self)
         where O: AsRawFd + Write,
               I: AsRawFd + Read
     {
@@ -61,11 +59,28 @@ impl Screen {
     }
 
     #[deprecated(since = "0.5.0", note = "Use Screen::new() instead")]
-    pub fn newterm<O, I>(term: Option<&str>, output: O, input: I) -> result!(Self)
+    pub fn newterm<O, I>(term: Option<&str>, output: &O, input: &I) -> result!(Self)
         where O: AsRawFd + Write,
               I: AsRawFd + Read
     {
         Self::new(term, output, input)
+    }
+
+    /// # Safety
+    /// 
+    /// convert a 'SCREEN' pointer from the underlying 'ncursesw' crate
+    /// to a 'ncurseswwin::Screen'.
+    pub unsafe fn from_ptr(screen: SCREEN) -> Self {
+        Self::_from(screen, false)
+    }
+
+    /// # Safety
+    /// 
+    /// Return's the 'Screen' as a pointer so we can use some of underlying 'ncursesw'
+    /// crates functions, for example 'ncursesw::extend::ColorPair::new_sp()' (as imported
+    /// in this crate as 'crate::extend::ColorPair::new_sp()')
+    pub unsafe fn as_ptr(&self) -> SCREEN {
+        self.handle
     }
 
     /// Set the input mode to use within NCurses on this Screen.
@@ -114,6 +129,14 @@ impl Screen {
         }
     }
 
+    pub fn set_filter(&self, flag: bool) {
+        if flag {
+            ncursesw::filter_sp(self.handle)
+        } else {
+            ncursesw::nofilter_sp(self.handle)
+        }
+    }
+
     /// Control whether NCurses translates the return key into newline on input on this Screen.
     ///
     /// This determines wether ncurses translates newline into return and line-feed on output (in either
@@ -129,14 +152,6 @@ impl Screen {
         } {
             Err(source) => Err(NCurseswWinError::NCurseswError { source }),
             Ok(_)       => Ok(())
-        }
-    }
-
-    pub fn set_filter(screen: &Screen, flag: bool) {
-        if flag {
-            ncursesw::filter_sp(screen._handle())
-        } else {
-            ncursesw::nofilter_sp(screen._handle())
         }
     }
 
@@ -168,8 +183,13 @@ impl Screen {
         ncursesw::can_change_color_sp(self.handle)
     }
 
-    pub fn curs_set(&self, cursor: CursorType) -> result!(CursorType) {
+    pub fn cursor_set(&self, cursor: CursorType) -> result!(CursorType) {
         Ok(ncursesw::curs_set_sp(self.handle, cursor)?)
+    }
+
+    #[deprecated(since = "0.6.0", note = "Use Screen::cursor_set() instead")]
+    pub fn curs_set(&self, cursor: CursorType) -> result!(CursorType) {
+        self.cursor_set(cursor)
     }
 
     pub fn define_key(&self, definition: Option<&str>, keycode: KeyBinding) -> result!(()) {
@@ -208,7 +228,7 @@ impl Screen {
         Ok(ncursesw::get_escdelay_sp(self.handle)?)
     }
 
-    pub fn getwin<I: AsRawFd + Read>(&self, file: I) -> result!(Window) {
+    pub fn getwin<I: AsRawFd + Read>(&self, file: &I) -> result!(Window) {
         Ok(Window::_from(Some(self.handle), ncursesw::getwin_sp(self.handle, file)?, true))
     }
 
@@ -237,18 +257,18 @@ impl Screen {
     }
 
     pub fn intrflush(&self, flag: bool) -> result!(()) {
-        Ok(ncursesw::intrflush_sp(self.handle, ptr::null_mut(), flag)?)
+        Ok(ncursesw::intrflush_sp(self.handle, flag)?)
     }
 
     pub fn is_term_resized(&self, size: Size) -> result!(bool) {
         Ok(ncursesw::is_term_resized_sp(self.handle, size.try_into()?))
     }
 
-    pub fn keybound(&self, keycode: KeyBinding, count: i32) -> result!(String) {
-        Ok(ncursesw::keybound_sp(self.handle, keycode, count)?)
+    pub fn keybound(&self, keycode: KeyBinding, count: i32) -> Option<String> {
+        ncursesw::keybound_sp(self.handle, keycode, count)
     }
 
-    pub fn key_defined(&self, definition: &str) -> result!(KeyBinding) {
+    pub fn key_defined(&self, definition: &str) -> result!(Option<KeyBinding>) {
         Ok(ncursesw::key_defined_sp(self.handle, definition)?)
     }
 
@@ -311,16 +331,16 @@ impl Screen {
         Ok(ncursesw::savetty_sp(self.handle)?)
     }
 
-    pub fn scr_init(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_init_sp(self.handle, filename)?)
+    pub fn scr_init<P: AsRef<Path>>(&self, path: P) -> result!(()) {
+        Ok(ncursesw::scr_init_sp(self.handle, path)?)
     }
 
-    pub fn scr_restore(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_restore_sp(self.handle, filename)?)
+    pub fn scr_restore<P: AsRef<Path>>(&self, path: P) -> result!(()) {
+        Ok(ncursesw::scr_restore_sp(self.handle, path)?)
     }
 
-    pub fn scr_set(&self, filename: &Path) -> result!(()) {
-        Ok(ncursesw::scr_set_sp(self.handle, filename)?)
+    pub fn scr_set<P: AsRef<Path>>(&self, path: P) -> result!(()) {
+        Ok(ncursesw::scr_set_sp(self.handle, path)?)
     }
 
     pub fn set_escdelay(&self, ms: time::Duration) -> result!(()) {
@@ -332,7 +352,7 @@ impl Screen {
     }
 
     pub fn set_term(&self) -> result!(Screen) {
-        Ok(Screen::_from(ncursesw::set_term(self._handle())?, false))
+        Ok(Screen::_from(ncursesw::set_term(self.handle)?, false))
     }
 
     pub fn start_color(&self) -> result!(()) {
@@ -397,6 +417,10 @@ impl Screen {
 impl Drop for Screen {
     fn drop(&mut self) {
         if self.free_on_drop {
+            if let Err(source) = ncursesw::endwin_sp(self.handle) {
+                panic!("{} @ {:?}", source, self)
+            }
+
             ncursesw::delscreen(self.handle);
         }
     }
@@ -423,15 +447,4 @@ impl fmt::Debug for Screen {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Screen {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
     }
-}
-
-pub fn new_prescr() -> result!(Screen) {
-    Ok(Screen::_from(ncursesw::new_prescr()?, true))
-}
-
-pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: O, input: I) -> result!(Screen)
-    where O: AsRawFd + Write,
-          I: AsRawFd + Read
-{
-    Ok(Screen::_from(ncursesw::newterm_sp(screen._handle(), term, output, input)?, true))
 }

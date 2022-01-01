@@ -21,7 +21,6 @@
 */
 
 use std::{ptr, fmt, hash::{Hash, Hasher}};
-
 use ncursesw::{
     form, form::{FIELD, FIELDTYPE},
     shims::bindings::{

@@ -1,7 +1,7 @@
 /*
     src/gen/graphicstransform.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -23,11 +23,7 @@
 #![allow(clippy::never_loop)]
 
 use std::convert::TryInto;
-
-use ncursesw::{
-    AttributesColorPairType, AttributesColorPairSet, ComplexChar,
-    WideChar, getcchar
-};
+use ncursesw::{AttributesColorPairSet, ComplexChar, WideChar, getcchar};
 use crate::{
     graphics::WIDEBOXDRAWING, Origin, Size,
     BoxDrawingType, BoxDrawingGraphic, NCurseswWinError,
@@ -127,8 +123,10 @@ pub trait GraphicsTransform: HasYXAxis + HasMvAddFunctions + HasMvInFunctions + 
 
         // return the transformed (or not!) complex character.
         match char_attr_pair.attributes_and_color_pair() {
-            AttributesColorPairSet::Normal(set)   => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair()),
-            AttributesColorPairSet::Extended(set) => complex_box_graphic(box_drawing_type, box_drawing_graphic, &set.attributes(), &set.color_pair())
+            AttributesColorPairSet::Normal(attrs_colorpair) =>
+                complex_box_graphic(box_drawing_type, box_drawing_graphic, &attrs_colorpair.attributes(), &attrs_colorpair.color_pair()),
+            AttributesColorPairSet::Extend(attrs_colorpair) =>
+                complex_box_graphic(box_drawing_type, box_drawing_graphic, &attrs_colorpair.attributes(), &attrs_colorpair.color_pair())
         }
     }
 

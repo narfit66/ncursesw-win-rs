@@ -21,7 +21,6 @@
 */
 
 use std::{ptr, fmt, convert::TryInto, hash::{Hash, Hasher}};
-
 use ncursesw::{panels, SCREEN, panels::PANEL};
 use crate::{Screen, Origin, Window, NCurseswWinError, gen::HasHandle, panels::funcs};
 
@@ -67,17 +66,17 @@ impl Panel {
         Self::new(window)
     }
 
-    /// The screen associated with the panel.
+    /// The screen associated with this `Panel`.
     pub fn screen(&self) -> Option<Screen> {
-        self.screen.map_or_else(|| None, |screen| Some(Screen::_from(screen, false)))
+        self.screen.map(|screen| Screen::_from(screen, false))
     }
 
-    /// Puts panel at the bottom of all panels.
+    /// Puts this `Panel` at the bottom of all panels.
     pub fn bottom_panel(&self) -> result!(()) {
         Ok(panels::bottom_panel(self.handle)?)
     }
 
-    /// Puts the given visible panel on top of all panels in the stack.
+    /// Puts the given visible `Panel` on top of all panels in the stack.
     pub fn top_panel(&self) -> result!(()) {
         Ok(panels::top_panel(self.handle)?)
     }
@@ -121,24 +120,24 @@ impl Panel {
         Ok(panels::panel_hidden(self.handle)?)
     }
 
-    /// Returns the panel above panel.
+    /// Returns the panel above this `Panel`.
     pub fn panel_above(&self) -> result!(Self) {
         funcs::panel_above(Some(self))
     }
 
-    /// Returns the panel just below panel.
+    /// Returns the panel just below this `Panel`.
     pub fn panel_below(&self) -> result!(Self) {
         funcs::panel_below(Some(self))
     }
 
     /// Sets the panel's user pointer to the passed `Panel`.
     pub fn set_panel_userptr<T>(&self, ptr: Option<Box<&T>>) -> result!(()) {
-        Ok(panels::set_panel_userptr(self.handle, ptr.map_or_else(|| None, |ptr| Some(Box::into_raw(ptr) as *const libc::c_void)))?)
+        Ok(panels::set_panel_userptr(self.handle, ptr.map(|ptr| Box::into_raw(ptr) as *const libc::c_void))?)
     }
 
     /// Returns the user pointers `Panel` for the given panel.
     pub fn panel_userptr<T>(&self) -> Option<Box<T>> {
-        panels::panel_userptr(self.handle).map_or_else(|| None, |ptr| Some(unsafe { Box::from_raw(ptr as *mut T) }))
+        panels::panel_userptr(self.handle).map(|ptr| unsafe { Box::from_raw(ptr as *mut T) })
     }
 }
 
@@ -157,7 +156,7 @@ unsafe impl Sync for Panel { } // too make thread safe
 
 impl PartialEq for Panel {
     fn eq(&self, rhs: &Self) -> bool {
-        self.screen == rhs._screen() && ptr::eq(self.handle, rhs.handle)
+        self.screen == rhs.screen && ptr::eq(self.handle, rhs.handle)
     }
 }
 

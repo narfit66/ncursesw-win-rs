@@ -1,7 +1,7 @@
 /*
     src/graphics/boxdrawinggraphic.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -20,10 +20,10 @@
     IN THE SOFTWARE.
 */
 
-#![allow(unused_imports)] // supress warning about un-used HashMap (this is used in the test transform_test()).
+#![allow(clippy::unusual_byte_groupings)]
+#![allow(unused_imports)]                 // surpress warning about un-used HashMap (this is used in the test transform_test()).
 
-use std::{convert::{TryFrom, Into}, collections::HashMap};
-
+use std::{convert::TryFrom, collections::HashMap};
 use crate::NCurseswWinError;
 
 // Uniform the size of the mask for BoxDrawingGraphic.

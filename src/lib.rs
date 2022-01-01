@@ -1,7 +1,7 @@
 /*
     src/lib.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,7 +22,6 @@
 
 extern crate libc;
 extern crate ncursesw;
-extern crate custom_error;
 #[macro_use]
 extern crate lazy_static;
 extern crate strum;
@@ -85,21 +84,18 @@ pub use crate::{
     timeout::*, window::*
 };
 
-//pub use ncursesw::{normal, extend};
 pub use ncursesw::{
     ChtypeChar, ChtypeString, ComplexChar, ComplexString,
     WideChar, WideCharAndAttributes, WideString
 };
 pub use ncursesw::{
-    AttributesColorPairSet, BaseColor, Changed, CharacterResult,
-    CursorType, Justification, KeyBinding, Legacy, NCursesColorType,
-    NCurseswError, panels::NCurseswPanelsError,
-    mouse::NCurseswMouseError, menu::NCurseswMenuError,
-    form::NCurseswFormError, Orientation, SoftLabelType
+    AttributesColorPairSet, Changed, CharacterResult, CursorType, Justification,
+    KeyBinding, Legacy, NCursesColorType, NCurseswError, panels::NCurseswPanelsError,
+    mouse::NCurseswMouseError, menu::NCurseswMenuError, form::NCurseswFormError,
+    Orientation, SoftLabelType
 };
 pub use ncursesw::{
-    AttributesColorPairType, AttributesGeneric, AttributesType,
-    ColorAttributeTypes, ColorPairColors, ColorPairType, ColorType,
+    AttributesType, ColorAttributeTypes, ColorPairColors, ColorPairType, ColorType,
     ColorsType
 };
 pub use ncursesw::{
@@ -114,6 +110,7 @@ pub use ncursesw::{
     scr_set, scrl, set_escdelay, set_tabsize, setcchar, typeahead,
     use_legacy_coding
 };
+pub use ncursesw::features;
 pub use ncursesw::mouse::{
     has_mouse, mouseinterval, mouse_version, has_mouse_interface
 };

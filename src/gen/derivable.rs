@@ -21,11 +21,10 @@
 */
 
 use std::convert::TryInto;
-
 use ncursesw::WINDOW;
 use crate::{
-    Origin, Size, NCurseswWinError,
-    window::Window, gen::{HasHandle, NCurseswWindow, HasYXAxis, IsWindow}
+    Origin, Size, NCurseswWinError, window::Window,
+    gen::{HasHandle, NCurseswWindow, HasYXAxis, IsWindow}
 };
 
 /// Is the window canvas type capable of creating a derived window.

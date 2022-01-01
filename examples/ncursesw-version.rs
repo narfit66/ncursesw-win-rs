@@ -1,7 +1,7 @@
 /*
     examples/ncursesw-version.rs
 
-    Copyright (c) 2019 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -22,9 +22,17 @@
 
 extern crate ncurseswwin;
 
-use ncursesw::*;
+use ncurseswwin::*;
 
 fn main() {
-    println!("curses_version:  {}", curses_version().unwrap());
+    if let Err(source) = main_routine() {
+        eprintln!("error: {}", source);
+    }
+}
+
+fn main_routine() -> Result<(), NCurseswWinError> {
+    println!("curses_version:  {}", curses_version()?);
     println!("ncurses_version: {}", ncurses_version());
+
+    Ok(())
 }

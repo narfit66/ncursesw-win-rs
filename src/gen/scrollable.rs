@@ -1,7 +1,7 @@
 /*
     src/gen/scrollable.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,7 +21,6 @@
 */
 
 use std::convert::{TryFrom, TryInto};
-
 use ncursesw::WINDOW;
 use crate::{Region, NCurseswWinError, gen::{HasHandle, HasYXAxis}};
 
@@ -44,6 +43,6 @@ pub trait Scrollable: HasHandle<WINDOW> + HasYXAxis {
     }
 
     fn getscrreg(&self) -> result!(Region) {
-        Ok(Region::try_from(ncursesw::wgetscrreg(self._handle())?)?)
+        Region::try_from(ncursesw::wgetscrreg(self._handle())?)
     }
 }
