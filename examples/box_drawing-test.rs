@@ -116,7 +116,7 @@ fn box_drawing_test(stdscr: &Window) -> Result<()> {
 
     // define our corner box origins.
     let corner_origins = {
-        let mut corner_origins: HashMap<Corner, Origin> = HashMap::new();
+        let mut corner_origins = HashMap::new();
 
         corner_origins.insert(Corner::TopLeft, Origin::default());
         corner_origins.insert(Corner::TopRight, Origin { y: 0, x: stdscr_size.columns - corner_box_size.columns });
