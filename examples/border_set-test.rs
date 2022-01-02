@@ -1,7 +1,7 @@
 /*
     examples/border_set-test.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -138,16 +138,15 @@ fn border_set_test(stdscr: &Window) -> Result<()> {
         stdscr.refresh()?;
 
         // press 'q' or 'Q' to quit, any other key to continue or wait for 5 seconds.
-        match inner_window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
-            Some(char_result) => match char_result {
+        if let Some(char_result) = inner_window.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
+            match char_result {
                 CharacterResult::Key(key_binding)    => if key_binding == KeyBinding::ResizeEvent {
                     return Err(Error::new(NCurseswError::KeyResize));
                 },
                 CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
-            },
-            None              => () // Timeout.
+            }
         }
     }
 

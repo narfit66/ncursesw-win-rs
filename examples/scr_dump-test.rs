@@ -1,7 +1,7 @@
 /*
     examples/scr_dump-test.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -108,7 +108,7 @@ fn window_test() -> Result<()> {
 
     let filename = &Path::new("/tmp/scr_dump.dat");
 
-    scr_dump(filename).with_context(|| errno::errno())?;
+    scr_dump(filename).with_context(errno::errno)?;
 
     window.clear()?;
 
@@ -120,7 +120,7 @@ fn window_test() -> Result<()> {
 
     window.getch()?;
 
-    scr_restore(filename).with_context(|| errno::errno())?;
+    scr_restore(filename).with_context(errno::errno)?;
 
     doupdate()?;
 

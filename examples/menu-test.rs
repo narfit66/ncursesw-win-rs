@@ -1,7 +1,7 @@
 /*
     examples/menu-test.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -33,8 +33,6 @@ use std::process::exit;
 use anyhow::Result;
 use gettextrs::{setlocale, LocaleCategory};
 use ncurseswwin::{*, menu::*};
-
-macro_rules! result { ($type: ty) => { Result<$type, NCurseswWinError> } }
 
 const CHOICES: [&str; 5] = ["Choice 1", "Choice 2", "Choice 3", "Choice 4", "Exit"];
 
@@ -83,20 +81,10 @@ fn menu_test(stdscr: &Window) -> Result<()> {
     let my_item4 = &MenuItem::new(CHOICES[4], &format!("{} description", CHOICES[4]))?;
 
     // Create items.
-    let my_items = &{
-        let mut my_items = vec!();
-
-        my_items.push(my_item0);
-        my_items.push(my_item1);
-        my_items.push(my_item2);
-        my_items.push(my_item3);
-        my_items.push(my_item4);
-
-        my_items
-    };
+    let my_items = vec![my_item0, my_item1, my_item2, my_item3, my_item4];
 
     // Crate menu.
-    let my_menu = &Menu::new(my_items)?;
+    let my_menu = &Menu::new(&my_items)?;
 
     my_menu.menu_opts_off(MenuOptions::default().set_show_description(true))?;
 
@@ -152,7 +140,7 @@ fn menu_test(stdscr: &Window) -> Result<()> {
     Ok(())
 }
 
-fn menu_driver(posted_menu: &PostedMenu, menu_request: MenuRequest) -> result!(()) {
+fn menu_driver(posted_menu: &PostedMenu, menu_request: MenuRequest) -> Result<(), NCurseswWinError> {
     if let Err(source) = posted_menu.menu_driver(menu_request) {
         if source != request_denied_error() {
             return Err(source)

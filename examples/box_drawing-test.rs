@@ -1,7 +1,7 @@
 /*
     examples/box_drawing-test.rs
 
-    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -199,23 +199,24 @@ fn box_drawing_test(stdscr: &Window) -> Result<()> {
         //  for KeyBinding::ResizeEvent have the ncursesw.key_resize_as_error
         //  feature enabled and this will bubble up through the Err on the
         //  initial match).
-        match stdscr.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
-            #[cfg(feature = "key_resize_as_error")]
-            Some(char_result) => if let CharacterResult::Character(character) = char_result {
+        #[cfg(feature = "ncursesw/key_resize_as_error")]
+        if let Some(char_result) = stdscr.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
+            if let CharacterResult::Character(character) = char_result {
                 if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
-            },
-            #[cfg(not(feature = "key_resize_as_error"))]
-            Some(char_result) => match char_result {
+            }
+        }
+        #[cfg(not(feature = "ncursesw/key_resize_as_error"))]
+        if let Some(char_result) = stdscr.getch_nonblocking(Some(time::Duration::new(5, 0)))? {
+            match char_result {
                 CharacterResult::Key(key_binding)     => if key_binding == KeyBinding::ResizeEvent {
                     return Err(Error::new(NCurseswError::KeyResize));
                 },
                 CharacterResult::Character(character) => if character.to_ascii_lowercase() == 'q' {
                     break;
                 }
-            },
-            None              => () // Timeout
+            }
         }
 
         // clear the stdscr

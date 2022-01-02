@@ -1,7 +1,7 @@
 /*
     examples/hello_world.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -27,7 +27,7 @@ use anyhow::Result;
 use ncurseswwin::*;
 
 fn main() {
-    if let Err(source) = ncursesw_entry(|stdscr| hello_world(stdscr)) {
+    if let Err(source) = ncursesw_entry(hello_world) {
         if let Some(err) = source.downcast_ref::<NCurseswWinError>() {
             match err {
                 NCurseswWinError::Panic { message } => eprintln!("panic: {}", message),
