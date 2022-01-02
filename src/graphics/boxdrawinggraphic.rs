@@ -1,7 +1,7 @@
 /*
     src/graphics/boxdrawinggraphic.rs
 
-    Copyright (c) 2019-2021 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -21,6 +21,7 @@
 */
 
 #![allow(clippy::unusual_byte_groupings)]
+#![allow(clippy::from_over_into)]
 #![allow(unused_imports)]                 // surpress warning about un-used HashMap (this is used in the test transform_test()).
 
 use std::{convert::TryFrom, collections::HashMap};

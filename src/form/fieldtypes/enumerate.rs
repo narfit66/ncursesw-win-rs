@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/enumerate.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -26,7 +26,7 @@
 use std::{fmt, mem, ptr, convert::TryFrom};
 use crate::{NCurseswWinError, cstring::*, form::{FieldType, FIELDTYPE_ENUM, IsFieldType}};
 
-type ENTRY = *const i8;
+type Entry = *const i8;
 
 /// This type allows you to restrict a field's values to be among a specified
 /// set of string values (for example, the two-letter postal codes for U.S. states).
@@ -34,14 +34,14 @@ type ENTRY = *const i8;
 pub struct Enumerate<'a> {
     fieldtype:    &'a FieldType,
     arguments:    u8,
-    value_list:   *const ENTRY,
+    value_list:   *const Entry,
     check_case:   bool,
     check_unique: bool
 }
 
 impl<'a> Enumerate<'a> {
     pub fn new(value_list: &[&str], check_case: bool, check_unique: bool) -> result!(Self) {
-        let entry_handles = unsafe { libc::calloc(value_list.len() + 1, mem::size_of::<ENTRY>()) as *const ENTRY };
+        let entry_handles = unsafe { libc::calloc(value_list.len() + 1, mem::size_of::<Entry>()) as *const Entry };
 
         if entry_handles.is_null() {
             Err(NCurseswWinError::OutOfMemory { func: "Enumerate::new".to_string() })
@@ -61,7 +61,7 @@ impl<'a> Enumerate<'a> {
     }
 }
 
-impl<'a> IsFieldType<'a, *const ENTRY, i32, i32> for Enumerate<'a> {
+impl<'a> IsFieldType<'a, *const Entry, i32, i32> for Enumerate<'a> {
     fn fieldtype(&self) -> &'a FieldType {
         self.fieldtype
     }
@@ -70,7 +70,7 @@ impl<'a> IsFieldType<'a, *const ENTRY, i32, i32> for Enumerate<'a> {
         self.arguments
     }
 
-    fn arg1(&self) -> *const ENTRY {
+    fn arg1(&self) -> *const Entry {
         self.value_list
     }
 

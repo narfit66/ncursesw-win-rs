@@ -1,7 +1,7 @@
 /*
     src/form/callbacks.rs
 
-    Copyright (c) 2020-2021 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -83,11 +83,11 @@ impl CallbackKey {
 unsafe impl Send for CallbackKey { }
 unsafe impl Sync for CallbackKey { }
 
-type CALLBACK = Option<Box<dyn Fn(&Form) + Send>>;
+type Callback = Option<Box<dyn Fn(&Form) + Send>>;
 
 lazy_static! {
     static ref FORMSCREENS: Mutex<HashMap<FormKey, FormValue>> = Mutex::new(HashMap::new());
-    static ref CALLBACKS: Mutex<HashMap<CallbackKey, CALLBACK>> = Mutex::new(HashMap::new());
+    static ref CALLBACKS: Mutex<HashMap<CallbackKey, Callback>> = Mutex::new(HashMap::new());
 }
 
 macro_rules! extern_form_callback {
