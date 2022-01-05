@@ -1,7 +1,7 @@
 /*
     src/screen.rs
 
-    Copyright (c) 2020, 2021 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -397,6 +397,14 @@ impl Screen {
 
     pub fn wunctrl(&self, ch: ComplexChar) -> result!(WideChar) {
         Ok(ncursesw::wunctrl_sp(self.handle, ch)?)
+    }
+
+    pub fn erasewchar(&self) -> result!(WideChar) {
+        Ok(ncursesw::erasewchar_sp(self.handle)?)
+    }
+
+    pub fn killwchar(&self) -> result!(WideChar) {
+        Ok(ncursesw::killwchar_sp(self.handle)?)
     }
 
     /// Returns the topmost panel in the given screen.

@@ -2,6 +2,11 @@
 
 All breaking changes are marked with [BC] and potentially require API consumer changes after updating to the respective version.
 
+## [0.6.2] - ????-??-??
+- Must now use a minimum `ncursesw` crate of `0.6.3`.
+- Added `erasewchar()` and `killwchar()` methods to `Screen`.
+- Added `ceiling_panel()` and `ground_panel()` functions to `ncurseswwin::panels` module (to bring it in line with equivilant `Screen::ceiling_panel()` and `Screen::ground_panel()` methods).
+
 ## [0.6.1] - 2022-01-02
 - Change to Cargo.toml to load ncursesw-rs from crates.io and not github.
 

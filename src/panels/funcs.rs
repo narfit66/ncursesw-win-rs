@@ -1,7 +1,7 @@
 /*
     src/panels/funcs.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -43,4 +43,14 @@ pub fn panel_below(panel: Option<&Panel>) -> result!(Panel) {
         Err(source) => Err(NCurseswWinError::PanelsError { source }),
         Ok(handle)  => Ok(Panel::_from(None, handle, false))
     }
+}
+
+/// Returns the topmost panel. Helper function and equivilant of `panel_below(None)`.
+pub fn ceiling_panel() -> result!(Panel) {
+    panel_below(None)
+}
+
+/// Returns the lowest panel. Helper function and equivilant of `panel_above(None)`.
+pub fn ground_panel() -> result!(Panel) {
+    panel_above(None)
 }
