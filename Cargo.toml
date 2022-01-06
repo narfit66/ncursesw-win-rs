@@ -36,12 +36,11 @@ rand = "0.8"
 gettext-rs = "0.7"
 
 [patch.crates-io]
-ncursesw = { git = "https://github.com/narfit66/ncursesw-rs", branch = "ncurses-v6.3" }
+#ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
 #ncursesw = { path = "../ncursesw-rs" }
 
 [features]
 #key_resize_as_error = [ "ncursesw/key_resize_as_error" ]
-#key_event_as_error = [ "ncursesw/key_event_as_error" ]
 
 [package.metadata.docs.rs]
 features = [ "ncursesw/docs-rs" ] # This feature will be enabled during the docs.rs build.

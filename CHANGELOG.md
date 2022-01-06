@@ -2,7 +2,7 @@
 
 All breaking changes are marked with [BC] and potentially require API consumer changes after updating to the respective version.
 
-## [0.6.2] - ????-??-??
+## [0.6.2] - 2022-01-06
 - Must now use a minimum `ncursesw` crate of `0.6.3`.
 - Added `erasewchar()` and `killwchar()` methods to `Screen`.
 - Added `ceiling_panel()` and `ground_panel()` functions to `ncurseswwin::panels` module (to bring it in line with equivilant `Screen::ceiling_panel()` and `Screen::ground_panel()` methods).
@@ -37,7 +37,7 @@ All breaking changes are marked with [BC] and potentially require API consumer c
 - Unreleased.
 
 ## [0.4.0] - 2019-12-09 [BC]
-- Coordinate system's used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]
+- Coordinate systems used within the crate (i.e. `Origin`, `Size` etc.) have been changed from using axis basic types of `i32` to `u16`. [BC]
 - NCurses menu module implemented as `menu`.
 - Moved `dupwin()` and `getwin()` from the `IsWindow` trait to `NCursesWindow` trait. [BC]
 
