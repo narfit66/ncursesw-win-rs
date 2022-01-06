@@ -1,6 +1,6 @@
 [package]
 name = "ncursesw-win"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["Steve Whittle <narfit66@googlemail.com>"]
 edition = "2021"
 description = "An extension wrapper around the ncursesw-rs crate that encapsulates the exposed raw pointers of the core NCurses TUI library"
@@ -22,7 +22,7 @@ is-it-maintained-open-issues = { repository = "narfit66/ncursesw-win-rs" }
 
 [dependencies]
 libc = "0.2"
-ncursesw = "0.6"
+ncursesw = ">=0.6.3"
 thiserror = "1.0"
 lazy_static = "1.4"
 strum = "0.23"
@@ -35,13 +35,12 @@ ascii = "1.0"
 rand = "0.8"
 gettext-rs = "0.7"
 
-#[patch.crates-io]
+[patch.crates-io]
 #ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
 #ncursesw = { path = "../ncursesw-rs" }
 
 [features]
 #key_resize_as_error = [ "ncursesw/key_resize_as_error" ]
-#key_event_as_error = [ "ncursesw/key_event_as_error" ]
 
 [package.metadata.docs.rs]
 features = [ "ncursesw/docs-rs" ] # This feature will be enabled during the docs.rs build.
