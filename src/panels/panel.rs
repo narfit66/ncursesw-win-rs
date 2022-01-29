@@ -168,6 +168,18 @@ impl Hash for Panel {
     }
 }
 
+impl AsRef<Panel> for Panel {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Panel> for Panel {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl fmt::Debug for Panel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Panel {{ screen: {:?}, handle: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.free_on_drop)

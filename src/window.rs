@@ -122,6 +122,18 @@ impl Hash for Window {
     }
 }
 
+impl AsRef<Window> for Window {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Window> for Window {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl fmt::Debug for Window {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Window {{ screen: {:?}, handle: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.free_on_drop)

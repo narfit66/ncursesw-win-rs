@@ -388,6 +388,18 @@ impl Hash for Menu {
     }
 }
 
+impl AsRef<Menu> for Menu {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Menu> for Menu {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl fmt::Debug for Menu {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Menu {{ handle: {:p}, item_handles: {:p}, free_on_drop: {} }}", self.handle, self.item_handles, self.free_on_drop)

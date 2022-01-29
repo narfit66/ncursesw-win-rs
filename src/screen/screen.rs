@@ -451,6 +451,18 @@ impl Hash for Screen {
     }
 }
 
+impl AsRef<Screen> for Screen {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Screen> for Screen {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl fmt::Debug for Screen {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Screen {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)

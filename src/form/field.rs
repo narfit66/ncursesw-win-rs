@@ -286,6 +286,18 @@ impl Hash for Field {
     }
 }
 
+impl AsRef<Field> for Field {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Field> for Field {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl fmt::Debug for Field {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Field {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)

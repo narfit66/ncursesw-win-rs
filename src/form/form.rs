@@ -391,6 +391,18 @@ impl Hash for Form {
     }
 }
 
+impl AsRef<Form> for Form {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Form> for Form {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl fmt::Debug for Form {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Form {{ screen: {:?}, handle: {:p}, field_handles: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.field_handles, self.free_on_drop)
