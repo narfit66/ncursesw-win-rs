@@ -403,6 +403,12 @@ impl AsMut<Form> for Form {
     }
 }
 
+impl Clone for Form {
+    fn clone(&self) -> Self {
+        Self::_from(self.screen, self.handle,self.field_handles, false)
+    }
+}
+
 impl fmt::Debug for Form {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Form {{ screen: {:?}, handle: {:p}, field_handles: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.field_handles, self.free_on_drop)

@@ -134,6 +134,12 @@ impl AsMut<Window> for Window {
     }
 }
 
+impl Clone for Window {
+    fn clone(&self) -> Self {
+        Self::_from(self.screen, self.handle, false)
+    }
+}
+
 impl fmt::Debug for Window {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Window {{ screen: {:?}, handle: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.free_on_drop)

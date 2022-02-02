@@ -111,6 +111,24 @@ impl Hash for Pad {
     }
 }
 
+impl AsRef<Pad> for Pad {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Pad> for Pad {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
+impl Clone for Pad {
+    fn clone(&self) -> Self {
+        Self::_from(self.screen, self.handle, false)
+    }
+}
+
 impl fmt::Debug for Pad {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Pad {{ screen: {:?}, handle: {:p}, free_on_drop: {} }}", self.screen, self.handle, self.free_on_drop)

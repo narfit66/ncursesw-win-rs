@@ -298,6 +298,12 @@ impl AsMut<Field> for Field {
     }
 }
 
+impl Clone for Field {
+    fn clone(&self) -> Self {
+        Self::_from(self.handle, false)
+    }
+}
+
 impl fmt::Debug for Field {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Field {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)

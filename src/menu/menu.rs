@@ -400,6 +400,12 @@ impl AsMut<Menu> for Menu {
     }
 }
 
+impl Clone for Menu {
+    fn clone(&self) -> Self {
+        Self::_from(self.screen, self.handle, self.item_handles, false)
+    }
+}
+
 impl fmt::Debug for Menu {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Menu {{ handle: {:p}, item_handles: {:p}, free_on_drop: {} }}", self.handle, self.item_handles, self.free_on_drop)

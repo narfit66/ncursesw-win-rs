@@ -463,6 +463,12 @@ impl AsMut<Screen> for Screen {
     }
 }
 
+impl Clone for Screen {
+    fn clone(&self) -> Self {
+        Self::_from(self.handle, false)
+    }
+}
+
 impl fmt::Debug for Screen {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Screen {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)
