@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/alphanumeric.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -57,6 +57,18 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for AlphaNumeric<'a> {
 
 unsafe impl<'a> Send for AlphaNumeric<'a> { } // too make thread safe
 unsafe impl<'a> Sync for AlphaNumeric<'a> { } // too make thread safe
+
+impl <'a>AsRef<AlphaNumeric<'a>> for AlphaNumeric<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<AlphaNumeric<'a>> for AlphaNumeric<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
 
 impl<'a> fmt::Debug for AlphaNumeric<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

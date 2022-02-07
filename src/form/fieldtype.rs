@@ -1,7 +1,7 @@
 /*
     src/form/fieldtype.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -132,6 +132,18 @@ impl Eq for FieldType { }
 impl Hash for FieldType {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.handle.hash(state);
+    }
+}
+
+impl AsRef<FieldType> for FieldType {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<FieldType> for FieldType {
+    fn as_mut(&mut self) -> &mut Self {
+        self
     }
 }
 

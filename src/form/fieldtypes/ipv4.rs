@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/ipv4.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -48,6 +48,18 @@ impl<'a> IsFieldType<'a, i32, i32, i32> for IpV4<'a> {
 
 unsafe impl<'a> Send for IpV4<'a> { } // too make thread safe
 unsafe impl<'a> Sync for IpV4<'a> { } // too make thread safe
+
+impl <'a>AsRef<IpV4<'a>> for IpV4<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<IpV4<'a>> for IpV4<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
 
 impl<'a> fmt::Debug for IpV4<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

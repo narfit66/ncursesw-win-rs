@@ -1,7 +1,7 @@
 /*
     src/form/postedform.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -103,6 +103,18 @@ unsafe impl<'a> Sync for PostedForm<'a> { } // too make thread safe
 impl<'a> Hash for PostedForm<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.form.hash(state);
+    }
+}
+
+impl <'a>AsRef<PostedForm<'a>> for PostedForm<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<PostedForm<'a>> for PostedForm<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
     }
 }
 

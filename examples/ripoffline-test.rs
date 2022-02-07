@@ -1,7 +1,7 @@
 /*
     examples/ripoffline-test.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -47,9 +47,9 @@ fn main() {
 
 fn main_routine() -> Result<()> {
     // ripoff a line from the top of the screen.
-    let top_ripoff = &RipoffLine::new(Orientation::Top)?;
+    let top_ripoff = RipoffLine::new(Orientation::Top)?;
     // ripoff a line from the bottom of the screen.
-    let bottom_ripoff = &RipoffLine::new(Orientation::Bottom)?;
+    let bottom_ripoff = RipoffLine::new(Orientation::Bottom)?;
 
     assert!(top_ripoff != bottom_ripoff);
 
@@ -62,7 +62,7 @@ fn main_routine() -> Result<()> {
 
         cursor_set(CursorType::Invisible)?;
 
-        ripoffline_test(stdscr, top_ripoff, bottom_ripoff)
+        ripoffline_test(stdscr, top_ripoff.as_ref(), bottom_ripoff.as_ref())
     })
 }
 

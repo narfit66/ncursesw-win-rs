@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/numeric.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -87,6 +87,18 @@ impl<'a> Hash for Numeric<'a> {
         self.padding.hash(state);
         transmute_value(self.minimum).hash(state);
         transmute_value(self.maximum).hash(state);
+    }
+}
+
+impl <'a>AsRef<Numeric<'a>> for Numeric<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<Numeric<'a>> for Numeric<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
     }
 }
 

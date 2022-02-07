@@ -106,6 +106,18 @@ impl<'a> Drop for Enumerate<'a> {
 unsafe impl<'a> Send for Enumerate<'a> { } // too make thread safe
 unsafe impl<'a> Sync for Enumerate<'a> { } // too make thread safe
 
+impl <'a>AsRef<Enumerate<'a>> for Enumerate<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<Enumerate<'a>> for Enumerate<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
+
 impl<'a> fmt::Debug for Enumerate<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(

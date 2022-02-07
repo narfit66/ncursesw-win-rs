@@ -1,7 +1,7 @@
 /*
     src/menu/postedmenu.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -96,6 +96,18 @@ unsafe impl<'a> Sync for PostedMenu<'a> { } // too make thread safe
 impl<'a> Hash for PostedMenu<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.menu.hash(state);
+    }
+}
+
+impl <'a>AsRef<PostedMenu<'a>> for PostedMenu<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<PostedMenu<'a>> for PostedMenu<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
     }
 }
 

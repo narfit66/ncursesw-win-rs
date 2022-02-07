@@ -1,7 +1,7 @@
 /*
     src/ripoff/ripoffwindow.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -92,6 +92,18 @@ impl Drop for RipoffWindow {
 
 unsafe impl Send for RipoffWindow { } // too make thread safe
 unsafe impl Sync for RipoffWindow { } // too make thread safe
+
+impl AsRef<RipoffWindow> for RipoffWindow {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<RipoffWindow> for RipoffWindow {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
 
 impl fmt::Debug for RipoffWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

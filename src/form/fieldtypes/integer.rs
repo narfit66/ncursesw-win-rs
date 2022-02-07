@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/integer.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -63,6 +63,18 @@ impl<'a> IsFieldType<'a, i32, libc::c_long, libc::c_long> for Integer<'a> {
 
 unsafe impl<'a> Send for Integer<'a> { } // too make thread safe
 unsafe impl<'a> Sync for Integer<'a> { } // too make thread safe
+
+impl <'a>AsRef<Integer<'a>> for Integer<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<Integer<'a>> for Integer<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
 
 impl<'a> fmt::Debug for Integer<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

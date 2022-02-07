@@ -1,7 +1,7 @@
 /*
     src/form/fieldtypes/regularexpression.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -57,6 +57,18 @@ impl<'a> IsFieldType<'a, *const i8, i32, i32> for RegularExpression<'a> {
 
 unsafe impl<'a> Send for RegularExpression<'a> { } // too make thread safe
 unsafe impl<'a> Sync for RegularExpression<'a> { } // too make thread safe
+
+impl <'a>AsRef<RegularExpression<'a>> for RegularExpression<'a> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl <'a>AsMut<RegularExpression<'a>> for RegularExpression<'a> {
+    fn as_mut(&mut self) -> &mut Self {
+        self
+    }
+}
 
 impl<'a> fmt::Debug for RegularExpression<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

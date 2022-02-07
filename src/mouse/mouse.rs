@@ -1,7 +1,7 @@
 /*
     src/mouse/mouse.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -182,6 +182,18 @@ impl Eq for Mouse { }
 impl Hash for Mouse {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.mevent.id.hash(state);
+    }
+}
+
+impl AsRef<Mouse> for Mouse {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl AsMut<Mouse> for Mouse {
+    fn as_mut(&mut self) -> &mut Self {
+        self
     }
 }
 
