@@ -130,7 +130,7 @@ impl AsRef<Window> for Window {
 
 impl Clone for Window {
     fn clone(&self) -> Self {
-        Self::_from(self.screen, self.handle, false)
+        Self::_from(self.screen.clone(), self.handle.clone(), false)
     }
 }
 

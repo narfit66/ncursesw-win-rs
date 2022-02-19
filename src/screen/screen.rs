@@ -459,7 +459,7 @@ impl AsRef<Screen> for Screen {
 
 impl Clone for Screen {
     fn clone(&self) -> Self {
-        Self::_from(self.handle, false)
+        Self::_from(self.handle.clone(), false)
     }
 }
 

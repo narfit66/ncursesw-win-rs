@@ -30,16 +30,17 @@ use crate::{Screen, Origin, NCurseswWinError, gen::*};
 /// to `_win_st` the 'w' has been removed for example the ncurses function `wget_wch(*WINDOW)`
 /// has become the method `self.get_wch()`.
 pub struct RipoffWindow {
-    screen: Option<SCREEN>, // pointer to ncurses screen internal structure
-    handle: WINDOW          // pointer to ncurses _win_st internal structure
+    screen:       Option<SCREEN>, // pointer to ncurses screen internal structure
+    handle:       WINDOW,         // pointer to ncurses _win_st internal structure
+    free_on_drop: bool
 }
 
 impl HasHandle<WINDOW> for RipoffWindow {
-    fn _from(screen: Option<SCREEN>, handle: WINDOW, _: bool) -> Self {
+    fn _from(screen: Option<SCREEN>, handle: WINDOW, free_on_drop: bool) -> Self {
         assert!(screen.map_or_else(|| true, |screen| !screen.is_null()), "RipoffWindow::_from() : screen.is_null()");
         assert!(!handle.is_null(), "RipoffWindow::_from() : handle.is_null()");
 
-        Self { screen, handle }
+        Self { screen, handle, free_on_drop }
     }
 
     fn _screen(&self) -> Option<SCREEN> {
@@ -84,8 +85,10 @@ impl RipoffWindow {
 
 impl Drop for RipoffWindow {
     fn drop(&mut self) {
-        if let Err(source) = ncursesw::delwin(self.handle) {
-            panic!("{} @ {:?}", source, self)
+        if self.free_on_drop {
+            if let Err(source) = ncursesw::delwin(self.handle) {
+                panic!("{} @ {:?}", source, self)
+            }
         }
     }
 }
@@ -96,6 +99,12 @@ unsafe impl Sync for RipoffWindow { } // too make thread safe
 impl AsRef<RipoffWindow> for RipoffWindow {
     fn as_ref(&self) -> &Self {
         self
+    }
+}
+
+impl Clone for RipoffWindow {
+    fn clone(&self) -> Self {
+        Self { screen: self.screen.clone(), handle: self.handle.clone(), free_on_drop: false }
     }
 }
 

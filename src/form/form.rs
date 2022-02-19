@@ -405,7 +405,7 @@ impl AsMut<Form> for Form {
 
 impl Clone for Form {
     fn clone(&self) -> Self {
-        Self::_from(self.screen, self.handle,self.field_handles, false)
+        Self::_from(self.screen.clone(), self.handle.clone(), self.field_handles.clone(), false)
     }
 }
 

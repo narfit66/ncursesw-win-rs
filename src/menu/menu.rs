@@ -402,7 +402,7 @@ impl AsMut<Menu> for Menu {
 
 impl Clone for Menu {
     fn clone(&self) -> Self {
-        Self::_from(self.screen, self.handle, self.item_handles, false)
+        Self::_from(self.screen.clone(), self.handle.clone(), self.item_handles.clone(), false)
     }
 }
 

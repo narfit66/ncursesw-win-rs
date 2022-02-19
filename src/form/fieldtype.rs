@@ -147,6 +147,12 @@ impl AsMut<FieldType> for FieldType {
     }
 }
 
+impl Clone for FieldType {
+    fn clone(&self) -> Self {
+        Self { handle: self.handle.clone(), free_on_drop: false }
+    }
+}
+
 impl fmt::Debug for FieldType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "FieldType {{ handle: {:p}, free_on_drop: {} }}", self.handle, self.free_on_drop)

@@ -119,7 +119,7 @@ impl AsRef<Pad> for Pad {
 
 impl Clone for Pad {
     fn clone(&self) -> Self {
-        Self::_from(self.screen, self.handle, false)
+        Self::_from(self.screen.clone(), self.handle.clone(), false)
     }
 }
 

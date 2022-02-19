@@ -294,7 +294,7 @@ impl AsRef<Field> for Field {
 
 impl Clone for Field {
     fn clone(&self) -> Self {
-        Self::_from(self.handle, false)
+        Self::_from(self.handle.clone(), false)
     }
 }
 

@@ -152,7 +152,7 @@ impl AsRef<MenuItem> for MenuItem {
 
 impl Clone for MenuItem {
     fn clone(&self) -> Self {
-        Self::_from(self.handle, false)
+        Self::_from(self.handle.clone(), false)
     }
 }
 
