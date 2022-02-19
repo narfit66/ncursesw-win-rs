@@ -150,12 +150,6 @@ impl AsRef<MenuItem> for MenuItem {
     }
 }
 
-impl AsMut<MenuItem> for MenuItem {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl Clone for MenuItem {
     fn clone(&self) -> Self {
         Self::_from(self.handle, false)

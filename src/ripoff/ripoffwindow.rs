@@ -99,12 +99,6 @@ impl AsRef<RipoffWindow> for RipoffWindow {
     }
 }
 
-impl AsMut<RipoffWindow> for RipoffWindow {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl fmt::Debug for RipoffWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "RipoffWindow {{ screen: {:?}, handle: {:p} }}", self.screen, self.handle)

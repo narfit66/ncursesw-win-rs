@@ -457,12 +457,6 @@ impl AsRef<Screen> for Screen {
     }
 }
 
-impl AsMut<Screen> for Screen {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl Clone for Screen {
     fn clone(&self) -> Self {
         Self::_from(self.handle, false)

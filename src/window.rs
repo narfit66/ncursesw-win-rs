@@ -128,12 +128,6 @@ impl AsRef<Window> for Window {
     }
 }
 
-impl AsMut<Window> for Window {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl Clone for Window {
     fn clone(&self) -> Self {
         Self::_from(self.screen, self.handle, false)

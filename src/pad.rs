@@ -117,12 +117,6 @@ impl AsRef<Pad> for Pad {
     }
 }
 
-impl AsMut<Pad> for Pad {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl Clone for Pad {
     fn clone(&self) -> Self {
         Self::_from(self.screen, self.handle, false)

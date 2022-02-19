@@ -292,12 +292,6 @@ impl AsRef<Field> for Field {
     }
 }
 
-impl AsMut<Field> for Field {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl Clone for Field {
     fn clone(&self) -> Self {
         Self::_from(self.handle, false)

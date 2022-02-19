@@ -170,12 +170,6 @@ impl AsRef<RipoffLine> for RipoffLine {
     }
 }
 
-impl AsMut<RipoffLine> for RipoffLine {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl fmt::Debug for RipoffLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "RipoffLine {{ screen: {:?}, number: {} }}", self.screen, self.number)

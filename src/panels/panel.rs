@@ -174,12 +174,6 @@ impl AsRef<Panel> for Panel {
     }
 }
 
-impl AsMut<Panel> for Panel {
-    fn as_mut(&mut self) -> &mut Self {
-        self
-    }
-}
-
 impl Clone for Panel {
     fn clone(&self) -> Self {
         Self::_from(self.screen, self.handle, false)
