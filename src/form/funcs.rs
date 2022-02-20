@@ -1,7 +1,7 @@
 /*
     src/form/funcs.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -149,7 +149,7 @@ pub fn form_page() -> result!(usize) {
 
 /// Searches in the name-table for a request with the given name and returns
 /// its request code as a `Some`. Otherwise `None` is returned.
-pub fn form_request_by_name(name: &str) -> result!(Option<FormRequest>) {
+pub fn form_request_by_name<S: Into<String>>(name: S) -> result!(Option<FormRequest>) {
     Ok(ncursesw::form::form_request_by_name(name)?)
 }
 

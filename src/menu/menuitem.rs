@@ -44,13 +44,16 @@ impl MenuItem {
 
 impl MenuItem {
     /// Create a new menu item instance.
-    pub fn new(name: &str, description: &str) -> result!(Self) {
-        Ok(Self::_from(menu::new_item(name, description)?, true))
+    pub fn new<S: Into<String>>(name: S, description: S) -> result!(Self) {
+        let name = name.into().to_string();
+        let description = description.into().to_string();
+
+        Ok(Self::_from(menu::new_item(name.as_str(), description.as_str())?, true))
     }
 
     #[deprecated(since = "0.4.0", note = "Use MenuItem::new() instead")]
     /// Create a new menu item instance.
-    pub fn new_item(name: &str, description: &str) -> result!(Self) {
+    pub fn new_item<S: Into<String>>(name: S, description: S) -> result!(Self) {
         Self::new(name, description)
     }
 

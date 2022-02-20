@@ -1,7 +1,7 @@
 /*
     src/gen/hasinsfunctions.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@ pub trait HasInsFunctions: HasHandle<WINDOW> {
         Ok(ncursesw::winsch(self._handle(), ch)?)
     }
 
-    fn insnstr(&self, str: &str, length: Option<u16>) -> result!(()) {
+    fn insnstr<S: Into<String>>(&self, str: S, length: Option<u16>) -> result!(()) {
         Ok(ncursesw::winsnstr(self._handle(), str, option_length!(length)?)?)
     }
 
@@ -38,7 +38,7 @@ pub trait HasInsFunctions: HasHandle<WINDOW> {
         Ok(ncursesw::wins_nwstr(self._handle(), wstr, option_length!(length)?)?)
     }
 
-    fn insstr(&self, str: &str) -> result!(()) {
+    fn insstr<S: Into<String>>(&self, str: S) -> result!(()) {
         Ok(ncursesw::winsstr(self._handle(), str)?)
     }
 

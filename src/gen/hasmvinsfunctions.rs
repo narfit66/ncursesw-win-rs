@@ -1,7 +1,7 @@
 /*
     src/gen/hasmvinsfunctions.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@ pub trait HasMvInsFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwinsch(self._handle(), origin.try_into()?, ch)?)
     }
 
-    fn mvinsnstr(&self, origin: Origin, str: &str, length: Option<u16>) -> result!(()) {
+    fn mvinsnstr<S: Into<String>>(&self, origin: Origin, str: S, length: Option<u16>) -> result!(()) {
         assert_origin!("mvinsnstr", self.size()?, origin);
 
         Ok(ncursesw::mvwinsnstr(self._handle(), origin.try_into()?, str, option_length!(length)?)?)
@@ -44,7 +44,7 @@ pub trait HasMvInsFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwins_nwstr(self._handle(), origin.try_into()?, wstr, option_length!(length)?)?)
     }
 
-    fn mvinsstr(&self, origin: Origin, str: &str) -> result!(()) {
+    fn mvinsstr<S: Into<String>>(&self, origin: Origin, str: S) -> result!(()) {
         assert_origin!("mvinsstr", self.size()?, origin);
 
         Ok(ncursesw::mvwinsstr(self._handle(), origin.try_into()?, str)?)

@@ -33,7 +33,9 @@ pub struct RegularExpression<'a> {
 }
 
 impl<'a> RegularExpression<'a> {
-    pub fn new(regexp: &str) -> result!(Self) {
+    pub fn new<S: Into<String>>(regexp: S) -> result!(Self) {
+        let regexp = regexp.into().to_string();
+        
         Ok(Self { fieldtype: &*FIELDTYPE_REGEXP, arguments: 1, regexp: c_str_with_nul!(regexp) })
     }
 }

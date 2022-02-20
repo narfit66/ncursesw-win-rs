@@ -1,7 +1,7 @@
 /*
     src/gen/hasmvaddfunctions.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -44,7 +44,7 @@ pub trait HasMvAddFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwaddchstr(self._handle(), origin.try_into()?, chstr)?)
     }
 
-    fn mvaddnstr(&self, origin: Origin, str: &str, length: Option<u16>) -> result!(()) {
+    fn mvaddnstr<S: Into<String>>(&self, origin: Origin, str: S, length: Option<u16>) -> result!(()) {
         assert_origin!("mvaddnstr", self.size()?, origin);
 
         Ok(ncursesw::mvwaddnstr(self._handle(), origin.try_into()?, str, option_length!(length)?)?)
@@ -56,7 +56,7 @@ pub trait HasMvAddFunctions: HasHandle<WINDOW> + HasYXAxis {
         Ok(ncursesw::mvwaddnwstr(self._handle(), origin.try_into()?, wstr, option_length!(length)?)?)
     }
 
-    fn mvaddstr(&self, origin: Origin, str: &str) -> result!(()) {
+    fn mvaddstr<S: Into<String>>(&self, origin: Origin, str: S) -> result!(()) {
         assert_origin!("mvaddstr", self.size()?, origin);
 
         Ok(ncursesw::mvwaddstr(self._handle(), origin.try_into()?, str)?)

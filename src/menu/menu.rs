@@ -309,7 +309,7 @@ impl Menu {
         Ok(menu::set_menu_pad(Some(self.handle), pad)?)
     }
 
-    pub fn set_menu_pattern(&self, pattern: &str) -> result!(()) {
+    pub fn set_menu_pattern<S: Into<String>>(&self, pattern: S) -> result!(()) {
         Ok(menu::set_menu_pattern(self.handle, pattern)?)
     }
 

@@ -1,7 +1,7 @@
 /*
     src/screen/funcs.rs
 
-    Copyright (c) 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2020-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -27,8 +27,9 @@ pub fn new_prescr() -> result!(Screen) {
     Ok(Screen::_from(ncursesw::new_prescr()?, true))
 }
 
-pub fn newterm<O, I>(screen: &Screen, term: Option<&str>, output: &O, input: &I) -> result!(Screen)
-    where O: AsRawFd + Write,
+pub fn newterm<S, O, I>(screen: &Screen, term: Option<S>, output: &O, input: &I) -> result!(Screen)
+    where S: Into<String>,
+          O: AsRawFd + Write,
           I: AsRawFd + Read
 {
     Ok(Screen::_from(ncursesw::newterm_sp(screen._handle(), term, output, input)?, true))

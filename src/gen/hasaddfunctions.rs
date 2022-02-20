@@ -1,7 +1,7 @@
 /*
     src/gen/hasaddfunctions.rs
 
-    Copyright (c) 2019, 2020 Stephen Whittle  All rights reserved.
+    Copyright (c) 2019-2022 Stephen Whittle  All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@ pub trait HasAddFunctions: HasHandle<WINDOW> {
         Ok(ncursesw::waddchstr(self._handle(), chstr)?)
     }
 
-    fn addnstr(&self, str: &str, length: Option<u16>) -> result!(()) {
+    fn addnstr<S: Into<String>>(&self, str: S, length: Option<u16>) -> result!(()) {
         Ok(ncursesw::waddnstr(self._handle(), str, option_length!(length)?)?)
     }
 
@@ -46,7 +46,7 @@ pub trait HasAddFunctions: HasHandle<WINDOW> {
         Ok(ncursesw::waddnwstr(self._handle(), wstr, option_length!(length)?)?)
     }
 
-    fn addstr(&self, str: &str) -> result!(()) {
+    fn addstr<S: Into<String>>(&self, str: S) -> result!(()) {
         Ok(ncursesw::waddstr(self._handle(), str)?)
     }
 

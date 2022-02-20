@@ -51,16 +51,18 @@ impl Screen {
 }
 
 impl Screen {
-    pub fn new<O, I>(term: Option<&str>, output: &O, input: &I) -> result!(Self)
-        where O: AsRawFd + Write,
+    pub fn new<S, O, I>(term: Option<S>, output: &O, input: &I) -> result!(Self)
+        where S: Into<String>,
+              O: AsRawFd + Write,
               I: AsRawFd + Read
     {
         Ok(Screen::_from(ncursesw::newterm(term, output, input)?, true))
     }
 
     #[deprecated(since = "0.5.0", note = "Use Screen::new() instead")]
-    pub fn newterm<O, I>(term: Option<&str>, output: &O, input: &I) -> result!(Self)
-        where O: AsRawFd + Write,
+    pub fn newterm<S, O, I>(term: Option<S>, output: &O, input: &I) -> result!(Self)
+        where S: Into<String>,
+              O: AsRawFd + Write,
               I: AsRawFd + Read
     {
         Self::new(term, output, input)
