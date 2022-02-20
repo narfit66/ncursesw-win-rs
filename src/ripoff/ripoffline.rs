@@ -21,13 +21,11 @@
 */
 
 use std::{
-    fmt, convert::TryFrom, sync::{Mutex, atomic::{AtomicUsize, Ordering}},
-    hash::{Hash, Hasher}
+    fmt, sync::{Mutex, atomic::{AtomicUsize, Ordering}}, hash::{Hash, Hasher}
 };
 use ncursesw::{SCREEN, WINDOW, Orientation, shims::constants};
 use crate::{
-    Screen, RipoffWindow, NCurseswWinError, HasHandle,
-    ncurses::INITSCR_CALLED
+    Screen, RipoffWindow, NCurseswWinError, HasHandle, ncurses::INITSCR_CALLED
 };
 
 pub(in crate) const MAX_RIPOFF_LINES: usize = 5; // The maximum number of ripoff lines ncurses allows.
@@ -109,10 +107,10 @@ impl RipoffLine {
     }
 
     /// Update the ripoff line.
-    pub fn update<F: Fn(&RipoffWindow, u16) -> result!(T), T>(&self, func: F) -> result!(T) {
+    pub fn update<F: Fn(&RipoffWindow, u16) -> anyhow::Result<T>, T>(&self, func: F) -> anyhow::Result<T> {
         // Check that `initscr()` has been called.
         if !INITSCR_CALLED.load(Ordering::SeqCst) {
-            return Err(NCurseswWinError::InitscrNotCalled)
+            return Err(NCurseswWinError::InitscrNotCalled.into())
         }
 
         // Get the ripoff details and assert that we have a valid ripoff!

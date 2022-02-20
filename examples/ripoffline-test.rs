@@ -20,9 +20,7 @@
     IN THE SOFTWARE.
 */
 
-extern crate ncurseswwin;
-
-use std::{convert::TryFrom, process::exit};
+use std::process::exit;
 use anyhow::Result;
 use ncurseswwin::*;
 
@@ -97,13 +95,17 @@ fn ripoffline_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Rip
     stdscr.mvaddstr(origin, line3)?;
 
     //  update the top ripoff line.
-    top_ripoff.update(|ripoff_window, columns| -> Result<(), NCurseswWinError> {
-        update_ripoff(ripoff_window, columns, top_ripoff.orientation())
+    top_ripoff.update(|ripoff_window, columns| -> Result<()> {
+        update_ripoff(ripoff_window, columns, top_ripoff.orientation())?;
+
+        Ok(())
     })?;
 
     //  update the bottom ripoff line.
-    bottom_ripoff.update(|ripoff_window, columns| -> Result<(), NCurseswWinError> {
-        update_ripoff(ripoff_window, columns, bottom_ripoff.orientation())
+    bottom_ripoff.update(|ripoff_window, columns| -> Result<()> {
+        update_ripoff(ripoff_window, columns, bottom_ripoff.orientation())?;
+
+        Ok(())
     })?;
 
     doupdate()?;
@@ -114,9 +116,9 @@ fn ripoffline_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Rip
 }
 
 fn update_ripoff(ripoff_window: &RipoffWindow, columns: u16, orientation: Orientation) -> Result<(), NCurseswWinError> {
-    let ripoff_message = &format!("this is the ripoff line at the {:?} of the screen with a maximum of {} columns", orientation, columns);
+    let ripoff_message = format!("this is the ripoff line at the {:?} of the screen with a maximum of {} columns", orientation, columns);
 
-    ripoff_window.set_column(calc_x_axis(ripoff_message, columns)?)?;
+    ripoff_window.set_column(calc_x_axis(ripoff_message.as_str(), columns)?)?;
 
     ripoff_window.addstr(ripoff_message)?;
     ripoff_window.noutrefresh()?;

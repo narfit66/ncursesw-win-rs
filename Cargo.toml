@@ -22,7 +22,7 @@ is-it-maintained-open-issues = { repository = "narfit66/ncursesw-win-rs" }
 
 [dependencies]
 libc = "0.2"
-ncursesw = ">=0.6.3"
+ncursesw = "0.6"
 thiserror = "1.0"
 lazy_static = "1.4"
 strum = "0.23"
@@ -36,7 +36,7 @@ rand = "0.8"
 gettext-rs = "0.7"
 
 [patch.crates-io]
-#ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
+ncursesw = { git = "https://github.com/narfit66/ncursesw-rs" }
 #ncursesw = { path = "../ncursesw-rs" }
 
 [features]
