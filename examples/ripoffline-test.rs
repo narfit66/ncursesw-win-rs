@@ -95,14 +95,14 @@ fn ripoffline_test(stdscr: &Window, top_ripoff: &RipoffLine, bottom_ripoff: &Rip
     stdscr.mvaddstr(origin, line3)?;
 
     //  update the top ripoff line.
-    top_ripoff.update(|ripoff_window, columns| -> Result<()> {
+    top_ripoff.update(|ripoff_window, columns| {
         update_ripoff(ripoff_window, columns, top_ripoff.orientation())?;
 
         Ok(())
     })?;
 
     //  update the bottom ripoff line.
-    bottom_ripoff.update(|ripoff_window, columns| -> Result<()> {
+    bottom_ripoff.update(|ripoff_window, columns| {
         update_ripoff(ripoff_window, columns, bottom_ripoff.orientation())?;
 
         Ok(())
